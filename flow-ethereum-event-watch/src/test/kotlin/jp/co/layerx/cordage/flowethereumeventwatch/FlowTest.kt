@@ -1,7 +1,6 @@
 package jp.co.layerx.cordage.flowethereumeventwatch
 
-import org.assertj.core.api.Assertions.*
-
+import net.corda.client.rpc.notUsed
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.MockNetworkParameters
 import net.corda.testing.node.StartedMockNode
@@ -9,16 +8,18 @@ import net.corda.testing.node.TestCordapp
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import kotlin.test.assertEquals
+import jp.co.layerx.cordage.flowethereumeventwatch.flow.StartEventWatchFlow
 
-class FlowTest {
-    private val network: MockNetwork = MockNetwork(MockNetworkParameters(cordappsForAllNodes = listOf(
-            TestCordapp.findCordapp("jp.co.layerx.cordage.flowethereum"))))
-    private lateinit var a: StartedMockNode
+class FlowTests {
+    private lateinit var network: MockNetwork
+    private lateinit var node: StartedMockNode
 
     @Before
     fun setup() {
-        a = network.createPartyNode()
-        network.runNetwork()
+        network = MockNetwork(MockNetworkParameters(threadPerNode = true, cordappsForAllNodes = listOf(
+                TestCordapp.findCordapp("jp.co.layerx.cordage.flowethereumeventwatch"))))
+        node = network.createNode()
     }
 
     @After
@@ -27,12 +28,20 @@ class FlowTest {
     }
 
     @Test
-    fun `should return correctly`() {
-        val flow = Flow()
-        val future = a.startFlow(flow)
-        network.runNetwork()
-        val returnValue = future.get()
+    fun `eventwatch occurs every second`() {
+        val flow = StartEventWatchFlow()
+        node.startFlow(flow).get()
 
-        assertThat(returnValue).startsWith("0x")
+        val sleepTime: Long = 6000
+        Thread.sleep(sleepTime)
+
+        val recordedTxs = node.transaction {
+            val (recordedTxs, futureTxs) = node.services.validatedTransactions.track()
+            futureTxs.notUsed()
+            recordedTxs
+        }
+
+        val totalExpectedTransactions = 7
+        assertEquals(totalExpectedTransactions, recordedTxs.size)
     }
 }
