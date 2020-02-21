@@ -24,8 +24,8 @@ open class WatcherContract: Contract {
                 "No inputs should be consumed when issuing an Watcher." using (tx.inputs.isEmpty())
                 "Only one output state should be created when issuing an Watcher." using (tx.outputs.size == 1)
                 val watcher = tx.outputsOfType<WatcherState>().single()
-                "A newly issued Watcher's fromBlockNumber must be more than zero." using (watcher.fromBlockNumber >= 0)
-                "A newly issued Watcher must have a positive toBlockNumber." using (watcher.toBlockNumber > 0)
+                "A newly issued Watcher's fromBlockNumber must be more than zero." using (watcher.fromBlockNumber >= 0.toBigInteger())
+                "A newly issued Watcher must have a positive toBlockNumber." using (watcher.toBlockNumber > 0.toBigInteger())
                 "The toBlockNumber must be greater than the fromBlockNumber." using (watcher.toBlockNumber > watcher.fromBlockNumber)
                 "The targetContractAddress must start with 0x." using (watcher.targetContractAddress.startsWith("0x"))
             }
@@ -35,8 +35,8 @@ open class WatcherContract: Contract {
                 val input = tx.inputsOfType<WatcherState>().single()
                 val output = tx.outputsOfType<WatcherState>().single()
                 "The me property should not be change." using (input.me == output.me)
-                "Output WatcherState must have a positive toBlockNumber." using (output.toBlockNumber > 0)
-                "Output's fromBlockNumber should be next number after input's toBlockNumber." using (input.toBlockNumber + 1 == output.fromBlockNumber)
+                "Output WatcherState must have a positive toBlockNumber." using (output.toBlockNumber > 0.toBigInteger())
+                "Output's fromBlockNumber should be next number after input's toBlockNumber." using (input.toBlockNumber + 1.toBigInteger() == output.fromBlockNumber)
                 "The toBlockNumber must be greater than the fromBlockNumber." using (output.toBlockNumber > output.fromBlockNumber)
                 "The targetContractAddress property should not be change." using (input.targetContractAddress == output.targetContractAddress)
             }

@@ -1,21 +1,26 @@
 package jp.co.layerx.cordage.flowethereumeventwatch.flow
 
 import co.paralleluniverse.fibers.Suspendable
+import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
+import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract.Companion.contractID
+import jp.co.layerx.cordage.flowethereumeventwatch.state.WatcherState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateRef
+import net.corda.core.flows.FinalityFlow
+import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.InitiatingFlow
+import net.corda.core.flows.SchedulableFlow
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.ProgressTracker.Step
-import jp.co.layerx.cordage.flowethereumeventwatch.state.WatcherState
-import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
-import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract.Companion.contractID
-import net.corda.core.flows.*
-
+import org.web3j.protocol.Web3j
+import org.web3j.protocol.http.HttpService
 
 @InitiatingFlow
 @SchedulableFlow
 class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
+        const val ETHEREUM_RPC_URL = "http://localhost:8545"
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
         object GENERATING_TRANSACTION : Step("Generating a WatcherState transaction.")
@@ -45,7 +50,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val toBlockNumber = input.state.data.toBlockNumber
         val targetContractAddress = input.state.data.targetContractAddress
 
-        // val events = get Event with Web3.j with fromBlockNumber, toBlockNumber and targetContractAddress
+        val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
 
         // for (event in events) {
             // search vault for UTXO State by event id
@@ -55,10 +60,9 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         // }
 
         progressTracker.currentStep = CREATING_WATCHERSTATE
-        // val recentBlockNumber = get recent BlockNumber with Web3.j
-        val newFromBlockNumber = toBlockNumber + 1
-        // val toBlockNumber = recentBlockNumber
-        val newToBlockNumber = newFromBlockNumber + 100
+        val recentBlockNumber = web3.ethBlockNumber().sendAsync().get().blockNumber
+        val newFromBlockNumber = toBlockNumber.add(1.toBigInteger())
+        val newToBlockNumber = recentBlockNumber
         val output = WatcherState(ourIdentity, newFromBlockNumber, newToBlockNumber, targetContractAddress)
 
         progressTracker.currentStep = GENERATING_TRANSACTION
