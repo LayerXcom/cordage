@@ -17,7 +17,7 @@ class WatcherState(
         val fromBlockNumber: BigInteger,
         val toBlockNumber: BigInteger,
         val targetContractAddress: String,
-        val swapId: Int,
+        val eventName: String,
         private val nextActivityTime: Instant = Instant.now().plusSeconds(1)
 ) : SchedulableState {
 

@@ -49,7 +49,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val fromBlockNumber = input.state.data.fromBlockNumber
         val toBlockNumber = input.state.data.toBlockNumber
         val targetContractAddress = input.state.data.targetContractAddress
-        val swapId = input.state.data.swapId
+        val eventName = input.state.data.eventName
 
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
 
@@ -67,7 +67,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val recentBlockNumber = web3.ethBlockNumber().sendAsync().get().blockNumber
         val newFromBlockNumber = toBlockNumber.add(1.toBigInteger())
         val newToBlockNumber = recentBlockNumber
-        val output = WatcherState(ourIdentity, newFromBlockNumber, newToBlockNumber, targetContractAddress, swapId)
+        val output = WatcherState(ourIdentity, newFromBlockNumber, newToBlockNumber, targetContractAddress, eventName)
 
         progressTracker.currentStep = GENERATING_TRANSACTION
         val watchCmd = Command(WatcherContract.Commands.Watch(), ourIdentity.owningKey)
@@ -85,6 +85,6 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         progressTracker.currentStep = FINALISING_TRANSACTION
         subFlow(FinalityFlow(signedTx, listOf()))
 
-        return "Ethereum Event Watching Complete! fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber}, targetContractAddress: ${targetContractAddress}, swapId: ${swapId}"
+        return "Ethereum Event Watching Complete! fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber}, targetContractAddress: ${targetContractAddress}, swapId: ${eventName}"
     }
 }

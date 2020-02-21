@@ -12,10 +12,11 @@ import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
 import jp.co.layerx.cordage.flowethereumeventwatch.state.WatcherState
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
+import java.math.BigInteger
 
 @InitiatingFlow
 @StartableByRPC
-class StartEventWatchFlow(private val targetContractAddress: String, private val swapId: Int) : FlowLogic<Unit>() {
+class StartEventWatchFlow(private val fromBlockNumber: BigInteger, private val targetContractAddress: String, private val eventName: String) : FlowLogic<Unit>() {
     companion object {
         const val ETHEREUM_RPC_URL = "http://localhost:8545"
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
@@ -42,7 +43,7 @@ class StartEventWatchFlow(private val targetContractAddress: String, private val
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
         val recentBlockNumber = web3.ethBlockNumber().sendAsync().get().blockNumber
-        val output = WatcherState(ourIdentity, 0.toBigInteger(), recentBlockNumber, targetContractAddress, swapId)
+        val output = WatcherState(ourIdentity, fromBlockNumber, recentBlockNumber, targetContractAddress, eventName)
 
         progressTracker.currentStep = GENERATING_TRANSACTION
         val cmd = Command(WatcherContract.Commands.Issue(), ourIdentity.owningKey)
