@@ -15,7 +15,7 @@ import org.web3j.protocol.http.HttpService
 
 @InitiatingFlow
 @StartableByRPC
-class StartEventWatchFlow(private val fromBlockNumber: Int, private val targetContractAddress: String) : FlowLogic<Unit>() {
+class StartEventWatchFlow(private val targetContractAddress: String, private val swapId: Int) : FlowLogic<Unit>() {
     companion object {
         const val ETHEREUM_RPC_URL = "http://localhost:8545"
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
@@ -42,7 +42,7 @@ class StartEventWatchFlow(private val fromBlockNumber: Int, private val targetCo
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
         val recentBlockNumber = web3.ethBlockNumber().sendAsync().get().blockNumber
-        val output = WatcherState(ourIdentity, fromBlockNumber.toBigInteger(), recentBlockNumber, targetContractAddress)
+        val output = WatcherState(ourIdentity, 0.toBigInteger(), recentBlockNumber, targetContractAddress, swapId)
 
         progressTracker.currentStep = GENERATING_TRANSACTION
         val cmd = Command(WatcherContract.Commands.Issue(), ourIdentity.owningKey)

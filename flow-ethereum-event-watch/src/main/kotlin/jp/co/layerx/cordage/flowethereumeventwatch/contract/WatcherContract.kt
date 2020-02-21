@@ -28,6 +28,7 @@ open class WatcherContract: Contract {
                 "A newly issued Watcher must have a positive toBlockNumber." using (watcher.toBlockNumber > 0.toBigInteger())
                 "The toBlockNumber must be greater than the fromBlockNumber." using (watcher.toBlockNumber > watcher.fromBlockNumber)
                 "The targetContractAddress must start with 0x." using (watcher.targetContractAddress.startsWith("0x"))
+                "The swapId must be positive." using (watcher.swapId > 0)
             }
             is Commands.Watch -> requireThat {
                 "Input state shoud be only one state." using (tx.inputs.size == 1)
@@ -39,6 +40,7 @@ open class WatcherContract: Contract {
                 "Output's fromBlockNumber should be next number after input's toBlockNumber." using (input.toBlockNumber + 1.toBigInteger() == output.fromBlockNumber)
                 "The toBlockNumber must be greater than the fromBlockNumber." using (output.toBlockNumber > output.fromBlockNumber)
                 "The targetContractAddress property should not be change." using (input.targetContractAddress == output.targetContractAddress)
+                "The swapId property should not be change." using (input.swapId == output.swapId)
             }
         }
     }

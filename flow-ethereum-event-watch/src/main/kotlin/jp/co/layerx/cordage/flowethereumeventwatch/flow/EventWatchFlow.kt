@@ -49,13 +49,17 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val fromBlockNumber = input.state.data.fromBlockNumber
         val toBlockNumber = input.state.data.toBlockNumber
         val targetContractAddress = input.state.data.targetContractAddress
+        val swapId = input.state.data.swapId
 
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
 
         // for (event in events) {
-            // search vault for UTXO State by event id
-                // if match: subflow(UnlockFlow(UTXO State, event parameters))
-                    // In UnlockFlow, verify ethereum event and unlock lockedState
+            // filter event by swapId
+                // if match:
+                    // search vault for UTXO State by swapId
+                        // if match: subflow(UnlockFlow(UTXO State, event parameters))
+                            // In UnlockFlow, verify ethereum event and unlock lockedState
+                        // else: do nothing
                 // else: do nothing
         // }
 
@@ -63,7 +67,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val recentBlockNumber = web3.ethBlockNumber().sendAsync().get().blockNumber
         val newFromBlockNumber = toBlockNumber.add(1.toBigInteger())
         val newToBlockNumber = recentBlockNumber
-        val output = WatcherState(ourIdentity, newFromBlockNumber, newToBlockNumber, targetContractAddress)
+        val output = WatcherState(ourIdentity, newFromBlockNumber, newToBlockNumber, targetContractAddress, swapId)
 
         progressTracker.currentStep = GENERATING_TRANSACTION
         val watchCmd = Command(WatcherContract.Commands.Watch(), ourIdentity.owningKey)
@@ -81,6 +85,6 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         progressTracker.currentStep = FINALISING_TRANSACTION
         subFlow(FinalityFlow(signedTx, listOf()))
 
-        return "Ethereum Event Watching Complete! fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber}, targetContractAddress: ${targetContractAddress}"
+        return "Ethereum Event Watching Complete! fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber}, targetContractAddress: ${targetContractAddress}, swapId: ${swapId}"
     }
 }
