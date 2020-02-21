@@ -46,7 +46,7 @@ Private Keys
 ## Start EventWatch
 
 ```
-flow start jp.co.layerx.cordage.flowethereumeventwatch.flow.StartEventWatchFlow targetContractAddress: "0xd0a6E6C54DbC68Db5db3A091B171A77407Ff7ccf", swapId: 37
+flow start jp.co.layerx.cordage.flowethereumeventwatch.flow.StartEventWatchFlow fromBlockNumber: 28, targetContractAddress: "0xd0a6E6C54DbC68Db5db3A091B171A77407Ff7ccf", eventName: "SETTLED_EVENT"
 ```
 
 ## Start monitoring the node's flow activity...
