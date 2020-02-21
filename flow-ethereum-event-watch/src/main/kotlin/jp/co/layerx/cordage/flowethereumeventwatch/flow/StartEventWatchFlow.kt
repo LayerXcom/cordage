@@ -8,14 +8,14 @@ import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
-import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatchContract
-import jp.co.layerx.cordage.flowethereumeventwatch.state.WatchState
+import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
+import jp.co.layerx.cordage.flowethereumeventwatch.state.WatcherState
 
 @InitiatingFlow
 @StartableByRPC
 class StartEventWatchFlow : FlowLogic<Unit>() {
     companion object {
-        object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatchState transaction.")
+        object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
         object SIGNING_TRANSACTION : ProgressTracker.Step("Signing transaction with our private key.")
         object FINALISING_TRANSACTION : ProgressTracker.Step("Recording transaction.") {
             override fun childProgressTracker() = FinalityFlow.tracker()
@@ -33,10 +33,10 @@ class StartEventWatchFlow : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
         progressTracker.currentStep = GENERATING_TRANSACTION
-        val output = WatchState(ourIdentity)
-        val cmd = Command(WatchContract.Commands.Beat(), ourIdentity.owningKey)
+        val output = WatcherState(ourIdentity)
+        val cmd = Command(WatcherContract.Commands.Beat(), ourIdentity.owningKey)
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
-                .addOutputState(output, WatchContract.contractID)
+                .addOutputState(output, WatcherContract.contractID)
                 .addCommand(cmd)
 
         progressTracker.currentStep = SIGNING_TRANSACTION

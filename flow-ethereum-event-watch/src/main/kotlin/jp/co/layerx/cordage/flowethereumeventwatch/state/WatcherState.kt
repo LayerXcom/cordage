@@ -6,12 +6,12 @@ import net.corda.core.contracts.ScheduledActivity
 import net.corda.core.contracts.StateRef
 import net.corda.core.flows.FlowLogicRefFactory
 import net.corda.core.identity.Party
-import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatchContract
+import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
 import jp.co.layerx.cordage.flowethereumeventwatch.flow.EventWatchFlow
 import java.time.Instant
 
-@BelongsToContract(WatchContract::class)
-class WatchState(
+@BelongsToContract(WatcherContract::class)
+class WatcherState(
         private val me: Party,
         private val nextActivityTime: Instant = Instant.now().plusSeconds(1)
 ) : SchedulableState {

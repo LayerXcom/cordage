@@ -10,16 +10,16 @@ import net.corda.core.flows.SchedulableFlow
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.ProgressTracker.Step
-import jp.co.layerx.cordage.flowethereumeventwatch.state.WatchState
-import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatchContract
-import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatchContract.Companion.contractID
+import jp.co.layerx.cordage.flowethereumeventwatch.state.WatcherState
+import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
+import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract.Companion.contractID
 
 
 @InitiatingFlow
 @SchedulableFlow
 class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
-        object GENERATING_TRANSACTION : Step("Generating a WatchState transaction.")
+        object GENERATING_TRANSACTION : Step("Generating a WatcherState transaction.")
         object SIGNING_TRANSACTION : Step("Signing transaction with our private key.")
         object FINALISING_TRANSACTION : Step("Recording transaction.") {
             override fun childProgressTracker() = FinalityFlow.tracker()
@@ -37,9 +37,9 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     @Suspendable
     override fun call(): String {
         progressTracker.currentStep = GENERATING_TRANSACTION
-        val input = serviceHub.toStateAndRef<WatchState>(stateRef)
-        val output = WatchState(ourIdentity)
-        val beatCmd = Command(WatchContract.Commands.Beat(), ourIdentity.owningKey)
+        val input = serviceHub.toStateAndRef<WatcherState>(stateRef)
+        val output = WatcherState(ourIdentity)
+        val beatCmd = Command(WatcherContract.Commands.Beat(), ourIdentity.owningKey)
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
                 .addInputState(input)
                 .addOutputState(output, contractID)

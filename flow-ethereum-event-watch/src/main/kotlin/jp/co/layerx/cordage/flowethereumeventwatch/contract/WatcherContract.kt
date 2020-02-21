@@ -4,9 +4,9 @@ import net.corda.core.contracts.CommandData
 import net.corda.core.contracts.Contract
 import net.corda.core.transactions.LedgerTransaction
 
-open class WatchContract: Contract {
+open class WatcherContract: Contract {
     companion object {
-        const val contractID = "jp.co.layerx.cordage.flowethereumeventwatch.contract.WatchContract"
+        const val contractID = "jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract"
     }
 
     override fun verify(tx: LedgerTransaction) {
