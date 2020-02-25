@@ -108,7 +108,7 @@ task deleteDependencies(type: Delete) {
 }
 
 task copyDependencies(type: Copy, dependsOn: deleteDependencies) {
-    from configurations.runtime - configurations.cordaCompile - configurations.cordaRuntime
+    from configurations.compileClasspath - configurations.cordaCompile - configurations.cordaRuntime
     into dependenciesDir
 }
 
