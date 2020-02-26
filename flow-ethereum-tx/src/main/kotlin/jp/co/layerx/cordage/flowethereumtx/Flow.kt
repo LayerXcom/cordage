@@ -1,4 +1,4 @@
-package jp.co.layerx.cordage.flowethereum
+package jp.co.layerx.cordage.flowethereumtx
 
 import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.flows.FlowLogic

@@ -1,4 +1,4 @@
-package jp.co.layerx.cordage.flowethereum
+package jp.co.layerx.cordage.flowethereumtx
 
 import org.assertj.core.api.Assertions.*
 
@@ -12,7 +12,7 @@ import org.junit.Test
 
 class FlowTest {
     private val network: MockNetwork = MockNetwork(MockNetworkParameters(cordappsForAllNodes = listOf(
-            TestCordapp.findCordapp("jp.co.layerx.cordage.flowethereum"))))
+            TestCordapp.findCordapp("jp.co.layerx.cordage.flowethereumtx"))))
     private lateinit var a: StartedMockNode
 
     @Before
