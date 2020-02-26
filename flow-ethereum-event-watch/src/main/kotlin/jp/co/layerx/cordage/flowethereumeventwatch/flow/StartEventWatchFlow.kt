@@ -42,7 +42,7 @@ class StartEventWatchFlow(private val fromBlockNumber: BigInteger, private val t
     override fun call() {
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-        val recentBlockNumber = web3.ethBlockNumber().sendAsync().get().blockNumber
+        val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
         val output = WatcherState(ourIdentity, fromBlockNumber, recentBlockNumber, targetContractAddress, eventName)
 
         progressTracker.currentStep = GENERATING_TRANSACTION
