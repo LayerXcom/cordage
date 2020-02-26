@@ -2,7 +2,7 @@
 
 ## Run Ethereum Network
 ```
-docker run -d -p 8545:8545 trufflesuite/ganache-cli:v6.9.1 -b 1 -m 'myth like bonus scare over problem client lizard pioneer submit female collect'
+ganache-cli --allowUnlimitedContractSize --gasPrice 0 --gasLimit 90000000 --blockTime 3 -p 8545 --networkId 5778 -m "myth like bonus scare over problem client lizard pioneer submit female collect"
 ```
 
 ```
