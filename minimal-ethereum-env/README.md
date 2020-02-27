@@ -11,6 +11,23 @@ Run local ethereum network
 yarn network
 ```
 
+Deploy smart contract
+```
+yarn truffle migrate --network local
+```
+
+Run *get* command
+```
+yarn truffle exec scripts/get.js --network local
+```
+
+Run *set* command
+```
+yarn truffle exec scripts/set.js --network local
+```
+
+### Ethereum addresses and private keys
+
 ```
 Available Accounts
 ==================

@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "network": "ganache-cli -b 1 -m 'myth like bonus scare over problem client lizard pioneer submit female collect'"
+    "test": "echo \\\"Error: no scripts specified\\\" && exit 1",
+    "network": "ganache-cli -i 15777 -b 1 -m 'myth like bonus scare over problem client lizard pioneer submit female collect'"
   },
   "author": "LayerX Inc.",
   "license": "Apache-2.0",
