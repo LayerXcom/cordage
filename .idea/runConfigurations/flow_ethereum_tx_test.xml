@@ -1,6 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="flow-ethereum-tx test" type="JUnit" factoryName="JUnit">
     <module name="flow-ethereum-tx.test" />
+    <useClassPathOnly />
     <option name="PACKAGE_NAME" value="jp.co.layerx.cordage.flowethereumtx" />
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
