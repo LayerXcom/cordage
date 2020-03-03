@@ -90,7 +90,7 @@ class SimpleStorage : Contract {
 
         init {
             _addresses = HashMap()
-            _addresses!!["15777"] = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
+            _addresses!!["5777"] = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
             _addresses!!["1582785820509"] = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
         }
     }
