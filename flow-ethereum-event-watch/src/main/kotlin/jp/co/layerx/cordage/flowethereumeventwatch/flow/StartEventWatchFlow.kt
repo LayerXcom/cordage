@@ -1,6 +1,8 @@
 package jp.co.layerx.cordage.flowethereumeventwatch.flow
 
 import co.paralleluniverse.fibers.Suspendable
+import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
+import jp.co.layerx.cordage.flowethereumeventwatch.state.WatcherState
 import net.corda.core.contracts.Command
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic
@@ -8,15 +10,13 @@ import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
-import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
-import jp.co.layerx.cordage.flowethereumeventwatch.state.WatcherState
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
 import java.math.BigInteger
 
 @InitiatingFlow
 @StartableByRPC
-class StartEventWatchFlow(private val fromBlockNumber: BigInteger, private val targetContractAddress: String, private val eventName: String) : FlowLogic<Unit>() {
+class StartEventWatchFlow(private val targetContractAddress: String, private val eventName: String) : FlowLogic<Unit>() {
     companion object {
         const val ETHEREUM_RPC_URL = "http://localhost:8545"
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
@@ -42,6 +42,7 @@ class StartEventWatchFlow(private val fromBlockNumber: BigInteger, private val t
     override fun call() {
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+        val fromBlockNumber = BigInteger.ZERO
         val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
         val output = WatcherState(ourIdentity, fromBlockNumber, recentBlockNumber, targetContractAddress, eventName)
 
