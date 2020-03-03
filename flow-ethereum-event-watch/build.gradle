@@ -62,7 +62,9 @@ cordapp {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile "org.web3j:core:4.5.14"
+    // web3j version should strictly equal to 4.5.11 due to its okhttp dependency conflict
+    // https://github.com/web3j/web3j/issues/1167#issuecomment-593369842
+    compile "org.web3j:core:4.5.11"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testCompile "junit:junit:$junit_version"
     testCompile "org.assertj:assertj-core:3.15.0"

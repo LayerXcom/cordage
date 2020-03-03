@@ -1,16 +1,13 @@
 package jp.co.layerx.cordage.flowethereumeventwatch
 
-import jp.co.layerx.cordage.flowethereumeventwatch.ethWrapper.SimpleStorage
 import org.assertj.core.api.*
 import org.junit.Test
 import org.web3j.abi.FunctionReturnDecoder
-import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.http.HttpService
-import org.web3j.tx.gas.DefaultGasProvider
 import java.math.BigInteger
 
 

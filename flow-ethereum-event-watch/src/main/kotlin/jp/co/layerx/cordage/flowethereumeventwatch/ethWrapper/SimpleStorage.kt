@@ -1,11 +1,12 @@
 package jp.co.layerx.cordage.flowethereumeventwatch.ethWrapper
 
 import io.reactivex.Flowable
+import io.reactivex.functions.Function
+import jdk.nashorn.internal.runtime.regexp.joni.Config.log
 import org.web3j.abi.EventEncoder
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Event
-import org.web3j.abi.datatypes.Function
 import org.web3j.abi.datatypes.Type
 import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.crypto.Credentials
@@ -15,6 +16,7 @@ import org.web3j.protocol.core.RemoteCall
 import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.BaseEventResponse
+import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.Contract
 import org.web3j.tx.TransactionManager
@@ -90,6 +92,7 @@ class SimpleStorage : Contract {
 
         init {
             _addresses = HashMap()
+            _addresses!!["15777"] = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
             _addresses!!["5777"] = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
             _addresses!!["1582785820509"] = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
         }
@@ -119,13 +122,15 @@ class SimpleStorage : Contract {
     }
 
     fun setEventFlowable(filter: EthFilter?): Flowable<SetEventResponse> {
-        return web3j.ethLogFlowable(filter).map { log ->
-            val eventValues = extractEventParametersWithLog(SET_EVENT, log)
-            val typedResponse = SetEventResponse()
-            typedResponse.log = log
-            typedResponse.x = eventValues.nonIndexedValues[0].value as BigInteger
-            typedResponse
-        }
+        return web3j.ethLogFlowable(filter).map(object : Function<Log?, SetEventResponse> {
+            override fun apply(t: Log): SetEventResponse? {
+                val eventValues = extractEventParametersWithLog(SET_EVENT, log as Log)
+                val typedResponse = SetEventResponse()
+                typedResponse.log = log as Log
+                typedResponse.x = eventValues.nonIndexedValues[0].value as BigInteger
+                return typedResponse
+            }
+        })
     }
 
     fun setEventFlowable(startBlock: DefaultBlockParameter?, endBlock: DefaultBlockParameter?): Flowable<SetEventResponse> {
@@ -135,21 +140,21 @@ class SimpleStorage : Contract {
     }
 
     fun data(): RemoteFunctionCall<BigInteger> {
-        val function = Function(FUNC_DATA,
+        val function = org.web3j.abi.datatypes.Function(FUNC_DATA,
                 Arrays.asList(),
                 Arrays.asList<TypeReference<*>>(object : TypeReference<Uint256?>() {}))
         return executeRemoteCallSingleValueReturn(function, BigInteger::class.java)
     }
 
     fun set(x: BigInteger?): RemoteFunctionCall<TransactionReceipt> {
-        val function = Function(
+        val function = org.web3j.abi.datatypes.Function(
                 FUNC_SET,
                 Arrays.asList<Type<*>>(Uint256(x)), emptyList())
         return executeRemoteCallTransaction(function)
     }
 
     fun get(): RemoteFunctionCall<BigInteger> {
-        val function = Function(FUNC_GET,
+        val function = org.web3j.abi.datatypes.Function(FUNC_GET,
                 Arrays.asList(),
                 Arrays.asList<TypeReference<*>>(object : TypeReference<Uint256?>() {}))
         return executeRemoteCallSingleValueReturn(function, BigInteger::class.java)

@@ -44,7 +44,7 @@ class FlowTests {
         val fromBlockNumber = 1.toBigInteger()
         val targetContractAddress = "0xd0a6E6C54DbC68Db5db3A091B171A77407Ff7ccf"
         val eventName = "SETTLEMENT_EVENT"
-        val flow = StartEventWatchFlow(fromBlockNumber, targetContractAddress, eventName)
+        val flow = StartEventWatchFlow(targetContractAddress, eventName)
         node.startFlow(flow).get()
 
         val sleepTime: Long = 6000
