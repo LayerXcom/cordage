@@ -13,7 +13,6 @@ import org.junit.Test
 import jp.co.layerx.cordage.flowethereumeventwatch.flow.StartEventWatchFlow
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
-import java.math.BigInteger
 
 class FlowTests {
     private lateinit var network: MockNetwork
@@ -40,14 +39,13 @@ class FlowTests {
     }
 
     @Test
-    fun `eventwatch occurs every 5 seconds`() {
-        val fromBlockNumber = 1.toBigInteger()
-        val targetContractAddress = "0xd0a6E6C54DbC68Db5db3A091B171A77407Ff7ccf"
-        val eventName = "SETTLEMENT_EVENT"
+    fun `eventwatch occurs every 10 seconds`() {
+        val targetContractAddress = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
+        val eventName = "Set"
         val flow = StartEventWatchFlow(targetContractAddress, eventName)
         node.startFlow(flow).get()
 
-        val sleepTime: Long = 6000
+        val sleepTime: Long = 22000
         Thread.sleep(sleepTime)
 
         val recordedTxs = node.transaction {
@@ -56,7 +54,7 @@ class FlowTests {
             recordedTxs
         }
 
-        val totalExpectedTransactions = 7
+        val totalExpectedTransactions = 2
         assertThat(recordedTxs.size).isEqualTo(totalExpectedTransactions)
     }
 }

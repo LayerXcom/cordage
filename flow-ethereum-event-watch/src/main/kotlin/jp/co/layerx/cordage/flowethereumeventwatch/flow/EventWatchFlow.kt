@@ -14,6 +14,7 @@ import net.corda.core.flows.SchedulableFlow
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.ProgressTracker.Step
+import org.web3j.abi.DefaultFunctionReturnDecoder
 import org.web3j.abi.FunctionReturnDecoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Event
@@ -24,6 +25,7 @@ import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.http.HttpService
+import org.web3j.tx.gas.StaticGasProvider
 import java.math.BigInteger
 import java.util.*
 import org.web3j.tx.gas.DefaultGasProvider as DefaultGasProvider1
@@ -72,14 +74,16 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                 targetContractAddress)
 
         val ethLogs = web3.ethGetLogs(filter).send()
-        if (ethLogs != null) {
+        if (ethLogs.result.size != 0) {
             val sendEventLog =  ethLogs.result[0].get() as Log
-            val logResult = FunctionReturnDecoder.decode(sendEventLog.data, event.nonIndexedParameters)
-            val value = logResult[0].value as BigInteger
+            val logResult = DefaultFunctionReturnDecoder.decode(sendEventLog.data, event.nonIndexedParameters)
+            if (logResult.size != 0) {
+                val value = logResult[0].value as BigInteger
 
-            val credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
-            val simpleStorage: SimpleStorage = SimpleStorage.load("0xCfEB869F69431e42cdB54A4F4f105C19C080A601", web3, credentials, DefaultGasProvider1())
-            val result = simpleStorage.set(value).send()
+                val credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
+                val simpleStorage: SimpleStorage = SimpleStorage.load("0xCfEB869F69431e42cdB54A4F4f105C19C080A601", web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(21000)))
+                val result = simpleStorage.set(value).send()
+            }
         }
 
 
