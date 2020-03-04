@@ -1,8 +1,6 @@
 package jp.co.layerx.cordage.flowethereumeventwatch.ethWrapper
 
 import io.reactivex.Flowable
-import io.reactivex.functions.Function
-import jdk.nashorn.internal.runtime.regexp.joni.Config.log
 import org.web3j.abi.EventEncoder
 import org.web3j.abi.FunctionEncoder
 import org.web3j.abi.TypeReference
@@ -16,7 +14,6 @@ import org.web3j.protocol.core.RemoteCall
 import org.web3j.protocol.core.RemoteFunctionCall
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.BaseEventResponse
-import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.Contract
 import org.web3j.tx.TransactionManager
@@ -122,15 +119,13 @@ class SimpleStorage : Contract {
     }
 
     fun setEventFlowable(filter: EthFilter?): Flowable<SetEventResponse> {
-        return web3j.ethLogFlowable(filter).map(object : Function<Log?, SetEventResponse> {
-            override fun apply(t: Log): SetEventResponse? {
-                val eventValues = extractEventParametersWithLog(SET_EVENT, log as Log)
-                val typedResponse = SetEventResponse()
-                typedResponse.log = log as Log
-                typedResponse.x = eventValues.nonIndexedValues[0].value as BigInteger
-                return typedResponse
-            }
-        })
+        return web3j.ethLogFlowable(filter).map { log ->
+            val eventValues = extractEventParametersWithLog(SET_EVENT, log)
+            val typedResponse = SetEventResponse()
+            typedResponse.log = log
+            typedResponse.x = eventValues.nonIndexedValues[0].value as BigInteger
+            typedResponse
+        }
     }
 
     fun setEventFlowable(startBlock: DefaultBlockParameter?, endBlock: DefaultBlockParameter?): Flowable<SetEventResponse> {

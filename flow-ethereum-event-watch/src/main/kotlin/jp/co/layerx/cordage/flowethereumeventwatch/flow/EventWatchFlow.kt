@@ -15,7 +15,6 @@ import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.ProgressTracker.Step
 import org.web3j.abi.DefaultFunctionReturnDecoder
-import org.web3j.abi.FunctionReturnDecoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Event
 import org.web3j.abi.datatypes.generated.Uint256
@@ -28,7 +27,6 @@ import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.StaticGasProvider
 import java.math.BigInteger
 import java.util.*
-import org.web3j.tx.gas.DefaultGasProvider as DefaultGasProvider1
 
 @InitiatingFlow
 @SchedulableFlow
@@ -81,7 +79,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                 val value = logResult[0].value as BigInteger
 
                 val credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
-                val simpleStorage: SimpleStorage = SimpleStorage.load("0xCfEB869F69431e42cdB54A4F4f105C19C080A601", web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(21000)))
+                val simpleStorage: SimpleStorage = SimpleStorage.load("0xCfEB869F69431e42cdB54A4F4f105C19C080A601", web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
                 val result = simpleStorage.set(value).send()
             }
         }

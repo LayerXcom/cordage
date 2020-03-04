@@ -1,7 +1,8 @@
 package jp.co.layerx.cordage.flowethereumeventwatch
 
 import jp.co.layerx.cordage.flowethereumeventwatch.ethWrapper.SimpleStorage
-import org.assertj.core.api.*
+import org.assertj.core.api.Assertions
+import org.assertj.core.api.BigIntegerAssert
 import org.junit.Test
 import org.web3j.abi.DefaultFunctionReturnDecoder
 import org.web3j.crypto.Credentials
@@ -38,18 +39,16 @@ class SampleTest {
             }
         }
         BigIntegerAssert(BigInteger.ONE)
-//        ethLogs.result.map { (it.get() as Log).data }
-//                .map { FunctionReturnDecoder.decode(it, event.nonIndexedParameters) }
-
     }
 
     @Test
     fun `send ethereum tx test`() {
         val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+
         val credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
-        val simpleStorage: SimpleStorage = SimpleStorage.load("0xCfEB869F69431e42cdB54A4F4f105C19C080A601", web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(21000)))
-        val result = simpleStorage.set(99.toBigInteger()).send()
+        val simpleStorage: SimpleStorage = SimpleStorage.load("0xCfEB869F69431e42cdB54A4F4f105C19C080A601", web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
+        val result = simpleStorage.set(3.toBigInteger()).send()
         val returnValue = result.transactionHash
 
         Assertions.assertThat(returnValue).startsWith("0x")
