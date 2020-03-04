@@ -40,9 +40,8 @@ class FlowTests {
 
     @Test
     fun `eventwatch occurs every 10 seconds`() {
-        val targetContractAddress = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
-        val eventName = "Set"
-        val flow = StartEventWatchFlow(targetContractAddress, eventName)
+        val searchId = 10
+        val flow = StartEventWatchFlow(searchId)
         node.startFlow(flow).get()
 
         val sleepTime: Long = 22000

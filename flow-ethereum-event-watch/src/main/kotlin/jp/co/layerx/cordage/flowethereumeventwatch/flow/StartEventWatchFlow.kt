@@ -16,9 +16,11 @@ import java.math.BigInteger
 
 @InitiatingFlow
 @StartableByRPC
-class StartEventWatchFlow(private val targetContractAddress: String, private val eventName: String) : FlowLogic<Unit>() {
+class StartEventWatchFlow(private val searchId: Int) : FlowLogic<Unit>() {
     companion object {
         const val ETHEREUM_RPC_URL = "http://localhost:8545"
+        const val TARGET_CONTRACT_ADDRESS = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
+        const val EVENT_NAME = "Set"
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
         object VERIFYING_TRANSACTION : ProgressTracker.Step("Verifying a WatcherState transaction.")
@@ -44,7 +46,7 @@ class StartEventWatchFlow(private val targetContractAddress: String, private val
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
         val fromBlockNumber = BigInteger.ZERO
         val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
-        val output = WatcherState(ourIdentity, fromBlockNumber, recentBlockNumber, targetContractAddress, eventName)
+        val output = WatcherState(ourIdentity, fromBlockNumber, recentBlockNumber, TARGET_CONTRACT_ADDRESS, EVENT_NAME, searchId.toBigInteger())
 
         progressTracker.currentStep = GENERATING_TRANSACTION
         val cmd = Command(WatcherContract.Commands.Issue(), ourIdentity.owningKey)

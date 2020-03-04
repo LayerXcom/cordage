@@ -1,6 +1,7 @@
 package jp.co.layerx.cordage.flowethereumeventwatch
 
 import jp.co.layerx.cordage.flowethereumeventwatch.ethWrapper.SimpleStorage
+import jp.co.layerx.cordage.flowethereumeventwatch.flow.EventWatchFlow
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.BigIntegerAssert
 import org.junit.Test
@@ -23,22 +24,41 @@ class SampleTest {
 
         val targetContractAddress = SimpleStorage.getPreviouslyDeployedAddress("5777")
         val event = SimpleStorage.SET_EVENT
+        val searchId = 8.toBigInteger()
 
         val filter = EthFilter(DefaultBlockParameter.valueOf("earliest"),
                 DefaultBlockParameter.valueOf("latest"),
                 targetContractAddress)
 
         val ethLogs = web3.ethGetLogs(filter).send()
-        val result = ethLogs.result
-        if (result.size != 0) {
-            val sendEventLog =  ethLogs.result[0].get() as Log
-            val logResult = DefaultFunctionReturnDecoder.decode(sendEventLog.data, event.nonIndexedParameters)
-            if (logResult.size != 0) {
-                val value = logResult[0].value as BigInteger
-                BigIntegerAssert(value)
+        val decodedLogs = ethLogs.result?.map { (it.get() as Log).data }
+                ?.map { DefaultFunctionReturnDecoder.decode(it, event.nonIndexedParameters) }
+        if (decodedLogs != null) {
+            for (decodedLog in decodedLogs) {
+                val eventValues = decodedLog?.map { it.value as BigInteger }
+                // EventのvalueがsearchIdと一致する場合にはそれをincrementして新たな値としてsetし、WatcherState Loopを終了する
+                val filteredEventValues = eventValues?.filter { e -> e == searchId }
+                if (filteredEventValues != null) {
+                    for (filteredEventValue in filteredEventValues) {
+                        val credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
+                        val simpleStorage: SimpleStorage = SimpleStorage.load(targetContractAddress, web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
+                        val result = simpleStorage.set(filteredEventValue.inc()).send()
+                        val returnValue = result.transactionHash
+
+                        Assertions.assertThat(returnValue).startsWith("0x")
+                    }
+                }
             }
         }
-        BigIntegerAssert(BigInteger.ONE)
+//        val result = ethLogs.result
+//        if (result.size != 0) {
+//            val sendEventLog =  ethLogs.result[0].get() as Log
+//            val logResult = DefaultFunctionReturnDecoder.decode(sendEventLog.data, event.nonIndexedParameters)
+//            if (logResult.size != 0) {
+//                val value = logResult[0].value as BigInteger
+//                BigIntegerAssert(value)
+//            }
+//        }
     }
 
     @Test
