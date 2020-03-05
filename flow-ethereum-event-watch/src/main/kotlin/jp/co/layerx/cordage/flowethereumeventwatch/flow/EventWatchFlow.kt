@@ -14,6 +14,8 @@ import net.corda.core.flows.SchedulableFlow
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.trace
+import okhttp3.ConnectionPool
+import okhttp3.OkHttpClient
 import org.web3j.abi.DefaultFunctionReturnDecoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Event
@@ -26,6 +28,7 @@ import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.StaticGasProvider
 import java.math.BigInteger
+import java.util.concurrent.TimeUnit
 
 @InitiatingFlow
 @SchedulableFlow
@@ -65,13 +68,18 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val event = Event(eventName,
                 listOf<TypeReference<*>>(object : TypeReference<Uint256?>() {}))
 
-        val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+        val okHttpClient = OkHttpClient.Builder()
+                .connectionPool(ConnectionPool(0, 5, TimeUnit.MINUTES))
+                .build()
+        val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL, okHttpClient))
 
         val filter = EthFilter(DefaultBlockParameter.valueOf(fromBlockNumber),
                 DefaultBlockParameter.valueOf(toBlockNumber),
                 targetContractAddress)
 
         val ethLogs = web3.ethGetLogs(filter).send()
+        web3.shutdown()
+
         val decodedLogs = ethLogs.result?.map { (it.get() as Log).data }
                 ?.map { DefaultFunctionReturnDecoder.decode(it, event.nonIndexedParameters) }
         if (decodedLogs != null && decodedLogs.isNotEmpty()) {
@@ -89,16 +97,14 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                 }
             }
         }
-        logger.trace{ "passed through if sentence." }
 
 //        progressTracker.currentStep = CREATING_WATCHERSTATE
-        val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
-        logger.trace{ "after get recent block number." }
-        web3.shutdown()
+        val web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL, okHttpClient))
+        val recentBlockNumber = web3j.ethBlockNumber().send().blockNumber
+        web3j.shutdown()
         val newFromBlockNumber = toBlockNumber.inc()
         val newToBlockNumber = recentBlockNumber
         val output = WatcherState(ourIdentity, newFromBlockNumber, newToBlockNumber, targetContractAddress, eventName, searchId)
-        logger.trace{ "after make output state." }
 
 //        progressTracker.currentStep = GENERATING_TRANSACTION
         val watchCmd = Command(WatcherContract.Commands.Watch(), ourIdentity.owningKey)
@@ -107,19 +113,15 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                 .addOutputState(output, contractID)
                 .addCommand(watchCmd)
 
-        logger.trace{ "after transaction builder" }
 //        progressTracker.currentStep = VERIFYING_TRANSACTION
         txBuilder.verify(serviceHub)
-        logger.trace{ "after txBuilder." }
 
 //        progressTracker.currentStep = SIGNING_TRANSACTION
         val signedTx = serviceHub.signInitialTransaction(txBuilder)
-        logger.trace{ "after signInitialTransaction." }
 
 //        progressTracker.currentStep = FINALISING_TRANSACTION
 //        subFlow(FinalityFlow(signedTx, listOf(), FINALISING_TRANSACTION.childProgressTracker()))
         subFlow(FinalityFlow(signedTx, listOf()))
-        logger.trace{ "after FinalityFlow." }
 
         return "Event Watched. fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber}"
     }
