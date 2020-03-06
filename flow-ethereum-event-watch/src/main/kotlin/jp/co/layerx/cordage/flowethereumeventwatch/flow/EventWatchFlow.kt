@@ -13,9 +13,6 @@ import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.SchedulableFlow
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
-import net.corda.core.utilities.trace
-import okhttp3.ConnectionPool
-import okhttp3.OkHttpClient
 import org.web3j.abi.DefaultFunctionReturnDecoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Event
@@ -28,37 +25,37 @@ import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.StaticGasProvider
 import java.math.BigInteger
-import java.util.concurrent.TimeUnit
 
 @InitiatingFlow
 @SchedulableFlow
 class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
         const val ETHEREUM_RPC_URL = "http://localhost:8545"
-//        object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
-//        object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
-//        object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
-//        object VERIFYING_TRANSACTION : ProgressTracker.Step("Verifying a WatcherState transaction.")
-//        object SIGNING_TRANSACTION : ProgressTracker.Step("Signing transaction with our private key.")
-//        object FINALISING_TRANSACTION : ProgressTracker.Step("Recording transaction.") {
-//            override fun childProgressTracker() = FinalityFlow.tracker()
-//        }
-//
-//        fun tracker() = ProgressTracker(
-//                CREATING_WATCHERSTATE,
-//                WATCHING_EVENT,
-//                GENERATING_TRANSACTION,
-//                VERIFYING_TRANSACTION,
-//                SIGNING_TRANSACTION,
-//                FINALISING_TRANSACTION
-//        )
+        val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+        object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
+        object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
+        object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
+        object VERIFYING_TRANSACTION : ProgressTracker.Step("Verifying a WatcherState transaction.")
+        object SIGNING_TRANSACTION : ProgressTracker.Step("Signing transaction with our private key.")
+        object FINALISING_TRANSACTION : ProgressTracker.Step("Recording transaction.") {
+            override fun childProgressTracker() = FinalityFlow.tracker()
+        }
+
+        fun tracker() = ProgressTracker(
+                CREATING_WATCHERSTATE,
+                WATCHING_EVENT,
+                GENERATING_TRANSACTION,
+                VERIFYING_TRANSACTION,
+                SIGNING_TRANSACTION,
+                FINALISING_TRANSACTION
+        )
     }
 
-//    override val progressTracker = tracker()
+    override val progressTracker = tracker()
 
     @Suspendable
     override fun call(): String {
-//        progressTracker.currentStep = WATCHING_EVENT
+        progressTracker.currentStep = WATCHING_EVENT
         val input = serviceHub.toStateAndRef<WatcherState>(stateRef)
         val fromBlockNumber = input.state.data.fromBlockNumber
         val toBlockNumber = input.state.data.toBlockNumber
@@ -68,17 +65,11 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val event = Event(eventName,
                 listOf<TypeReference<*>>(object : TypeReference<Uint256?>() {}))
 
-        val okHttpClient = OkHttpClient.Builder()
-                .connectionPool(ConnectionPool(0, 5, TimeUnit.MINUTES))
-                .build()
-        val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL, okHttpClient))
-
         val filter = EthFilter(DefaultBlockParameter.valueOf(fromBlockNumber),
                 DefaultBlockParameter.valueOf(toBlockNumber),
                 targetContractAddress)
 
         val ethLogs = web3.ethGetLogs(filter).send()
-        web3.shutdown()
 
         val decodedLogs = ethLogs.result?.map { (it.get() as Log).data }
                 ?.map { DefaultFunctionReturnDecoder.decode(it, event.nonIndexedParameters) }
@@ -98,30 +89,27 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
             }
         }
 
-//        progressTracker.currentStep = CREATING_WATCHERSTATE
-        val web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL, okHttpClient))
-        val recentBlockNumber = web3j.ethBlockNumber().send().blockNumber
-        web3j.shutdown()
+        progressTracker.currentStep = CREATING_WATCHERSTATE
+        val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
         val newFromBlockNumber = toBlockNumber.inc()
         val newToBlockNumber = recentBlockNumber
         val output = WatcherState(ourIdentity, newFromBlockNumber, newToBlockNumber, targetContractAddress, eventName, searchId)
 
-//        progressTracker.currentStep = GENERATING_TRANSACTION
+        progressTracker.currentStep = GENERATING_TRANSACTION
         val watchCmd = Command(WatcherContract.Commands.Watch(), ourIdentity.owningKey)
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
                 .addInputState(input)
                 .addOutputState(output, contractID)
                 .addCommand(watchCmd)
 
-//        progressTracker.currentStep = VERIFYING_TRANSACTION
+        progressTracker.currentStep = VERIFYING_TRANSACTION
         txBuilder.verify(serviceHub)
 
-//        progressTracker.currentStep = SIGNING_TRANSACTION
+        progressTracker.currentStep = SIGNING_TRANSACTION
         val signedTx = serviceHub.signInitialTransaction(txBuilder)
 
-//        progressTracker.currentStep = FINALISING_TRANSACTION
-//        subFlow(FinalityFlow(signedTx, listOf(), FINALISING_TRANSACTION.childProgressTracker()))
-        subFlow(FinalityFlow(signedTx, listOf()))
+        progressTracker.currentStep = FINALISING_TRANSACTION
+        subFlow(FinalityFlow(signedTx, listOf(), FINALISING_TRANSACTION.childProgressTracker()))
 
         return "Event Watched. fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber}"
     }
