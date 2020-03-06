@@ -76,7 +76,6 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         if (decodedLogs != null && decodedLogs.isNotEmpty()) {
             for (decodedLog in decodedLogs) {
                 val eventValues = decodedLog?.map { it.value as BigInteger }
-                // EventのvalueがsearchIdと一致する場合にはそれをincrementして新たな値としてsetし、WatcherState Loopを終了する
                 val filteredEventValues = eventValues?.filter { e -> e == searchId }
                 if (filteredEventValues != null && filteredEventValues.isNotEmpty()) {
                     for (filteredEventValue in filteredEventValues) {

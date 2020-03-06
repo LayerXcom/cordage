@@ -1,9 +1,7 @@
 package jp.co.layerx.cordage.flowethereumeventwatch
 
 import jp.co.layerx.cordage.flowethereumeventwatch.ethWrapper.SimpleStorage
-import jp.co.layerx.cordage.flowethereumeventwatch.flow.EventWatchFlow
 import org.assertj.core.api.Assertions
-import org.assertj.core.api.BigIntegerAssert
 import org.junit.Test
 import org.web3j.abi.DefaultFunctionReturnDecoder
 import org.web3j.crypto.Credentials
@@ -18,7 +16,7 @@ import java.math.BigInteger
 
 class SampleTest {
     @Test
-    fun `get ethereum event test`() {
+    fun `get ethereum event and send tx test`() {
         val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
 
@@ -36,7 +34,6 @@ class SampleTest {
         if (decodedLogs != null) {
             for (decodedLog in decodedLogs) {
                 val eventValues = decodedLog?.map { it.value as BigInteger }
-                // EventのvalueがsearchIdと一致する場合にはそれをincrementして新たな値としてsetし、WatcherState Loopを終了する
                 val filteredEventValues = eventValues?.filter { e -> e == searchId }
                 if (filteredEventValues != null) {
                     for (filteredEventValue in filteredEventValues) {
@@ -50,15 +47,6 @@ class SampleTest {
                 }
             }
         }
-//        val result = ethLogs.result
-//        if (result.size != 0) {
-//            val sendEventLog =  ethLogs.result[0].get() as Log
-//            val logResult = DefaultFunctionReturnDecoder.decode(sendEventLog.data, event.nonIndexedParameters)
-//            if (logResult.size != 0) {
-//                val value = logResult[0].value as BigInteger
-//                BigIntegerAssert(value)
-//            }
-//        }
     }
 
     @Test
