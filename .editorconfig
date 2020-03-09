@@ -1,0 +1,17 @@
+# http://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[{*.js,*.json,*.sol}]
+indent_size = 2
+
+[{*.java,*.kt}]
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
