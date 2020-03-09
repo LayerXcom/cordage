@@ -32,6 +32,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
         const val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+        val credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
@@ -79,7 +80,6 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                 val filteredEventValues = eventValues?.filter { e -> e == searchId }
                 if (filteredEventValues != null && filteredEventValues.isNotEmpty()) {
                     for (filteredEventValue in filteredEventValues) {
-                        val credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
                         val simpleStorage: SimpleStorage = SimpleStorage.load(targetContractAddress, web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
                         val result = simpleStorage.set(filteredEventValue.inc()).send()
                         return "Ethereum Event with id: ${searchId} watched and send TX Completed"
