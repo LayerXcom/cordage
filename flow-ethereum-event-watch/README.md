@@ -65,6 +65,8 @@ If you now start monitoring the node's flow activity...
 
 ...you will see the `EventWatch` flow running every 10 seconds until you close the Flow Watch window using `ctrl/cmd + c`:
 
-    xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    Evlent Watched. fromBlockNumber: x, toBlockNumber: xxxx
+    xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    Evlent Watched. (fromBlockNumber: x, toBlockNumber: xxxx)
+
+...Or if aimed Ethereum Event was emitted on ganache network, `EventWatch` flow will end with below log:
 
     xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    Ethereum Event with id: xx watched and send TX Completed
