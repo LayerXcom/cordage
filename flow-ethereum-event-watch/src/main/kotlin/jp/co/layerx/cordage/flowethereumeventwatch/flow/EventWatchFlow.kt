@@ -109,6 +109,6 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         progressTracker.currentStep = FINALISING_TRANSACTION
         subFlow(FinalityFlow(signedTx, listOf(), FINALISING_TRANSACTION.childProgressTracker()))
 
-        return "Event Watched. fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber}"
+        return "Event Watched. (fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber})"
     }
 }
