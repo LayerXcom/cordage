@@ -2,7 +2,7 @@
 
 ## Run Ethereum Network
 ```
-ganache-cli --allowUnlimitedContractSize --gasPrice 0 --gasLimit 90000000 --blockTime 3 -p 8545 --networkId 5778 -m "myth like bonus scare over problem client lizard pioneer submit female collect"
+ganache-cli --allowUnlimitedContractSize --gasPrice 0 --gasLimit 90000000 --blockTime 3 -p 8545 --networkId 5777 -m "myth like bonus scare over problem client lizard pioneer submit female collect"
 ```
 
 ```
@@ -46,7 +46,7 @@ Private Keys
 ## Start EventWatch
 
 ```
-flow start jp.co.layerx.cordage.flowethereumeventwatch.flow.StartEventWatchFlow fromBlockNumber: 28, targetContractAddress: "0xd0a6E6C54DbC68Db5db3A091B171A77407Ff7ccf", eventName: "SETTLED_EVENT"
+flow start jp.co.layerx.cordage.flowethereumeventwatch.flow.StartEventWatchFlow searchId: 8
 ```
 
 ## Start monitoring the node's flow activity...
