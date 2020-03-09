@@ -6,6 +6,27 @@ ganache-cli --allowUnlimitedContractSize --gasPrice 0 --gasLimit 90000000 --bloc
 ```
 
 ```
+cd ../minimal-ethereum-env
+```
+
+```
+yarn network
+```
+
+```
+yarn truffle migrate --network local
+```
+
+```
+yarn truffle exec scripts/get.js --network local
+```
+
+```
+yarn truffle exec scripts/set.js --network local
+```
+
+## Available Accounts and Private Keys on ganache-cli
+```
 Available Accounts
 ==================
 (0) 0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1 (100 ETH)
@@ -31,6 +52,12 @@ Private Keys
 (7) 0xa453611d9419d0e56f499079478fd72c37b251a94bfde4d19872c44cf65386e3
 (8) 0x829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4
 (9) 0xb0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773
+```
+
+## Create SmartContract Wrapper by web3j command
+
+```
+web3j truffle generate ./minimal-ethereum-env/build/contracts/SimpleStorage.json -o ./flow-ethereum-event-watch/src/main/java -p jp.co.layerx.cordage.flowethereumeventwatch.ethWrapper
 ```
 
 ## Run Corda Nodes
