@@ -1,5 +1,5 @@
-const SimpleStorage = artifacts.require("SimpleStorage");
+const SimpleStorage = artifacts.require('SimpleStorage');
 
 module.exports = async deployer => {
-    await deployer.deploy(SimpleStorage, 4);
+  await deployer.deploy(SimpleStorage, 4);
 };
