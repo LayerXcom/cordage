@@ -1,32 +1,44 @@
 # Minimal Ethereum Environment
+This manages minimal ethereum environments.
+You can deploy the [SimpleStorage](./contracts/SimpleStorage.sol) contract that is used in Cordage examples.
 
 ## Dependencies
 - Node.js v12 (Required)
 - yarn (Optional but recommended)
 
 ## Usage
+Install npm dependencies
+```
+yarn
+```
 
 Run local ethereum network
 ```
 yarn network
 ```
 
-Deploy smart contract
+Deploy SimpleStorage smart contract
 ```
 yarn truffle migrate --network local
 ```
 
-Run *get* command
+Run *get* command that gets data from SimpleStorage
 ```
 yarn truffle exec scripts/get.js --network local
 ```
 
-Run *set* command
+Run *set* command that sets data into SimpleStorage
 ```
 yarn truffle exec scripts/set.js --network local
 ```
 
+*set* command with an argument
+```
+yarn truffle exec scripts/set.js 20 --network local
+```
+
 ### Ethereum addresses and private keys
+**DO NOT USE IN PRODUCTION**
 
 ```
 Available Accounts
