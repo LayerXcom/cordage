@@ -14,9 +14,7 @@ import net.corda.core.flows.SchedulableFlow
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import org.web3j.abi.DefaultFunctionReturnDecoder
-import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Event
-import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
@@ -32,7 +30,9 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
         const val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+        // TODOFIX
         val credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
+        val eventMapping = mapOf<String, Event>("Set" to SimpleStorage.SET_EVENT)
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
@@ -61,10 +61,9 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val fromBlockNumber = input.state.data.fromBlockNumber
         val toBlockNumber = input.state.data.toBlockNumber
         val targetContractAddress = input.state.data.targetContractAddress
-        val searchId = input.state.data.searchId
         val eventName = input.state.data.eventName
-        val event = Event(eventName,
-                listOf<TypeReference<*>>(object : TypeReference<Uint256?>() {}))
+        val searchId = input.state.data.searchId
+        val event = eventMapping[eventName]
 
         val filter = EthFilter(DefaultBlockParameter.valueOf(fromBlockNumber),
                 DefaultBlockParameter.valueOf(toBlockNumber),
@@ -73,7 +72,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val ethLogs = web3.ethGetLogs(filter).send()
 
         val decodedLogs = ethLogs.result?.map { (it.get() as Log).data }
-                ?.map { DefaultFunctionReturnDecoder.decode(it, event.nonIndexedParameters) }
+                ?.map { DefaultFunctionReturnDecoder.decode(it, event?.nonIndexedParameters) }
         if (decodedLogs != null && decodedLogs.isNotEmpty()) {
             for (decodedLog in decodedLogs) {
                 val eventValues = decodedLog?.map { it.value as BigInteger }
