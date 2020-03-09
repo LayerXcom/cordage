@@ -7,7 +7,7 @@
 </p>
 
 # Flow Ethereum Event Watch
-This CorDapp provides a simple example of how to get(watch) Ethereum Events and send a transaction to Ethereum Contract from Corda Flow.
+This CorDapp provides a simple example of how to watch(get) Ethereum Events and send a transaction to Ethereum Contract from Corda Flow.
 
 A node starts its event watching by calling the `StartEventWatchFlow`. This creates a `WatchState` on the ledger. This 
 `WatchState` has a scheduled activity to start the `EventWatchFlow` 10 seconds later.
