@@ -79,10 +79,8 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                 val eventValues = abiTypes?.map { it.value as BigInteger }
                 val filteredEventValues = eventValues?.filter { e -> e == searchId }
                 if (filteredEventValues != null && filteredEventValues.isNotEmpty()) {
-                    filteredEventValues.forEach { filteredEventValue ->
-                        doSomething(input.state.data)
-                        return "Ethereum Event with id: $searchId watched and send TX Completed"
-                    }
+                    doSomething(input.state.data)
+                    return "Ethereum Event with id: $searchId watched and send TX Completed"
                 }
             }
         }
