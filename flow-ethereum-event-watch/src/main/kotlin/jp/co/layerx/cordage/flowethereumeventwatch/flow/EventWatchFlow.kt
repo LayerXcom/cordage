@@ -28,10 +28,10 @@ import java.math.BigInteger
 @SchedulableFlow
 class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
-        const val ETHEREUM_RPC_URL = "http://localhost:8545"
-        val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+        private const val ETHEREUM_RPC_URL = "http://localhost:8545"
+        val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
         // TODOFIX
-        val credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
+        val credentials: Credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
         val eventMapping = mapOf<String, Event>("Set" to SimpleStorage.SET_EVENT)
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
@@ -80,8 +80,8 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                 if (filteredEventValues != null && filteredEventValues.isNotEmpty()) {
                     for (filteredEventValue in filteredEventValues) {
                         val simpleStorage: SimpleStorage = SimpleStorage.load(targetContractAddress, web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
-                        val result = simpleStorage.set(filteredEventValue.inc()).send()
-                        return "Ethereum Event with id: ${searchId} watched and send TX Completed"
+                        simpleStorage.set(filteredEventValue.inc()).send()
+                        return "Ethereum Event with id: $searchId watched and send TX Completed"
                     }
                 }
             }
@@ -90,8 +90,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
         val newFromBlockNumber = toBlockNumber.inc()
-        val newToBlockNumber = recentBlockNumber
-        val output = WatcherState(ourIdentity, newFromBlockNumber, newToBlockNumber, targetContractAddress, eventName, searchId)
+        val output = WatcherState(ourIdentity, newFromBlockNumber, recentBlockNumber, targetContractAddress, eventName, searchId)
 
         progressTracker.currentStep = GENERATING_TRANSACTION
         val watchCmd = Command(WatcherContract.Commands.Watch(), ourIdentity.owningKey)
