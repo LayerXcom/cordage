@@ -48,4 +48,4 @@ This distribution is published under the Apache License Version 2.0 found in the
 - [yudetamago](https://github.com/yudetamago)
 
 ## Sponsors
-<img src="./docs/images/layerx.png" alt="LayerX" width="500"><br />
+<a href="https://layerx.co.jp/en/"><img src="./docs/images/layerx.png" alt="LayerX" width="500"></a><br />
