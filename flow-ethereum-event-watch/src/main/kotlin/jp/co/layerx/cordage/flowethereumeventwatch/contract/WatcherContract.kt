@@ -25,7 +25,6 @@ open class WatcherContract: Contract {
                 "Only one output state should be created when issuing an Watcher." using (tx.outputs.size == 1)
                 val watcher = tx.outputsOfType<WatcherState>().single()
                 "A newly issued Watcher's fromBlockNumber must be more than zero." using (watcher.fromBlockNumber >= 0.toBigInteger())
-                "A newly issued Watcher must have a positive toBlockNumber." using (watcher.toBlockNumber > 0.toBigInteger())
                 "The toBlockNumber must be greater than the fromBlockNumber." using (watcher.toBlockNumber > watcher.fromBlockNumber)
                 "The targetContractAddress must start with 0x." using (watcher.targetContractAddress.startsWith("0x"))
             }
