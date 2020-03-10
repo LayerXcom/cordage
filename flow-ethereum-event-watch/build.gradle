@@ -33,6 +33,7 @@ repositories {
 }
 
 apply plugin: 'kotlin'
+apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'net.corda.plugins.cordapp'
 apply plugin: 'net.corda.plugins.publish-utils'
@@ -62,7 +63,9 @@ cordapp {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile "org.web3j:core:4.5.14"
+    // web3j version should strictly equal to 4.5.11 due to its okhttp dependency conflict
+    // https://github.com/web3j/web3j/issues/1167#issuecomment-593369842
+    compile "org.web3j:core:4.5.11"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testCompile "junit:junit:$junit_version"
     testCompile "org.assertj:assertj-core:3.15.0"
@@ -101,6 +104,11 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     }
 }
 
+sourceSets {
+    main.kotlin.srcDirs += 'src/main/kotlin' //for kotlin file
+    main.java.srcDirs += 'src/main/java' //for java file
+}
+
 task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     delete "./build/nodes"
     directory "./build/nodes"
@@ -127,7 +135,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     node {
         name "O=ParticipantA,L=London,C=GB"
         p2pPort 10007
-        webPort 10009
+//        webPort 10009
         rpcSettings {
             useSsl false
             standAloneBroker false

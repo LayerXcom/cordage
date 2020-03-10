@@ -18,7 +18,8 @@ class WatcherState(
         val toBlockNumber: BigInteger,
         val targetContractAddress: String,
         val eventName: String,
-        private val nextActivityTime: Instant = Instant.now().plusSeconds(1)
+        val searchId: BigInteger,
+        private val nextActivityTime: Instant = Instant.now().plusSeconds(10)
 ) : SchedulableState {
 
     override val participants get() = listOf(me)
