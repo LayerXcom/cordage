@@ -26,7 +26,7 @@ See https://docs.corda.net/getting-set-up.html.
 ### Run ganache-cli
 [ganache-cli](https://github.com/trufflesuite/ganache-cli) is a fast Ethereum RPC client for testing and development.
 
-You can run ganache-cli by following [Minimal Ethereum Environment](https://github.com/LayerXcom/cordage/blob/master/minimal-ethereum-env/README.md).
+You can run ganache-cli by following [Minimal Ethereum Environment](../minimal-ethereum-env/README.md).
 
 
 ## Usage
