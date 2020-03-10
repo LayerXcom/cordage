@@ -7,19 +7,20 @@
 </p>
 
 # Flow Ethereum Event Watch
-This CorDapp provides a simple example of how to watch(get) Ethereum Events and send a transaction to Ethereum Contract from Corda Flow.
+This CorDapp provides a simple example of how to watch (retrieve) Ethereum Events from Corda Flow.
 
-A node starts its event watching by calling the `StartEventWatchFlow`. This creates a `WatchState` on the ledger. This 
-`WatchState` has a scheduled activity to start the `EventWatchFlow` 10 seconds later.
+A node starts event-watching by calling the `StartEventWatchFlow`. This creates a `WatchState` on the ledger.
+This `WatchState` has a scheduled activity to start the `EventWatchFlow` 10 seconds later.
 
-When the `EventWatchFlow` runs 10 seconds later, it consumes the existing `WatchState` and
-the Flow gets Ethereum Logs and takes out some Ethereum Events object.
-If the Flow can find aimed Ethereum Event, it sends Ethereum Transaction to the Ethereum Contract or if not, the Flow creates a new `WatchState`. 
+When the `EventWatchFlow` runs, it consumes the existing `WatchState`.
+Then, the flow retrieves Ethereum Logs that contain Ethereum Events.
+If the Ethereum Event outputs the number which equals to `searchId`, the flow stops to produce `WatchState`;
+otherwise, the flow creates a new `WatchState`. 
 
 The new `WatchState` also has a scheduled activity to start the `EventWatchFlow` in 10 seconds.
 
-In this way, calling the `StartEventWatchFlow` creates an endless chain of `EventWatchFlow`s 10 seconds apart
-as long as the Flow cannot find aimed Ethereum Event.
+After all, `StartEventWatchFlow` creates an endless chain of `WatchState`s that runs `EventWatchFlow` every 10 seconds
+as long as the flow cannot meet a certain condition.
 
 
 Be aware that support of HTTP requests in flows is currently limited:
@@ -37,7 +38,7 @@ See https://docs.corda.net/getting-set-up.html.
 ### Run ganache-cli
 [ganache-cli](https://github.com/trufflesuite/ganache-cli) is a fast Ethereum RPC client for testing and development.
 
-You can run ganache-cli and deploy sample Contract by following [Minimal Ethereum Environment](https://github.com/LayerXcom/cordage/blob/master/minimal-ethereum-env/README.md).
+You can run ganache-cli and deploy sample Contract by following [Minimal Ethereum Environment](../minimal-ethereum-env/README.md).
 
 ### Create SmartContract Wrapper Class by web3j command
  
@@ -55,11 +56,11 @@ Use the `deployNodes` task and `./build/nodes/runnodes` script.
 
 ## Interacting with the nodes:
 
-Go to the CRaSH shell for PartyA, and run the `StartEventWatchFlow` with `searchId`:
+Go to the CRaSH shell for ParticipantA, and run the `StartEventWatchFlow` with `searchId`:
 
     flow start jp.co.layerx.cordage.flowethereumeventwatch.flow.StartEventWatchFlow searchId: 8
 
-If you now start monitoring the node's flow activity...
+You can now start monitoring the node's flow activity...
 
     flow watch
 
@@ -67,6 +68,8 @@ If you now start monitoring the node's flow activity...
 
     xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    Event Watched. (fromBlockNumber: x, toBlockNumber: xxxx)
 
-...Or if aimed Ethereum Event was emitted on ganache network, `EventWatch` flow will end with below log:
+...Or if aimed Ethereum Event was emitted on ethereum network, `EventWatch` flow will end with below log:
 
     xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    Ethereum Event with id: xx watched and send TX Completed
+
+You can send Ethereum tx to emit event using minimal ethereum env [scripts](../minimal-ethereum-env/scripts).
