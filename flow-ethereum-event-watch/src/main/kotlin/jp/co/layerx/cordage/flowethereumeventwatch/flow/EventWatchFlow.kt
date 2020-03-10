@@ -74,13 +74,13 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val decodedLogs = ethLogs.result?.map { (it.get() as Log).data }
                 ?.map { DefaultFunctionReturnDecoder.decode(it, event?.nonIndexedParameters) }
         if (decodedLogs != null && decodedLogs.isNotEmpty()) {
-            for (decodedLog in decodedLogs) {
-                val eventValues = decodedLog?.map { it.value as BigInteger }
+            decodedLogs.forEach { abiTypes ->
+                // find event values by searchId
+                val eventValues = abiTypes?.map { it.value as BigInteger }
                 val filteredEventValues = eventValues?.filter { e -> e == searchId }
                 if (filteredEventValues != null && filteredEventValues.isNotEmpty()) {
-                    for (filteredEventValue in filteredEventValues) {
-                        val simpleStorage: SimpleStorage = SimpleStorage.load(targetContractAddress, web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
-                        simpleStorage.set(filteredEventValue.inc()).send()
+                    filteredEventValues.forEach { filteredEventValue ->
+                        doSomething(input.state.data)
                         return "Ethereum Event with id: $searchId watched and send TX Completed"
                     }
                 }
@@ -109,5 +109,11 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         subFlow(FinalityFlow(signedTx, listOf(), FINALISING_TRANSACTION.childProgressTracker()))
 
         return "Event Watched. (fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber})"
+    }
+
+    private fun doSomething(input: WatcherState) {
+        val simpleStorage: SimpleStorage = SimpleStorage.load(input.targetContractAddress, web3, credentials,
+                StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
+        simpleStorage.set(input.searchId.inc()).send()
     }
 }
