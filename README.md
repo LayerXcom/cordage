@@ -1,7 +1,7 @@
 # Cordage
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/26994507/76292661-f3cb0e00-62f2-11ea-910b-096b269b9a10.png" alt="Cordage" width="500">
+  <img src="./docs/images/logo.png" alt="Cordage" width="500">
 </p>
 
 Cordage is a project that enables the interoperability of Corda and other Blockchains.
@@ -18,10 +18,10 @@ WARNING: Cordage is alpha quality software, improvements and fixes are made freq
 
 For now, we focus on EVM Based Blockchain and only supported for two functions below.
 
-1. [Flow Ethereum TX](/flow-ethereum-tx)
+1. [Flow Ethereum TX](./flow-ethereum-tx)
 - This CorDapp provides a simple example of how to send a transaction to Ethereum from Corda Flow.
 
-2. [Flow Ethereum Event Watch](/flow-ethereum-event-watch)
+2. [Flow Ethereum Event Watch](./flow-ethereum-event-watch)
 - This CorDapp provides a simple example of how to watch(get) Ethereum Events and send a transaction to Ethereum Contract from Corda Flow.
 
 
