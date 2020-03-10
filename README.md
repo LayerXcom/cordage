@@ -1,7 +1,7 @@
 # Cordage
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/26994507/76292290-46f09100-62f2-11ea-84a8-299f472d70e6.png" alt="Cordage" width="500">
+  <img src="https://user-images.githubusercontent.com/26994507/76292661-f3cb0e00-62f2-11ea-910b-096b269b9a10.png" alt="Cordage" width="500">
 </p>
 
 Cordage is a project that enables the interoperability of Corda and other Blockchains.
@@ -38,10 +38,8 @@ For further discussions and questions talk to us on Gitter!
 We welcome contributions to Cordage.
 Feel free to submit your own issues and PRs!
 
-Please review [contributing](/CONTRIBUTING.md) guidelines to get started.
-
 ## License
-This distribution is published under the Apache License Version 2.0 found in the [LICENSE](/LICENSE) file.
+This distribution is published under the Apache License Version 2.0 found in the [LICENSE](./LICENSE) file.
 
 ## Maintainers
 
