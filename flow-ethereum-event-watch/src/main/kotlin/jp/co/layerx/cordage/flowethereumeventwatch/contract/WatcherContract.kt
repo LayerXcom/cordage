@@ -18,7 +18,7 @@ open class WatcherContract: Contract {
     }
 
     override fun verify(tx: LedgerTransaction) {
-        val command = tx.commands.requireSingleCommand<WatcherContract.Commands>()
+        val command = tx.commands.requireSingleCommand<Commands>()
         when (command.value) {
             is Commands.Issue -> requireThat {
                 "No inputs should be consumed when issuing an Watcher." using (tx.inputs.isEmpty())
