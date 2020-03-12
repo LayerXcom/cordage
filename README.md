@@ -4,7 +4,8 @@
 </p>
 
 Cordage makes the interoperability possible between [Corda](https://www.corda.net/) and other Blockchains
-by providing several modules that propagate, pull and verify information between Blockchains without any trusted third party.
+by providing several modules that propagate, pull and verify information between Blockchains
+without any trusted third party.
 
 In the first stage, we focus on EVM based blockchain such as Ethereum and [Quorum](https://www.goquorum.com/).
 
@@ -31,14 +32,14 @@ Implementing the wrapped asset such as Wrapped Bitcoin enables you to move asset
 By implementing the cross-chain oracle, you can import external ledger information such as ETH/DAI price.
 
 The other one is the data update with condition triggers.
-The cross-chain atomic swap is one of the most appealing features.
+The cross-chain atomic swap is one of the most appealing applications.
 It enables payment-versus-payment and payment-versus-delivery settlement.
 This pattern also includes asset encumbrance.
 It realizes various applications such as liens, collateral in finance, clawbacks, etc.
 
 ## Cordage modules
 In the first stage, we focus on Corda and EVM based blockchain interoperability,
-especially, Corda-vs-Ethereum PoW and Corda-vs-Quorum IBFT.
+especially, Ethereum PoW and Quorum IBFT.
 
 In this combination, data propagation and data verification features are consists of subdivided features as follow:
 
@@ -49,7 +50,7 @@ Data propagation
 - P4: Feature to import Tx finalized in Corda into Ethereum
 
 Data verification
-- V1: Feature to verify Tx / Event imported at P3 and to verify finality of Ethereum block linked to Tx / Event
+- V1: Feature to verify Ethereum Tx, Event and Block imported at P3 and to verify finality of Block
 - V2: Feature to verify Tx value imported at P4 and to verify finality of Corda Tx
 
 ### Implementation status
