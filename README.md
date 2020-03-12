@@ -2,7 +2,7 @@
 
 Cordage makes the interoperability possible between [Corda](https://www.corda.net/) and other Blockchains
 by providing several modules that propagate, pull and verify information between Blockchains
-without any trusted third party.
+without further trusted third party.
 
 In the first stage, we focus on EVM based blockchain such as Ethereum and [Quorum](https://www.goquorum.com/).
 
