@@ -30,8 +30,8 @@ open class WatcherContract: Contract {
                 "The targetContractAddress must start with 0x." using (watcher.targetContractAddress.startsWith("0x"))
             }
             is Commands.Watch -> requireThat {
-                "Input state shoud be only one state." using (tx.inputs.size == 1)
-                "Output state shoud be only one state." using (tx.outputs.size == 1)
+                "Input state should be only one state." using (tx.inputs.size == 1)
+                "Output state should be only one state." using (tx.outputs.size == 1)
                 val input = tx.inputsOfType<WatcherState>().single()
                 val output = tx.outputsOfType<WatcherState>().single()
                 "The me property should not be change." using (input.me == output.me)
