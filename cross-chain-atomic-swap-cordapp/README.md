@@ -22,6 +22,7 @@ You can run ganache-cli and deploy sample Contract by following [Minimal Ethereu
  
  ```
  web3j truffle generate ../minimal-ethereum-env/build/contracts/SimpleStorage.json -o ./src/main/java -p jp.co.layerx.cordage.crosschainatomicswap.ethWrapper ```
+ ```
 
 # Usage
 
@@ -32,21 +33,3 @@ See https://docs.corda.net/tutorial-cordapp.html#running-the-example-cordapp.
 Use the `deployNodes` task and `./build/nodes/runnodes` script.
 
 ## Interacting with the nodes:
-
-Go to the CRaSH shell for ParticipantA, and run the `StartEventWatchFlow` with `searchId`:
-
-    flow start jp.co.layerx.cordage.flowethereumeventwatch.flow.StartEventWatchFlow searchId: 8
-
-You can now start monitoring the node's flow activity...
-
-    flow watch
-
-...you will see the `EventWatch` flow running every 10 seconds until you close the Flow Watch window using `ctrl/cmd + c`:
-
-    xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    Event Watched. (fromBlockNumber: x, toBlockNumber: xxxx)
-
-...Or if aimed Ethereum Event was emitted on ethereum network, `EventWatch` flow will end with below log:
-
-    xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    Ethereum Event with id: xx watched and send TX Completed
-
-You can send Ethereum tx to emit event using minimal ethereum env [scripts](../minimal-ethereum-env/scripts).
