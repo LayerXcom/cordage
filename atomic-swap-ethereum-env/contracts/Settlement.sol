@@ -2,11 +2,8 @@ pragma solidity >=0.4.21 <0.7.0;
 pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract Settlement is Ownable {
-  using SafeMath for uint256;
-
   enum SwapStatus {
     Locked,
     Unlocked,
