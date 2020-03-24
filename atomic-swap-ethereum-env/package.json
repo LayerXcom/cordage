@@ -16,6 +16,7 @@
   "author": "LayerX Inc.",
   "license": "Apache-2.0",
   "dependencies": {
+    "openzeppelin-solidity": "2.3.0",
     "ganache-cli": "^6.9.1",
     "truffle": "^5.1.14"
   },

@@ -1,4 +1,5 @@
 pragma solidity >=0.4.21 <0.7.0;
+pragma experimental ABIEncoderV2;
 
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
@@ -54,8 +55,8 @@ contract Settlement is Ownable {
     address _transferToAddress,
     uint256 _etherAmount,
     uint256 _securityAmount,
-    string _proposerCordaName,
-    string _acceptorCordaName
+    string memory _proposerCordaName,
+    string memory _acceptorCordaName
   ) public payable {
     require(msg.sender == _transferFromAddress, "msg.sender is not _transferFromAddress");
     require(msg.value == _etherAmount, "msg.value is not equivalent to _etherAmount");
@@ -79,11 +80,9 @@ contract Settlement is Ownable {
   function unlock(
     string memory _swapId,
     address _transferFromAddress,
-    address _transferToAddress,
+    address payable _transferToAddress,
     uint256 _etherAmount
   ) public onlyOwner {
-    require(_swapIdToDetailMaps[_swapId]);
-
     SwapDetail storage swapDetail = _swapIdToDetailMaps[_swapId];
 
     require(swapDetail.status == SwapStatus.Locked, "swapDetail.status is not Locked");
@@ -91,11 +90,8 @@ contract Settlement is Ownable {
     require(swapDetail.transferToAddress == _transferToAddress, "swapDetail.transferToAddress is not equal to _transferToAddress");
     require(swapDetail.etherAmount == _etherAmount, "swapDetail.etherAmount is not equal to _etherAmount");
 
-    address targetAddress = (_transferToAddress != 0) ? _transferToAddress : msg.sender;
-
     // Try sending ether to targetAddress.
-    if (!targetAddress.send(_etherAmount))
-      throw;  // In case of failure revert the transaction.
+    require(_transferToAddress.send(_etherAmount));
 
     swapDetail.status = SwapStatus.Unlocked;
 
@@ -108,12 +104,10 @@ contract Settlement is Ownable {
 
   function abort(
     string memory _swapId,
-    address _transferFromAddress,
+    address payable _transferFromAddress,
     address _transferToAddress,
     uint256 _etherAmount
   ) public onlyOwner {
-    require(_swapIdToDetailMaps[_swapId]);
-
     SwapDetail storage swapDetail = _swapIdToDetailMaps[_swapId];
 
     require(swapDetail.status == SwapStatus.Locked, "swapDetail.status is not Locked");
@@ -121,11 +115,8 @@ contract Settlement is Ownable {
     require(swapDetail.transferToAddress == _transferToAddress, "swapDetail.transferToAddress is not equal to _transferToAddress");
     require(swapDetail.etherAmount == _etherAmount, "swapDetail.etherAmount is not equal to _etherAmount");
 
-    address targetAddress = (_transferFromAddress != 0) ? _transferFromAddress : msg.sender;
-
     // Try sending ether to targetAddress.
-    if (!targetAddress.send(_etherAmount))
-      throw;  // In case of failure revert the transaction.
+    require(_transferFromAddress.send(_etherAmount));
 
     swapDetail.status = SwapStatus.Aborted;
 
