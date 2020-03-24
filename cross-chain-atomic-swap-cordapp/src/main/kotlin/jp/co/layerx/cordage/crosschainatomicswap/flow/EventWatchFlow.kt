@@ -62,7 +62,9 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val toBlockNumber = input.state.data.toBlockNumber
         val targetContractAddress = input.state.data.targetContractAddress
         val eventName = input.state.data.eventName
-        val searchId = input.state.data.searchId
+        val proposalStateAndRef = input.state.data.proposalStateAndRef
+        val proposalState = proposalStateAndRef.state.data
+        val searchId = proposalState.swapID
         val event = eventMapping[eventName]
 
         val filter = EthFilter(DefaultBlockParameter.valueOf(fromBlockNumber),
@@ -79,7 +81,8 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                 val eventValues = abiTypes?.map { it.value as BigInteger }
                 val filteredEventValues = eventValues?.filter { e -> e == searchId }
                 if (filteredEventValues != null && filteredEventValues.isNotEmpty()) {
-                    doSomething(input.state.data)
+//                    doSomething(input.state.data)
+                    subFlow(SecurityTransferToOtherChainFlow(proposalStateAndRef))
                     return "Ethereum Event with id: $searchId watched and send TX Completed"
                 }
             }
@@ -88,7 +91,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
         val newFromBlockNumber = toBlockNumber.inc()
-        val output = WatcherState(ourIdentity, newFromBlockNumber, recentBlockNumber, targetContractAddress, eventName, searchId)
+        val output = WatcherState(ourIdentity, newFromBlockNumber, recentBlockNumber, targetContractAddress, eventName, proposalStateAndRef)
 
         progressTracker.currentStep = GENERATING_TRANSACTION
         val watchCmd = Command(WatcherContract.Commands.Watch(), ourIdentity.owningKey)
@@ -112,6 +115,6 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     private fun doSomething(input: WatcherState) {
         val simpleStorage: SimpleStorage = SimpleStorage.load(input.targetContractAddress, web3, credentials,
                 StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
-        simpleStorage.set(input.searchId.inc()).send()
+        simpleStorage.set(input.proposalStateAndRef.state.data.swapID.inc()).send()
     }
 }

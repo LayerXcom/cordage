@@ -39,7 +39,7 @@ open class WatcherContract: Contract {
                 "The toBlockNumber must be greater than the fromBlockNumber." using (output.toBlockNumber > output.fromBlockNumber)
                 "The targetContractAddress property should not be change." using (input.targetContractAddress == output.targetContractAddress)
                 "The eventName property should not be change." using (input.eventName == output.eventName)
-                "The searchId property should not be change." using (input.searchId == output.searchId)
+                "The searchId property should not be change." using (input.proposalStateAndRef.state.data.swapID == output.proposalStateAndRef.state.data.swapID)
             }
         }
     }

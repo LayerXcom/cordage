@@ -21,7 +21,7 @@ You can run ganache-cli and deploy sample Contract by following [Minimal Ethereu
 ### Create SmartContract Wrapper Class by web3j command
  
  ```
- web3j truffle generate ../minimal-ethereum-env/build/contracts/SimpleStorage.json -o ./src/main/java -p jp.co.layerx.cordage.crosschainatomicswap.ethWrapper ```
+ web3j truffle generate ../minimal-ethereum-env/build/contracts/SimpleStorage.json -o ./src/main/java -p jp.co.layerx.cordage.crosschainatomicswap.ethWrapper
  ```
 
 # Usage

@@ -1,15 +1,13 @@
 package jp.co.layerx.cordage.crosschainatomicswap.state
 
-import net.corda.core.contracts.BelongsToContract
-import net.corda.core.contracts.SchedulableState
-import net.corda.core.contracts.ScheduledActivity
-import net.corda.core.contracts.StateRef
 import net.corda.core.flows.FlowLogicRefFactory
 import net.corda.core.identity.Party
 import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract
 import jp.co.layerx.cordage.crosschainatomicswap.flow.EventWatchFlow
+import net.corda.core.contracts.*
 import java.math.BigInteger
 import java.time.Instant
+import javax.swing.plaf.nimbus.State
 
 @BelongsToContract(WatcherContract::class)
 class WatcherState(
@@ -18,7 +16,7 @@ class WatcherState(
         val toBlockNumber: BigInteger,
         val targetContractAddress: String,
         val eventName: String,
-        val searchId: BigInteger,
+        val proposalStateAndRef: StateAndRef<ProposalState>,
         private val nextActivityTime: Instant = Instant.now().plusSeconds(10)
 ) : SchedulableState {
 

@@ -3,33 +3,43 @@ package jp.co.layerx.cordage.crosschainatomicswap.flow
 import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
+import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalStatus
 import net.corda.core.contracts.Command
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
+import net.corda.core.node.services.queryBy
+import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class AbortAtomicSwapFlow(val state: ProposalState): FlowLogic<SignedTransaction>() {
+class AbortAtomicSwapFlow(val linearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
-        val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
-        val abortCommand = Command(ProposalContract.Commands.Abort(), state.participants.map { it.owningKey })
+        val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
+        val proposalStateAndRef =  serviceHub.vaultService.queryBy<ProposalState>(queryCriteria).states.single()
+        val inputProposal = proposalStateAndRef.state.data
 
-        val builder = TransactionBuilder(notary = notary)
+        if (ourIdentity != inputProposal.proposer) {
+            throw IllegalArgumentException("Proposal abort can only be initiated by the Proposal proposer.")
+        }
 
-        builder.addOutputState(state, ProposalContract.contractID)
-        builder.addCommand(abortCommand)
+        val outputProposal = inputProposal.withNewStatus(ProposalStatus.ABORTED)
 
-        builder.verify(serviceHub)
-        val ptx = serviceHub.signInitialTransaction(builder)
+        val signers = inputProposal.proposer.owningKey
+        val abortCommand = Command(ProposalContract.Commands.Abort(), signers)
 
-        val sessions = (state.participants - ourIdentity).map { initiateFlow(it) }.toSet()
-        val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
+        val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
+            .addInputState(proposalStateAndRef)
+            .addOutputState(outputProposal, ProposalContract.contractID)
+            .addCommand(abortCommand)
 
-        return subFlow(FinalityFlow(stx, sessions))
+        txBuilder.verify(serviceHub)
+        val signedTx = serviceHub.signInitialTransaction(txBuilder)
+        return subFlow(FinalityFlow(signedTx, listOf()))
     }
 }
 

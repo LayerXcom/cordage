@@ -8,14 +8,22 @@ import net.corda.core.identity.Party
 import java.math.BigInteger
 
 @BelongsToContract(ProposalContract::class)
-data class ProposalState(val securityAmount: BigInteger,
+data class ProposalState(val securityLinearId: UniqueIdentifier,
+                         val securityAmount: BigInteger,
                          val moneyAmount: BigInteger,
                          val swapID: BigInteger,
                          val proposer: Party,
                          val acceptor: Party,
                          val FromEthereumAddress: String,
                          val ToEthereumAddress: String,
+                         val status: ProposalStatus = ProposalStatus.PROPOSED,
                          override val linearId: UniqueIdentifier = UniqueIdentifier()): LinearState {
 
     override val participants: List<Party> get() = listOf(proposer, acceptor)
+
+    fun withNewStatus(newStatus: ProposalStatus) = copy(status = newStatus)
+}
+
+enum class ProposalStatus {
+    PROPOSED, CONSUMED, ABORTED
 }

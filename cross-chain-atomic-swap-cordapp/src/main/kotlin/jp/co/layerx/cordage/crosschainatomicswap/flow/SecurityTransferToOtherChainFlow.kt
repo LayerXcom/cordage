@@ -1,14 +1,13 @@
 package jp.co.layerx.cordage.crosschainatomicswap.flow
 
 import co.paralleluniverse.fibers.Suspendable
+import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
 import jp.co.layerx.cordage.crosschainatomicswap.contract.SecurityContract
+import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
+import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalStatus
 import jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
-import net.corda.core.contracts.Command
-import net.corda.core.contracts.StateAndContract
-import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.contracts.requireThat
+import net.corda.core.contracts.*
 import net.corda.core.flows.*
-import net.corda.core.identity.Party
 import net.corda.core.node.services.queryBy
 import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
@@ -16,11 +15,11 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class SecurityTransferToOtherChainFlow(val linearId: UniqueIdentifier,
-                           val newOwner: Party): FlowLogic<SignedTransaction>() {
+class SecurityTransferToOtherChainFlow(val proposalStateRef: StateAndRef<ProposalState>): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
-        val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
+        val inputProposal = proposalStateRef.state.data
+        val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(inputProposal.securityLinearId))
         val securityStateAndRef =  serviceHub.vaultService.queryBy<SecurityState>(queryCriteria).states.single()
         val inputSecurity = securityStateAndRef.state.data
 
@@ -28,22 +27,26 @@ class SecurityTransferToOtherChainFlow(val linearId: UniqueIdentifier,
             throw IllegalArgumentException("Security transfer can only be initiated by the Security Owner.")
         }
 
-        val outputSecurity = inputSecurity.withNewOwner(newOwner)
+        val outputSecurity = inputSecurity.withNewOwner(inputProposal.acceptor)
+        val outputProposal = inputProposal.withNewStatus(ProposalStatus.CONSUMED)
 
-        val signers = (inputSecurity.participants + newOwner).map { it.owningKey }
-        val transferCommand = Command(SecurityContract.Commands.Transfer(), signers)
+        val securitySigners = (inputSecurity.participants).map { it.owningKey }
+        val proposalSigners = (inputProposal.participants).map { it.owningKey }
+        val transferCommand = Command(SecurityContract.Commands.Transfer(), securitySigners)
+        val consumeCommand= Command(ProposalContract.Commands.Consume(), proposalSigners)
 
-        val notary = serviceHub.networkMapCache.notaryIdentities.first()
-        val builder = TransactionBuilder(notary = notary)
+        val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
+            .addInputState(securityStateAndRef)
+            .addOutputState(outputSecurity, SecurityContract.contractID)
+            .addCommand(transferCommand)
+            .addInputState(proposalStateRef)
+            .addOutputState(outputProposal,ProposalContract.contractID)
+            .addCommand(consumeCommand)
 
-        builder.withItems(securityStateAndRef,
-            StateAndContract(outputSecurity, SecurityContract.contractID),
-            transferCommand)
+        txBuilder.verify(serviceHub)
+        val ptx = serviceHub.signInitialTransaction(txBuilder)
 
-        builder.verify(serviceHub)
-        val ptx = serviceHub.signInitialTransaction(builder)
-
-        val sessions = (inputSecurity.participants - ourIdentity + newOwner).map { initiateFlow(it) }.toSet()
+        val sessions = (inputSecurity.participants - ourIdentity + inputProposal.participants - ourIdentity).map { initiateFlow(it) }.toSet()
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
         return subFlow(FinalityFlow(stx, sessions))
