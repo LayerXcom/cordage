@@ -1,0 +1,144 @@
+buildscript {
+    ext {
+        corda_release_version = '4.0'
+        corda_release_distribution = 'net.corda'
+        corda_gradle_plugins_version = '4.0.42'
+        kotlin_version = '1.2.71'
+        junit_version = '4.12'
+        quasar_version = '0.7.10'
+        jolokia_version = '1.3.7'
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "net.corda.plugins:cordapp:$corda_gradle_plugins_version"
+        classpath "net.corda.plugins:publish-utils:$corda_gradle_plugins_version"
+        classpath "net.corda.plugins:cordformation:$corda_gradle_plugins_version"
+        classpath "net.corda.plugins:quasar-utils:$corda_gradle_plugins_version"
+    }
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven { url 'https://dl.bintray.com/kotlin/exposed' }
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'idea'
+apply plugin: 'net.corda.plugins.cordapp'
+apply plugin: 'net.corda.plugins.publish-utils'
+apply plugin: 'net.corda.plugins.cordformation'
+apply plugin: 'net.corda.plugins.quasar-utils'
+apply plugin: 'maven-publish'
+
+cordapp {
+    signing {
+        enabled false
+    }
+    targetPlatformVersion 4
+    minimumPlatformVersion 4
+    workflow {
+        name "Custom Notary Flow"
+        vendor "LayerX Inc"
+        licence "Apache 2.0"
+        versionId 1
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    testImplementation "junit:junit:$junit_version"
+    testImplementation "org.assertj:assertj-core:3.15.0"
+    testImplementation group: 'io.netty', name: 'netty-common', version: '4.1.45.Final'
+
+    // Corda integration dependencies
+    cordaRuntime "$corda_release_distribution:corda:$corda_release_version"
+    cordaCompile "$corda_release_distribution:corda-core:$corda_release_version"
+    cordaCompile "$corda_release_distribution:corda-jackson:$corda_release_version"
+    cordaCompile "$corda_release_distribution:corda-rpc:$corda_release_version"
+    cordaCompile "$corda_release_distribution:corda-node:$corda_release_version"
+    cordaCompile "$corda_release_distribution:corda-node-api:$corda_release_version"
+
+    testImplementation "$corda_release_distribution:corda-test-utils:$corda_release_version"
+    testImplementation "$corda_release_distribution:corda-node-driver:$corda_release_version"
+
+
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.0'
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        languageVersion = "1.2"
+        apiVersion = "1.2"
+        jvmTarget = "1.8"
+        javaParameters = true   // Useful for reflection.
+    }
+}
+
+task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
+    def nodesDir = "./build/nodes"
+    delete nodesDir
+    directory nodesDir
+
+    signing {
+        enabled false
+    }
+
+    nodeDefaults {
+        rpcUsers = [[ user: "user1", "password": "password", "permissions": ["ALL"]]]
+    }
+
+    node {
+        name "O=Notary,L=London,C=GB"
+        notary = [validating: true, className: "jp.co.layerx.cordage.customnotaryflow.notary.CustomValidatingNotaryService"]
+        p2pPort 10002
+        rpcSettings {
+            useSsl false
+            standAloneBroker false
+            address "0.0.0.0:10003"
+            adminAddress "0.0.0.0:10103"
+        }
+        extraConfig = [
+            dataSourceProperties: [
+                dataSourceClassName : "org.postgresql.ds.PGSimpleDataSource",
+                'dataSource.url' : "jdbc:postgresql://localhost:5432/postgres",
+                'dataSource.user' : "postgres",
+                'dataSource.password' : "password"
+            ],
+            database: [
+                transactionIsolationLevel : "READ_COMMITTED"
+            ]
+        ]
+    }
+    node {
+        name "O=ParticipantA,L=London,C=GB"
+        p2pPort 10007
+        rpcSettings {
+            useSsl false
+            standAloneBroker false
+            address "0.0.0.0:10008"
+            adminAddress "0.0.0.0:10108"
+        }
+    }
+}
+
+idea {
+    module {
+        downloadJavadoc = true // defaults to false
+        downloadSources = true
+    }
+}

@@ -10,7 +10,7 @@ indent_style = space
 [{*.js,*.json,*.sol}]
 indent_size = 2
 
-[{*.java,*.kt}]
+[{*.java,*.kt,*.gradle}]
 indent_size = 4
 
 [*.md]
