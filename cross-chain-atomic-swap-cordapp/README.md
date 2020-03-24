@@ -16,12 +16,12 @@ See https://docs.corda.net/getting-set-up.html.
 ### Run ganache-cli
 [ganache-cli](https://github.com/trufflesuite/ganache-cli) is a fast Ethereum RPC client for testing and development.
 
-You can run ganache-cli and deploy sample Contract by following [Minimal Ethereum Environment](../minimal-ethereum-env/README.md).
+You can run ganache-cli and deploy sample Contract by following [Atomic Swap Ethereum Environment](../atomic-swap-ethereum-env/README.md).
 
 ### Create SmartContract Wrapper Class by web3j command
  
  ```
- web3j truffle generate ../minimal-ethereum-env/build/contracts/SimpleStorage.json -o ./src/main/java -p jp.co.layerx.cordage.crosschainatomicswap.ethWrapper
+ web3j truffle generate ../atomic-swap-ethereum-env/build/contracts/Settlement.json -o ./src/main/java -p jp.co.layerx.cordage.crosschainatomicswap.ethWrapper
  ```
 
 # Usage

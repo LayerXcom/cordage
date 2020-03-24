@@ -11,7 +11,7 @@ import java.math.BigInteger
 data class ProposalState(val securityLinearId: UniqueIdentifier,
                          val securityAmount: BigInteger,
                          val moneyAmount: BigInteger,
-                         val swapID: BigInteger,
+                         val swapId: BigInteger,
                          val proposer: Party,
                          val acceptor: Party,
                          val FromEthereumAddress: String,

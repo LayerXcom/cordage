@@ -64,7 +64,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val eventName = input.state.data.eventName
         val proposalStateAndRef = input.state.data.proposalStateAndRef
         val proposalState = proposalStateAndRef.state.data
-        val searchId = proposalState.swapID
+        val searchId = proposalState.swapId
         val event = eventMapping[eventName]
 
         val filter = EthFilter(DefaultBlockParameter.valueOf(fromBlockNumber),
@@ -115,6 +115,6 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     private fun doSomething(input: WatcherState) {
         val simpleStorage: SimpleStorage = SimpleStorage.load(input.targetContractAddress, web3, credentials,
                 StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
-        simpleStorage.set(input.proposalStateAndRef.state.data.swapID.inc()).send()
+        simpleStorage.set(input.proposalStateAndRef.state.data.swapId.inc()).send()
     }
 }
