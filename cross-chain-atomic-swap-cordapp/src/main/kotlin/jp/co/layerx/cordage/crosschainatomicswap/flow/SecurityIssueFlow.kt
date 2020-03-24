@@ -6,14 +6,19 @@ import jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
+import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class SecurityIssueFlow(val state: SecurityState): FlowLogic<SignedTransaction>() {
+class SecurityIssueFlow(val amount: Int,
+                        val owner: Party,
+                        val issuer: Party,
+                        val name: String): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
+        val state = SecurityState(amount, owner, issuer, name)
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
         val issueCommand = Command(SecurityContract.Commands.Issue(), state.participants.map { it.owningKey })

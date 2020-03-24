@@ -3,17 +3,38 @@ package jp.co.layerx.cordage.crosschainatomicswap.flow
 import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
+import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalStatus
 import net.corda.core.contracts.Command
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
+import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class ProposeAtomicSwapFlow(val state: ProposalState): FlowLogic<String>() {
+class ProposeAtomicSwapFlow(private val securityLinearIdString: String,
+                            private val securityAmount: Int,
+                            private val moneyAmount: Int,
+                            private val swapId: Int,
+                            private val proposer: Party,
+                            private val acceptor: Party,
+                            private val FromEthereumAddress: String,
+                            private val ToEthereumAddress: String): FlowLogic<String>() {
     @Suspendable
     override fun call(): String {
+        val securityLinearId = UniqueIdentifier.fromString(securityLinearIdString)
+        val status: ProposalStatus = ProposalStatus.PROPOSED
+        val state = ProposalState(securityLinearId,
+            securityAmount.toBigInteger(),
+            moneyAmount.toBigInteger(),
+            swapId.toBigInteger(),
+            proposer,
+            acceptor,
+            FromEthereumAddress,
+            ToEthereumAddress,
+            status)
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
         val proposeCommand = Command(ProposalContract.Commands.Propose(), state.participants.map { it.owningKey })
