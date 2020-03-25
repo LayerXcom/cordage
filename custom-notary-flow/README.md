@@ -17,6 +17,11 @@ See https://docs.corda.net/getting-set-up.html.
 
 ## Usage
 
+### Running the database:
+```
+docker run --name postgres96 -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:9.6
+```
+
 ### Running the nodes:
 
 See https://docs.corda.net/tutorial-cordapp.html#running-the-example-cordapp.
@@ -27,6 +32,12 @@ Use the `deployNodes` task and `./build/nodes/runnodes` script.
 
 You'll be interacting with the node via its interactive shell.
 
+Run this from PartyA:
 ```
-flow start jp.co.layerx.cordage.customnotaryflow.Flow
+flow start jp.co.layerx.cordage.customnotaryflow.flows.MakeAgreementFlow target: "O=ParticipantB,L=Tokyo,C=JP", agreementBody: "RESIDENTIAL LEASE AGREEMENT"
+```
+
+Run this from both PartyA and PartyB:
+```
+run vaultQuery contractStateType: jp.co.layerx.cordage.customnotaryflow.states.Agreement
 ```

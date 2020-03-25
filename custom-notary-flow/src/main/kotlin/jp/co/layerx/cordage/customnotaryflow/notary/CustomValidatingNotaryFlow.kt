@@ -40,5 +40,6 @@ class CustomValidatingNotaryFlow(otherSide: FlowSession, service: CustomValidati
 
     private fun customVerify(stx: SignedTransaction) {
         // Add custom verification logic
+        println("CUSTOM NOTARY FLOW")
     }
 }
