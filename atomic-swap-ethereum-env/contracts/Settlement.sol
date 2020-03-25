@@ -23,19 +23,19 @@ contract Settlement is Ownable {
   event Locked(
     uint256 settlementId,
     string swapId,
-    SwapDetail swapDetail
+    bytes encodedSwapDetail
   );
 
   event Unlocked(
     uint256 settlementId,
     string swapId,
-    SwapDetail swapDetail
+    bytes encodedSwapDetail
   );
 
   event Aborted(
     uint256 settlementId,
     string swapId,
-    SwapDetail swapDetail
+    bytes encodedSwapDetail
   );
 
   mapping (string => SwapDetail) _swapIdToDetailMaps;
@@ -67,10 +67,12 @@ contract Settlement is Ownable {
     swapDetail.acceptorCordaName = _acceptorCordaName;
     swapDetail.status = SwapStatus.Locked;
 
+    bytes memory encodedSwapDetail = abi.encode(swapDetail);
+
     emit Locked(
       settlementId++,
       _swapId,
-      swapDetail
+      encodedSwapDetail
     );
   }
 
@@ -92,10 +94,12 @@ contract Settlement is Ownable {
 
     swapDetail.status = SwapStatus.Unlocked;
 
+    bytes memory encodedSwapDetail = abi.encode(swapDetail);
+
     emit Unlocked(
       settlementId++,
       _swapId,
-      swapDetail
+      encodedSwapDetail
     );
   }
 
@@ -117,10 +121,12 @@ contract Settlement is Ownable {
 
     swapDetail.status = SwapStatus.Aborted;
 
+    bytes memory encodedSwapDetail = abi.encode(swapDetail);
+
     emit Aborted(
       settlementId++,
       _swapId,
-      swapDetail
+      encodedSwapDetail
     );
   }
 }

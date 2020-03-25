@@ -5,6 +5,7 @@ import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
+import net.corda.core.serialization.CordaSerializable
 import java.math.BigInteger
 
 @BelongsToContract(ProposalContract::class)
@@ -24,6 +25,7 @@ data class ProposalState(val securityLinearId: UniqueIdentifier,
     fun withNewStatus(newStatus: ProposalStatus) = copy(status = newStatus)
 }
 
+@CordaSerializable
 enum class ProposalStatus {
     PROPOSED, CONSUMED, ABORTED
 }

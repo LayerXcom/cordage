@@ -4,6 +4,7 @@ import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.crosschainatomicswap.contract.SecurityContract
 import jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
 import net.corda.core.contracts.Command
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
@@ -15,9 +16,9 @@ import net.corda.core.transactions.TransactionBuilder
 class SecurityIssueFlow(val amount: Int,
                         val owner: Party,
                         val issuer: Party,
-                        val name: String): FlowLogic<SignedTransaction>() {
+                        val name: String): FlowLogic<UniqueIdentifier>() {
     @Suspendable
-    override fun call(): SignedTransaction {
+    override fun call(): UniqueIdentifier {
         val state = SecurityState(amount, owner, issuer, name)
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
@@ -34,7 +35,9 @@ class SecurityIssueFlow(val amount: Int,
         val sessions = (state.participants - ourIdentity).map { initiateFlow(it) }.toSet()
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
-        return subFlow(FinalityFlow(stx, sessions))
+        val finalizedTx = subFlow(FinalityFlow(stx, sessions))
+        val issuedSecurityState = finalizedTx.coreTransaction.outputsOfType<SecurityState>().first()
+        return issuedSecurityState.linearId
     }
 }
 
