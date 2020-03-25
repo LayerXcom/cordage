@@ -9,6 +9,7 @@ import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.StaticGasProvider
+import org.web3j.utils.Convert
 import java.math.BigInteger
 
 @InitiatingFlow
@@ -19,7 +20,7 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
         const val TARGET_CONTRACT_ADDRESS = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
         // TODO credentials should be imported by .env
-        val credentials: Credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
+        val credentials: Credentials = Credentials.create("0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1")
         object SEND_TRANSACTION_TO_ETHEREUM_CONTRACT: ProgressTracker.Step("Send Tx to Ethereum Contract.")
 
         fun tracker() = ProgressTracker(
@@ -36,11 +37,12 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
         val swapId = finalizedProposalState.swapId
         val transferFromAddress = finalizedProposalState.FromEthereumAddress
         val transferToAddress = finalizedProposalState.ToEthereumAddress
-        val etherAmount = finalizedProposalState.moneyAmount
+        val etherAmount = finalizedProposalState.etherAmount
         val securityAmount = finalizedProposalState.securityAmount
         val proposerCordaName = finalizedProposalState.proposer.name.toString()
         val acceptorCordaName = finalizedProposalState.acceptor.name.toString()
-        val weiValue = BigInteger.valueOf(1_000_000_000_000_000_000)
+//        val weiValue = Convert.toWei(etherAmount, Convert.Unit.WEI)
+        val weiValue = BigInteger.valueOf(1_000_000_000_000)
 
         // load Smart Contract Wrapper
         val settlement: Settlement = Settlement.load(TARGET_CONTRACT_ADDRESS, web3, credentials,
@@ -49,8 +51,8 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
              swapId,
              transferFromAddress,
              transferToAddress,
-             etherAmount,
-             securityAmount,
+             etherAmount.toBigInteger(),
+             securityAmount.toBigInteger(),
              proposerCordaName,
              acceptorCordaName,
              weiValue

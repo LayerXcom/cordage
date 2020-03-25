@@ -16,7 +16,7 @@ import net.corda.core.transactions.TransactionBuilder
 @StartableByRPC
 class ProposeAtomicSwapFlow(private val securityLinearIdString: String,
                             private val securityAmount: Int,
-                            private val moneyAmount: Int,
+                            private val etherAmount: Int,
                             private val swapId: String,
                             private val proposer: Party,
                             private val acceptor: Party,
@@ -27,8 +27,8 @@ class ProposeAtomicSwapFlow(private val securityLinearIdString: String,
         val securityLinearId = UniqueIdentifier.fromString(securityLinearIdString)
         val status: ProposalStatus = ProposalStatus.PROPOSED
         val state = ProposalState(securityLinearId,
-            securityAmount.toBigInteger(),
-            moneyAmount.toBigInteger(),
+            securityAmount,
+            etherAmount.toBigDecimal(),
             swapId,
             proposer,
             acceptor,

@@ -30,7 +30,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
         // TODO credentials should be imported by .env
-        val credentials: Credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
+        val credentials: Credentials = Credentials.create("0x6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c")
         val eventMapping = mapOf<String, Event>("Locked" to Settlement.LOCKED_EVENT)
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")

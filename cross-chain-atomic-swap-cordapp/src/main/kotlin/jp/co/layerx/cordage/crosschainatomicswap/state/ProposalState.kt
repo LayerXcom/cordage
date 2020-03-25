@@ -6,12 +6,13 @@ import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable
+import java.math.BigDecimal
 import java.math.BigInteger
 
 @BelongsToContract(ProposalContract::class)
 data class ProposalState(val securityLinearId: UniqueIdentifier,
-                         val securityAmount: BigInteger,
-                         val moneyAmount: BigInteger,
+                         val securityAmount: Int,
+                         val etherAmount: BigDecimal,
                          val swapId: String,
                          val proposer: Party,
                          val acceptor: Party,
