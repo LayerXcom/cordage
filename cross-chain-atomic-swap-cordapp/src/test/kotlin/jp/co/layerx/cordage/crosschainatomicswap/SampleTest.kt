@@ -1,6 +1,5 @@
 package jp.co.layerx.cordage.crosschainatomicswap
 
-import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.SimpleStorage
 import org.assertj.core.api.Assertions
 import org.junit.Test
 import org.web3j.abi.DefaultFunctionReturnDecoder

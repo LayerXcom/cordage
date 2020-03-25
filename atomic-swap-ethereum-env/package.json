@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "truffle test",
-    "network": "ganache-cli -i 5777 -b 1 -m 'myth like bonus scare over problem client lizard pioneer submit female collect'",
+    "network": "ganache-cli -i 5777 -b 1 -l 100000000 -m 'myth like bonus scare over problem client lizard pioneer submit female collect'",
     "lint": "yarn lint:sol && yarn lint:js",
     "lint:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:js": "eslint migrations/*.js test/**/*.js scripts/*.js",

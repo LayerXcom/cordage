@@ -1,7 +1,7 @@
 package jp.co.layerx.cordage.crosschainatomicswap.flow
 
 import co.paralleluniverse.fibers.Suspendable
-import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.SimpleStorage
+import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.Settlement
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
 import net.corda.core.flows.*
 import net.corda.core.utilities.ProgressTracker
@@ -10,7 +10,6 @@ import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.StaticGasProvider
 import java.math.BigInteger
-import org.web3j.protocol.core.methods.request.Transaction
 
 @InitiatingFlow
 @StartableByRPC
@@ -34,21 +33,29 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
     override fun call(): String {
         progressTracker.currentStep = SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
 
+        val swapId = finalizedProposalState.swapId
+        val transferFromAddress = finalizedProposalState.FromEthereumAddress
+        val transferToAddress = finalizedProposalState.ToEthereumAddress
+        val etherAmount = finalizedProposalState.moneyAmount
+        val securityAmount = finalizedProposalState.securityAmount
+        val proposerCordaName = finalizedProposalState.proposer.name.toString()
+        val acceptorCordaName = finalizedProposalState.acceptor.name.toString()
+        val weiValue = BigInteger.valueOf(1_000_000_000_000_000_000)
+
         // load Smart Contract Wrapper
-        val simpleStorage: SimpleStorage = SimpleStorage.load(TARGET_CONTRACT_ADDRESS, web3, credentials,
-            StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
-        // simpleStorage.set(100).send()
+        val settlement: Settlement = Settlement.load(TARGET_CONTRACT_ADDRESS, web3, credentials,
+            StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(50000000)))
+        val response = settlement.lock(
+             swapId,
+             transferFromAddress,
+             transferToAddress,
+             etherAmount,
+             securityAmount,
+             proposerCordaName,
+             acceptorCordaName,
+             weiValue
+        ).send()
 
-        val tx = Transaction.createEtherTransaction(
-            "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
-            null,
-            BigInteger.valueOf(1),
-            BigInteger.valueOf(21000),
-            "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0",
-            BigInteger.valueOf(1_000_000_000_000_000_000)
-        )
-
-        val response = web3.ethSendTransaction(tx).send()
         return response.transactionHash
     }
 }

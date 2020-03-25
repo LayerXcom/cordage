@@ -23,7 +23,7 @@ class StartEventWatchFlow(private val signedProposalStateAndRef: StateAndRef<Pro
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
         const val TARGET_CONTRACT_ADDRESS = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
-        const val EVENT_NAME = "Set"
+        const val EVENT_NAME = "Locked"
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
         object VERIFYING_TRANSACTION : ProgressTracker.Step("Verifying a WatcherState transaction.")

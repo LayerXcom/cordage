@@ -3,7 +3,7 @@ package jp.co.layerx.cordage.crosschainatomicswap.flow
 import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract
 import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract.Companion.contractID
-import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.SimpleStorage
+import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.Settlement
 import jp.co.layerx.cordage.crosschainatomicswap.state.WatcherState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateRef
@@ -21,7 +21,6 @@ import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.http.HttpService
-import org.web3j.tx.gas.StaticGasProvider
 import java.math.BigInteger
 
 @InitiatingFlow
@@ -32,7 +31,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
         // TODO credentials should be imported by .env
         val credentials: Credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
-        val eventMapping = mapOf<String, Event>("Set" to SimpleStorage.SET_EVENT)
+        val eventMapping = mapOf<String, Event>("Locked" to Settlement.LOCKED_EVENT)
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
@@ -78,12 +77,11 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         if (decodedLogs != null && decodedLogs.isNotEmpty()) {
             decodedLogs.forEach { abiTypes ->
                 // find event values by searchId
-                val eventValues = abiTypes?.map { it.value as BigInteger }
+                val eventValues = abiTypes?.map { it.value as String }
                 val filteredEventValues = eventValues?.filter { e -> e == searchId }
                 if (filteredEventValues != null && filteredEventValues.isNotEmpty()) {
-//                    doSomething(input.state.data)
                     subFlow(SecurityTransferToOtherChainFlow(proposalStateAndRef))
-                    return "Ethereum Event with id: $searchId watched and send TX Completed"
+                    return "Ethereum Event with id: $searchId watched and executed SecurityTransferToOtherChainFlow"
                 }
             }
         }
@@ -110,11 +108,5 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         subFlow(FinalityFlow(signedTx, listOf(), FINALISING_TRANSACTION.childProgressTracker()))
 
         return "Event Watched. (fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber})"
-    }
-
-    private fun doSomething(input: WatcherState) {
-        val simpleStorage: SimpleStorage = SimpleStorage.load(input.targetContractAddress, web3, credentials,
-                StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
-        simpleStorage.set(input.proposalStateAndRef.state.data.swapId.inc()).send()
     }
 }

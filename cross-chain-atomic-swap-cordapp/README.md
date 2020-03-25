@@ -41,5 +41,5 @@ flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityIssueFlow amou
 
 ### Propose Cross-Chain Atomic Swap
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearIdString: "0x001.....", securityAmount: 10, moneyAmount: 10, swapId: 1, proposer: "O=ParticipantA,L=London,C=GB", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearIdString: "60deb390-beb3-4359-bdf0-9aaace8db6ef", securityAmount: 10, moneyAmount: 10, swapId: "1", proposer: "O=ParticipantA,L=London,C=GB", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
 ```
