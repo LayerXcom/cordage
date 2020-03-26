@@ -1,10 +1,10 @@
 # Custom Notary Flow
 <p align="center">
-  <img src="https://www.corda.net/wp-content/uploads/2016/11/fg005_corda_b.png" alt="Corda" width="500">
+  <img src="../docs/images/corda.png" alt="Corda" width="500">
 </p>
 
 <p align="center">
-  <img src="https://ethereum.org/assets/img/ethereum-logo-landscape-purple.7c3c27fd.png" alt="Ethereum" width="500">
+  <img src="../docs/images/ethereum.png" alt="Ethereum" width="500">
 </p>
 
 This CorDapp provides ...
