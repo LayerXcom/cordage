@@ -3,13 +3,17 @@ package jp.co.layerx.cordage.crosschainatomicswap.flow
 import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
+import jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
 import jp.co.layerx.cordage.crosschainatomicswap.state.WatcherState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateAndRef
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic
 import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
+import net.corda.core.node.services.queryBy
+import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import org.web3j.protocol.Web3j
@@ -18,7 +22,7 @@ import java.math.BigInteger
 
 @InitiatingFlow
 @StartableByRPC
-class StartEventWatchFlow(private val signedProposalStateAndRef: StateAndRef<ProposalState>) : FlowLogic<Unit>() {
+class StartEventWatchFlow(private val proposalStateLinearId: UniqueIdentifier) : FlowLogic<Unit>() {
     companion object {
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
@@ -45,6 +49,9 @@ class StartEventWatchFlow(private val signedProposalStateAndRef: StateAndRef<Pro
 
     @Suspendable
     override fun call() {
+        val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(proposalStateLinearId))
+        val signedProposalStateAndRef =  serviceHub.vaultService.queryBy<ProposalState>(queryCriteria).states.single()
+
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val fromBlockNumber = BigInteger.ZERO
         val recentBlockNumber = web3.ethBlockNumber().send().blockNumber

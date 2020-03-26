@@ -6,7 +6,6 @@ import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party
 import net.corda.core.serialization.CordaSerializable
-import java.math.BigDecimal
 import java.math.BigInteger
 
 @BelongsToContract(ProposalContract::class)
@@ -16,8 +15,8 @@ data class ProposalState(val securityLinearId: UniqueIdentifier,
                          val swapId: String,
                          val proposer: Party,
                          val acceptor: Party,
-                         val FromEthereumAddress: String,
-                         val ToEthereumAddress: String,
+                         val fromEthereumAddress: String,
+                         val toEthereumAddress: String,
                          val status: ProposalStatus = ProposalStatus.PROPOSED,
                          override val linearId: UniqueIdentifier = UniqueIdentifier()): LinearState {
 
