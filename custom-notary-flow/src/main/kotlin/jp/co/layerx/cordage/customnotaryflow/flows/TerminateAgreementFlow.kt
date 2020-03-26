@@ -27,9 +27,9 @@ class TerminateAgreementFlow(private val linearId: String): FlowLogic<SignedTran
         tx.verify(serviceHub)
 
         val ptx = serviceHub.signInitialTransaction(tx)
-        val targetSession = initiateFlow(output.target)
-        val ftx = subFlow(CollectSignaturesFlow(ptx, setOf(targetSession)))
+        val targetSessions = (output.participants - ourIdentity).map { initiateFlow(it) }
+        val ftx = subFlow(CollectSignaturesFlow(ptx, targetSessions))
 
-        return subFlow(FinalityFlow(ftx, setOf(targetSession)))
+        return subFlow(FinalityFlow(ftx, targetSessions))
     }
 }
