@@ -23,7 +23,7 @@ class AgreementContract: Contract {
     override fun verify(tx: LedgerTransaction) {
         val command = tx.commands.requireSingleCommand<AgreementCommand>()
         if (command.value is AgreementCommand.Make) verifyMaking(tx, command.signers)
-        if (command.value is AgreementCommand.Terminate) verifyTerminate(tx, command.signers)
+        if (command.value is AgreementCommand.Terminate) verifyTerminating(tx, command.signers)
     }
 
     private fun verifyMaking(tx: LedgerTransaction, signers: List<PublicKey>) {
@@ -40,7 +40,7 @@ class AgreementContract: Contract {
         }
     }
 
-    private fun verifyTerminate(tx: LedgerTransaction, signers: List<PublicKey>) {
+    private fun verifyTerminating(tx: LedgerTransaction, signers: List<PublicKey>) {
         requireThat {
             "One input" using (tx.inputs.size == 1)
             "One output" using (tx.outputs.size == 1)

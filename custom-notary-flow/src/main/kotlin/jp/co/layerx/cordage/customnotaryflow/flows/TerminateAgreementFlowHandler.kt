@@ -5,7 +5,7 @@ import net.corda.core.flows.*
 import net.corda.core.transactions.SignedTransaction
 
 @InitiatedBy(TerminateAgreementFlow::class)
-class TerminateAgreementHandler(val targetPartySession: FlowSession): FlowLogic<SignedTransaction>() {
+class TerminateAgreementFlowHandler(val targetPartySession: FlowSession): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(targetPartySession) {
