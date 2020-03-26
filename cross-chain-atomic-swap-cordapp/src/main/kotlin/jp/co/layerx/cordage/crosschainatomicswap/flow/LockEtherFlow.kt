@@ -34,8 +34,8 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
         progressTracker.currentStep = SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
 
         val swapId = finalizedProposalState.swapId
-        val transferFromAddress = finalizedProposalState.FromEthereumAddress
-        val transferToAddress = finalizedProposalState.ToEthereumAddress
+        val transferFromAddress = finalizedProposalState.fromEthereumAddress
+        val transferToAddress = finalizedProposalState.toEthereumAddress
         val weiAmount = finalizedProposalState.weiAmount
         val securityAmount = finalizedProposalState.securityAmount
         val proposerCordaName = finalizedProposalState.proposer.name.toString()
