@@ -9,7 +9,6 @@ import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
 import org.web3j.tx.gas.StaticGasProvider
-import org.web3j.utils.Convert
 import java.math.BigInteger
 
 @InitiatingFlow
@@ -37,12 +36,11 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
         val swapId = finalizedProposalState.swapId
         val transferFromAddress = finalizedProposalState.FromEthereumAddress
         val transferToAddress = finalizedProposalState.ToEthereumAddress
-        val etherAmount = finalizedProposalState.etherAmount
+        val weiAmount = finalizedProposalState.weiAmount
         val securityAmount = finalizedProposalState.securityAmount
         val proposerCordaName = finalizedProposalState.proposer.name.toString()
         val acceptorCordaName = finalizedProposalState.acceptor.name.toString()
-//        val weiValue = Convert.toWei(etherAmount, Convert.Unit.WEI)
-        val weiValue = BigInteger.valueOf(1_000_000_000_000)
+        // val weiValue = Convert.toWei(etherAmount, Convert.Unit.WEI)
 
         // load Smart Contract Wrapper
         val settlement: Settlement = Settlement.load(TARGET_CONTRACT_ADDRESS, web3, credentials,
@@ -51,11 +49,11 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
              swapId,
              transferFromAddress,
              transferToAddress,
-             etherAmount.toBigInteger(),
-             securityAmount.toBigInteger(),
+             weiAmount,
+             securityAmount,
              proposerCordaName,
              acceptorCordaName,
-             weiValue
+             weiAmount
         ).send()
 
         return response.transactionHash

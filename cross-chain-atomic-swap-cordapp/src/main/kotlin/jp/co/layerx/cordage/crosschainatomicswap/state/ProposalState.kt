@@ -11,8 +11,8 @@ import java.math.BigInteger
 
 @BelongsToContract(ProposalContract::class)
 data class ProposalState(val securityLinearId: UniqueIdentifier,
-                         val securityAmount: Int,
-                         val etherAmount: BigDecimal,
+                         val securityAmount: BigInteger,
+                         val weiAmount: BigInteger,
                          val swapId: String,
                          val proposer: Party,
                          val acceptor: Party,
