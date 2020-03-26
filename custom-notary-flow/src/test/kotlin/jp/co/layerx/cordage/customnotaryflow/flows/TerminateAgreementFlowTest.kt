@@ -2,8 +2,10 @@ package jp.co.layerx.cordage.customnotaryflow.flows
 
 import jp.co.layerx.cordage.customnotaryflow.contracts.AgreementContract
 import jp.co.layerx.cordage.customnotaryflow.states.Agreement
-import jp.co.layerx.cordage.customnotaryflow.states.AgreementStatus
+import net.corda.core.contracts.StateRef
 import net.corda.core.identity.CordaX500Name
+import net.corda.core.identity.Party
+import net.corda.core.transactions.SignedTransaction
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.MockNetworkNotarySpec
@@ -14,8 +16,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
-
-internal class MakeAgreementFlowTest {
+class TerminateAgreementFlowTest {
     lateinit var network: MockNetwork
     lateinit var a: StartedMockNode
     lateinit var b: StartedMockNode
@@ -38,23 +39,34 @@ internal class MakeAgreementFlowTest {
         network.stopNodes()
     }
 
+    private fun makeAgreement(target: Party, agreementBody: String): SignedTransaction {
+        val flow = MakeAgreementFlow(target, agreementBody)
+        val future = a.startFlow(flow)
+        network.runNetwork()
+        return future.getOrThrow()
+    }
+
     @Test
     fun `normal scenario`() {
+        // make agreement
         val target = b.info.legalIdentities.single()
         val agreementBody = "RESIDENTIAL LEASE AGREEMENT"
-        val flow = MakeAgreementFlow(target, agreementBody)
+        val stx = makeAgreement(target, agreementBody)
+
+        // set up for terminating
+        val input = stx.tx.outputStates.single() as Agreement
+        val flow = TerminateAgreementFlow(input.linearId.toString())
         val future = a.startFlow(flow)
         network.runNetwork()
         val tx = future.getOrThrow()
 
-        val origin = a.info.legalIdentities.single()
-        val expected = Agreement(origin, target, AgreementStatus.MADE, agreementBody)
+        val expected = input.terminate()
 
-        Assertions.assertThat(tx.inputs.isEmpty())
+        Assertions.assertThat(tx.inputs.single() == StateRef(stx.id, 0))
         Assertions.assertThat(tx.tx.outputStates.single() == expected)
 
         val command = tx.tx.commands.single()
-        Assertions.assertThat(command.value is AgreementContract.AgreementCommand.Make)
+        Assertions.assertThat(command.value is AgreementContract.AgreementCommand.Terminate)
         Assertions.assertThat(command.signers.toSet() == expected.participants.map { it.owningKey }.toSet())
         tx.verifyRequiredSignatures()
     }
