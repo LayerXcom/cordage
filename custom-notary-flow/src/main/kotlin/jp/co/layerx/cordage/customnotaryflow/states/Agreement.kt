@@ -2,7 +2,6 @@ package jp.co.layerx.cordage.customnotaryflow.states
 
 import jp.co.layerx.cordage.customnotaryflow.contracts.AgreementContract
 import net.corda.core.contracts.BelongsToContract
-import net.corda.core.contracts.ContractState
 import net.corda.core.contracts.LinearState
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.Party

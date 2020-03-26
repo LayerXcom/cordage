@@ -36,7 +36,7 @@ class AgreementContract: Contract {
         requireThat {
             "origin is not equal to target" using (agreement.origin != agreement.target)
             "Agreement must be made" using (agreement.status == AgreementStatus.MADE)
-            "Agreement must be signed by both party" using (signers.containsAll(agreement.participants.map { it.owningKey }))
+            "Agreement must be signed by both party only" using (signers.toSet() == agreement.participants.map { it.owningKey }.toSet())
         }
     }
 
@@ -52,7 +52,7 @@ class AgreementContract: Contract {
             "Each element is same except status" using (input == output.copy(status = input.status))
             "Input agreement must be made" using (input.status == AgreementStatus.MADE)
             "Output agreement must be terminated" using (output.status == AgreementStatus.TERMINATED)
-            "Agreement must be signed by both party" using (signers.containsAll(output.participants.map { it.owningKey }))
+            "Agreement must be signed by both party only" using (signers.toSet() == output.participants.map { it.owningKey }.toSet())
         }
     }
 }
