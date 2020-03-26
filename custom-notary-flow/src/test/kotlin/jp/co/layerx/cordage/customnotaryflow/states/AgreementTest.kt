@@ -2,13 +2,16 @@ package jp.co.layerx.cordage.customnotaryflow.states
 
 import jp.co.layerx.cordage.customnotaryflow.ALICE
 import jp.co.layerx.cordage.customnotaryflow.BOB
+import net.corda.core.contracts.UniqueIdentifier
 import org.assertj.core.api.Assertions
 import org.junit.Test
+import java.util.*
 
 
 internal class AgreementTest {
     private val expectedAgreementBody = "RESIDENTIAL LEASE AGREEMENT"
-    private val actual = Agreement(ALICE.party, BOB.party, AgreementStatus.MADE, expectedAgreementBody)
+    private val expectedUuid = UUID.randomUUID()
+    private val actual = Agreement(ALICE.party, BOB.party, AgreementStatus.MADE, expectedAgreementBody, UniqueIdentifier(id = expectedUuid))
 
     @Test
     fun origin() {
@@ -28,6 +31,11 @@ internal class AgreementTest {
     @Test
     fun agreementBody() {
         Assertions.assertThat(actual.agreementBody == expectedAgreementBody)
+    }
+
+    @Test
+    fun linearId() {
+        Assertions.assertThat(actual.linearId.toString() == expectedUuid.toString())
     }
 
     @Test
