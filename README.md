@@ -75,7 +75,6 @@ Cordage is licensed under [the Apache License, Version 2.0](./LICENSE).
 ## Maintainers
 - [shun-tak](https://github.com/shun-tak)
 - [etaroid](https://github.com/etaroid)
-- [yudetamago](https://github.com/yudetamago)
 
 ## Sponsors
 <a href="https://layerx.co.jp/en/"><img src="./docs/images/layerx.png" alt="LayerX" width="500"></a><br />
