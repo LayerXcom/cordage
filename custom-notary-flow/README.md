@@ -32,7 +32,7 @@ Use the `deployNodes` task and `./build/nodes/runnodes` script.
 
 You'll be interacting with the node via its interactive shell.
 
-Run this from PartyA:
+Run MakeAgreementFlow from PartyA:
 ```
 flow start jp.co.layerx.cordage.customnotaryflow.flows.MakeAgreementFlow target: "O=ParticipantB,L=Tokyo,C=JP", agreementBody: "RESIDENTIAL LEASE AGREEMENT"
 ```
@@ -40,4 +40,9 @@ flow start jp.co.layerx.cordage.customnotaryflow.flows.MakeAgreementFlow target:
 Run this from both PartyA and PartyB:
 ```
 run vaultQuery contractStateType: jp.co.layerx.cordage.customnotaryflow.states.Agreement
+```
+
+Run TerminateAgreementFlow from PartyA:
+```
+flow start jp.co.layerx.cordage.customnotaryflow.flows.TerminateAgreementFlow linearId: "661504cb-ba74-4bd5-9b93-940201ca7a11"
 ```
