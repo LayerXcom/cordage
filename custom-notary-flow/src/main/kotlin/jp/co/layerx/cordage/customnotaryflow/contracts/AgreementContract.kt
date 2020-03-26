@@ -35,15 +35,24 @@ class AgreementContract: Contract {
         val agreement = tx.outputsOfType<Agreement>().single()
         requireThat {
             "origin is not equal to target" using (agreement.origin != agreement.target)
-        }
-
-        requireThat {
             "Agreement must be made" using (agreement.status == AgreementStatus.MADE)
             "Agreement must be signed by both party" using (signers.containsAll(agreement.participants.map { it.owningKey }))
         }
     }
 
     private fun verifyTerminate(tx: LedgerTransaction, signers: List<PublicKey>) {
+        requireThat {
+            "One input" using (tx.inputs.size == 1)
+            "One output" using (tx.outputs.size == 1)
+        }
 
+        val input = tx.inputsOfType<Agreement>().single()
+        val output = tx.outputsOfType<Agreement>().single()
+        requireThat {
+            "Each element is same except status" using (input == output.copy(status = input.status))
+            "Input agreement must be made" using (input.status == AgreementStatus.MADE)
+            "Output agreement must be terminated" using (output.status == AgreementStatus.TERMINATED)
+            "Agreement must be signed by both party" using (signers.containsAll(output.participants.map { it.owningKey }))
+        }
     }
 }
