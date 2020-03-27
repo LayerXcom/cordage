@@ -24,7 +24,12 @@ You can run ganache-cli and deploy sample Contract by following [Atomic Swap Eth
  web3j truffle generate ../atomic-swap-ethereum-env/build/contracts/Settlement.json -o ./src/main/java -p jp.co.layerx.cordage.crosschainatomicswap.ethWrapper
  ```
 
-# Usage
+## Usage
+
+### Running the database:
+```
+docker run --name postgres96 -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:9.6
+```
 
 ### Running the nodes:
 
@@ -35,6 +40,7 @@ Use the `deployNodes` task and `./build/nodes/runnodes` script.
 ## Interacting with the nodes:
 
 ### Issue Security State
+Run SecurityIssueFlow from PartyC:
 ```
 flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityIssueFlow amount: 100, owner: "O=ParticipantB,L=New York,C=US", issuer: "O=ParticipantC,L=Paris,C=FR", name: "inPublic"
 ```
@@ -54,6 +60,7 @@ flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityIssueFlow amou
 This flow returns linearId of SecurityState.
 
 ### Propose Cross-Chain Atomic Swap
+Run ProposeAtomicSwapFlow from PartyA:
 ```
 flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearIdString: "1b06f3ae-47b6-409d-8b01-625b7522156c", securityAmount: 10, weiAmount: 1000000, swapId: "1", proposer: "O=ParticipantA,L=London,C=GB", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
 ```

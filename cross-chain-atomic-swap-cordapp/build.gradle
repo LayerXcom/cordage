@@ -48,13 +48,13 @@ cordapp {
     targetPlatformVersion 4
     minimumPlatformVersion 3
     contract {
-        name "Ethereum"
+        name "Cross-chain atomic swap contract"
         vendor "LayerX Inc"
         licence "Apache 2.0"
         versionId 1
     }
     workflow {
-        name "Ethereum"
+        name "Cross-chain atomic swap workflow"
         vendor "LayerX Inc"
         licence "Apache 2.0"
         versionId 1
@@ -75,20 +75,12 @@ dependencies {
     cordaCompile "$corda_release_distribution:corda-core:$corda_release_version"
     cordaCompile "$corda_release_distribution:corda-jackson:$corda_release_version"
     cordaCompile "$corda_release_distribution:corda-rpc:$corda_release_version"
+    cordaCompile "$corda_release_distribution:corda-node:$corda_release_version"
     cordaCompile "$corda_release_distribution:corda-node-api:$corda_release_version"
-    cordaCompile "$corda_release_distribution:corda-webserver-impl:$corda_release_version"
     cordaRuntime "$corda_release_distribution:corda:$corda_release_version"
-    cordaRuntime "$corda_release_distribution:corda-webserver:$corda_release_version"
 
     testCompile "$corda_release_distribution:corda-test-utils:$corda_release_version"
     testCompile "$corda_release_distribution:corda-node-driver:$corda_release_version"
-
-
-    // GraphStream: For visualisation (required by TemplateClientRPC app)
-    compile "org.graphstream:gs-core:1.3"
-    compile("org.graphstream:gs-ui:1.3") {
-        exclude group: "bouncycastle"
-    }
 
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'
@@ -124,6 +116,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     node {
         name "O=Notary,L=London,C=GB"
         notary = [validating: true]
+        notary = [validating: true, className: "jp.co.layerx.cordage.crosschainatomicswap.notary.CustomValidatingNotaryService"]
         p2pPort 10002
         rpcSettings {
             useSsl false
@@ -131,11 +124,21 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             address "0.0.0.0:10003"
             adminAddress "0.0.0.0:10103"
         }
+        extraConfig = [
+            dataSourceProperties: [
+                dataSourceClassName : "org.postgresql.ds.PGSimpleDataSource",
+                'dataSource.url' : "jdbc:postgresql://localhost:5432/postgres",
+                'dataSource.user' : "postgres",
+                'dataSource.password' : "password"
+            ],
+            database: [
+                transactionIsolationLevel : "READ_COMMITTED"
+            ]
+        ]
     }
     node {
         name "O=ParticipantA,L=London,C=GB"
         p2pPort 10007
-//        webPort 10009
         rpcSettings {
             useSsl false
             standAloneBroker false
@@ -146,7 +149,6 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     node {
         name "O=ParticipantB,L=New York,C=US"
         p2pPort 10010
-//        webPort 10012
         rpcSettings {
             useSsl false
             standAloneBroker false
@@ -157,7 +159,6 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     node {
         name "O=ParticipantC,L=Paris,C=FR"
         p2pPort 10013
-//        webPort 10015
         rpcSettings {
             useSsl false
             standAloneBroker false
