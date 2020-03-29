@@ -38,8 +38,6 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
         val transferToAddress = finalizedProposalState.toEthereumAddress
         val weiAmount = finalizedProposalState.weiAmount
         val securityAmount = finalizedProposalState.securityAmount
-        val proposerCordaName = finalizedProposalState.proposer.name.toString()
-        val acceptorCordaName = finalizedProposalState.acceptor.name.toString()
         // val weiValue = Convert.toWei(etherAmount, Convert.Unit.WEI)
 
         // load Smart Contract Wrapper
@@ -51,8 +49,6 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
              transferToAddress,
              weiAmount,
              securityAmount,
-             proposerCordaName,
-             acceptorCordaName,
              weiAmount
         ).send()
 

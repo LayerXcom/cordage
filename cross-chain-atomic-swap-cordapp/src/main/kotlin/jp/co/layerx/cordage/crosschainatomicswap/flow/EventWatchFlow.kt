@@ -5,6 +5,8 @@ import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract
 import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract.Companion.contractID
 import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.Settlement
 import jp.co.layerx.cordage.crosschainatomicswap.state.WatcherState
+import jp.co.layerx.cordage.crosschainatomicswap.types.LockedEvent
+import jp.co.layerx.cordage.crosschainatomicswap.types.SwapDetail
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateRef
 import net.corda.core.flows.FinalityFlow
@@ -14,14 +16,19 @@ import net.corda.core.flows.SchedulableFlow
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import org.web3j.abi.DefaultFunctionReturnDecoder
+import org.web3j.abi.TypeReference
+import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Event
+import org.web3j.abi.datatypes.Type
+import org.web3j.abi.datatypes.generated.Uint256
+import org.web3j.abi.datatypes.generated.Uint8
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.http.HttpService
-import java.math.BigInteger
+import java.util.*
 
 @InitiatingFlow
 @SchedulableFlow
@@ -29,9 +36,20 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+
         // TODO credentials should be imported by .env
         val credentials: Credentials = Credentials.create("0x6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c")
         val eventMapping = mapOf<String, Event>("Locked" to Settlement.LOCKED_EVENT)
+
+        private val HEX_CHARS = "0123456789ABCDEF".toCharArray()
+        val swapDetailType = Arrays.asList<TypeReference<*>?>(
+            object : TypeReference<Address?>() {},
+            object : TypeReference<Address?>() {},
+            object : TypeReference<Uint256?>() {},
+            object : TypeReference<Uint256?>() {},
+            object : TypeReference<Uint8?>() {}
+        )
+
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
@@ -77,11 +95,18 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         if (decodedLogs != null && decodedLogs.isNotEmpty()) {
             decodedLogs.forEach { abiTypes ->
                 // find event values by searchId
-                val eventValues = abiTypes?.map { it.value as String }
-                val filteredEventValues = eventValues?.filter { e -> e == searchId }
-                if (filteredEventValues != null && filteredEventValues.isNotEmpty()) {
-                    subFlow(SecurityTransferToOtherChainFlow(proposalStateAndRef))
-                    return "Ethereum Event with id: $searchId watched and executed SecurityTransferToOtherChainFlow"
+                val eventValues = abiTypes?.map { it.value }
+                if (eventValues != null && eventValues.isNotEmpty()) {
+                    val lockedEvent = eventValues?.let { LockedEvent.listToLockedEvent(it) }
+                    if (lockedEvent.swapId.equals(searchId)) {
+                        val encodedSwapDetail = lockedEvent.encodedSwapDetail
+                        val stringEncodedSwapDetail = "0x" + encodedSwapDetail.toHex()
+                        val decodedSwapDetailList = DefaultFunctionReturnDecoder.decode(stringEncodedSwapDetail, swapDetailType as MutableList<TypeReference<Type<Any>>>?)
+                        val swapDetail = SwapDetail.listToSwapDetail(decodedSwapDetailList)
+                        subFlow(SecurityTransferWithProposalStateFlow(proposalStateAndRef))
+
+                        return "SecurityTransferWithProposalStateFlow has executed with ${swapDetail.securityAmount} securities."
+                    }
                 }
             }
         }
@@ -108,5 +133,19 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         subFlow(FinalityFlow(signedTx, listOf(), FINALISING_TRANSACTION.childProgressTracker()))
 
         return "Event Watched. (fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber})"
+    }
+
+    fun ByteArray.toHex() : String {
+        val result = StringBuffer()
+
+        forEach {
+            val octet = it.toInt()
+            val firstIndex = (octet and 0xF0).ushr(4)
+            val secondIndex = octet and 0x0F
+            result.append(HEX_CHARS[firstIndex])
+            result.append(HEX_CHARS[secondIndex])
+        }
+
+        return result.toString()
     }
 }

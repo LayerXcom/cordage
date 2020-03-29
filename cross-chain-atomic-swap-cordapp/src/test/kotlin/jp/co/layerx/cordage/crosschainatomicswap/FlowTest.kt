@@ -2,7 +2,6 @@ package jp.co.layerx.cordage.crosschainatomicswap
 
 import org.assertj.core.api.Assertions.*
 
-import net.corda.client.rpc.notUsed
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.MockNetworkParameters
 import net.corda.testing.node.StartedMockNode
@@ -10,7 +9,6 @@ import net.corda.testing.node.TestCordapp
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
 
@@ -38,22 +36,22 @@ class FlowTests {
         assertThat(recentBlockNumber.toInt()).isPositive()
     }
 
-    @Test
-    fun `eventwatch occurs every 10 seconds`() {
-        val searchId = 10
-        val flow = StartEventWatchFlow(searchId)
-        node.startFlow(flow).get()
-
-        val sleepTime: Long = 22000
-        Thread.sleep(sleepTime)
-
-        val recordedTxs = node.transaction {
-            val (recordedTxs, futureTxs) = node.services.validatedTransactions.track()
-            futureTxs.notUsed()
-            recordedTxs
-        }
-
-        val totalExpectedTransactions = 2
-        assertThat(recordedTxs.size).isEqualTo(totalExpectedTransactions)
-    }
+//    @Test
+//    fun `eventwatch occurs every 10 seconds`() {
+//        val searchId = "10"
+//        val flow = StartEventWatchFlow(searchId)
+//        node.startFlow(flow).get()
+//
+//        val sleepTime: Long = 22000
+//        Thread.sleep(sleepTime)
+//
+//        val recordedTxs = node.transaction {
+//            val (recordedTxs, futureTxs) = node.services.validatedTransactions.track()
+//            futureTxs.notUsed()
+//            recordedTxs
+//        }
+//
+//        val totalExpectedTransactions = 2
+//        assertThat(recordedTxs.size).isEqualTo(totalExpectedTransactions)
+//    }
 }

@@ -3,8 +3,7 @@ package jp.co.layerx.cordage.crosschainatomicswap.flow
 import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
-import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalStatus
-import jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
+import jp.co.layerx.cordage.crosschainatomicswap.types.ProposalStatus
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
@@ -59,10 +58,10 @@ class ProposeAtomicSwapFlow(private val securityLinearIdString: String,
 }
 
 @InitiatedBy(ProposeAtomicSwapFlow::class)
-class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession): FlowLogic<UniqueIdentifier>() {
+class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession): FlowLogic<Unit>() {
 
     @Suspendable
-    override fun call(): UniqueIdentifier {
+    override fun call() {
         val signedTransactionFlow = object : SignTransactionFlow(flowSession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
                 val output = stx.tx.outputs.single().data
@@ -75,7 +74,6 @@ class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession): FlowLogic<Un
 
         val signedTx = subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txWeJustSignedId.id))
         val signedProposalState = signedTx.coreTransaction.outputsOfType<ProposalState>().first()
-        return signedProposalState.linearId
-        // subFlow(StartEventWatchFlow(linearId))
+        subFlow(StartEventWatchFlow(signedProposalState.linearId))
     }
 }

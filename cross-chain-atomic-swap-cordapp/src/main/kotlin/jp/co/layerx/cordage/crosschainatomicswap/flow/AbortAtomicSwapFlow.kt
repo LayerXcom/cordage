@@ -3,7 +3,7 @@ package jp.co.layerx.cordage.crosschainatomicswap.flow
 import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
-import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalStatus
+import jp.co.layerx.cordage.crosschainatomicswap.types.ProposalStatus
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat

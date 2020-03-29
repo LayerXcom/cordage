@@ -15,8 +15,6 @@ contract Settlement is Ownable {
     address transferToAddress;
     uint256 weiAmount;
     uint256 securityAmount;
-    string proposerCordaName;
-    string acceptorCordaName;
     SwapStatus status;
   }
 
@@ -51,9 +49,7 @@ contract Settlement is Ownable {
     address _transferFromAddress,
     address _transferToAddress,
     uint256 _weiAmount,
-    uint256 _securityAmount,
-    string memory _proposerCordaName,
-    string memory _acceptorCordaName
+    uint256 _securityAmount
   ) public payable {
     require(msg.sender == _transferFromAddress, "msg.sender is not _transferFromAddress");
     require(msg.value == _weiAmount, "msg.value is not equivalent to _weiAmount");
@@ -63,8 +59,6 @@ contract Settlement is Ownable {
     swapDetail.transferToAddress = _transferToAddress;
     swapDetail.weiAmount = _weiAmount;
     swapDetail.securityAmount = _securityAmount;
-    swapDetail.proposerCordaName = _proposerCordaName;
-    swapDetail.acceptorCordaName = _acceptorCordaName;
     swapDetail.status = SwapStatus.Locked;
 
     bytes memory encodedSwapDetail = abi.encode(swapDetail);

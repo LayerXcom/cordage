@@ -40,19 +40,23 @@ Use the `deployNodes` task and `./build/nodes/runnodes` script.
 ## Interacting with the nodes:
 
 ### Issue Security State
-Run SecurityIssueFlow from PartyC:
+Run SecurityIssueFlow from Security Issuer ParticipantC:
+
 ```
 flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityIssueFlow amount: 100, owner: "O=ParticipantB,L=New York,C=US", issuer: "O=ParticipantC,L=Paris,C=FR", name: "inPublic"
 ```
 This flow returns linearId of SecurityState
 
 ### vaultQuery for Security State
+Run vaultQuery from ParticipantB:
+
 ```
 run vaultQuery contractStateType: jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
 ```
 You can get linearId of Security State by the result.
 
 ### Transfer Security State
+
 ```
 flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityIssueFlow amount: 100, owner: "O=ParticipantB,L=New York,C=US", issuer: "O=ParticipantC,L=Paris,C=FR", name: "inPublic"
 ```
@@ -60,12 +64,14 @@ flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityIssueFlow amou
 This flow returns linearId of SecurityState.
 
 ### Propose Cross-Chain Atomic Swap
-Run ProposeAtomicSwapFlow from PartyA:
+Run ProposeAtomicSwapFlow from ParticipantA with ParticipantB's securityLinearId:
+
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearIdString: "1b06f3ae-47b6-409d-8b01-625b7522156c", securityAmount: 10, weiAmount: 1000000, swapId: "1", proposer: "O=ParticipantA,L=London,C=GB", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearIdString: "d600932e-2036-4c06-ba13-29979581f220", securityAmount: 10, weiAmount: 1000000, swapId: "1", proposer: "O=ParticipantA,L=London,C=GB", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
 ```
 
-The acceptor can validate this Proposal with `checkTransaction()` in `ProposeAtomicSwapFlowResponder`.
+The proposer ParticipantA will transfer Ether to ParticipantB's ethereum address in subflow.
+The acceptor ParticipantB can validate this Proposal with `checkTransaction()` in `ProposeAtomicSwapFlowResponder`.
 
 ### vaultQuery for Proposal State
 ```
@@ -76,9 +82,9 @@ You can get linearId of Proposal State by the result.
 
 ## Start EventWatchFlow
 
-Go to the CRaSH shell for ParticipantA, and run the `StartEventWatchFlow` with `proposalStateLinearId`:
+Go to the CRaSH shell for ParticipantB, and run the `StartEventWatchFlow` with `proposalStateLinearId`:
 
-    flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "24a11297-d9f4-47dc-a904-9af9aa75f640"
+    flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "481fa190-ccd5-4992-9176-1f2aaa1549df"
 
 You can now start monitoring the node's flow activity...
 
