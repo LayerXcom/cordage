@@ -5,6 +5,7 @@ import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract
 import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract.Companion.contractID
 import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.Settlement
 import jp.co.layerx.cordage.crosschainatomicswap.state.WatcherState
+import jp.co.layerx.cordage.crosschainatomicswap.toHex
 import jp.co.layerx.cordage.crosschainatomicswap.types.LockedEvent
 import jp.co.layerx.cordage.crosschainatomicswap.types.SwapDetail
 import net.corda.core.contracts.Command
@@ -41,7 +42,6 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val credentials: Credentials = Credentials.create("0x6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c")
         val eventMapping = mapOf<String, Event>("Locked" to Settlement.LOCKED_EVENT)
 
-        private val HEX_CHARS = "0123456789ABCDEF".toCharArray()
         val swapDetailType = Arrays.asList<TypeReference<*>?>(
             object : TypeReference<Address?>() {},
             object : TypeReference<Address?>() {},
@@ -133,19 +133,5 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         subFlow(FinalityFlow(signedTx, listOf(), FINALISING_TRANSACTION.childProgressTracker()))
 
         return "Event Watched. (fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber})"
-    }
-
-    fun ByteArray.toHex() : String {
-        val result = StringBuffer()
-
-        forEach {
-            val octet = it.toInt()
-            val firstIndex = (octet and 0xF0).ushr(4)
-            val secondIndex = octet and 0x0F
-            result.append(HEX_CHARS[firstIndex])
-            result.append(HEX_CHARS[secondIndex])
-        }
-
-        return result.toString()
     }
 }
