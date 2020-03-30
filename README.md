@@ -59,6 +59,9 @@ P1: [Flow Ethereum TX](./flow-ethereum-tx)
 P3: [Flow Ethereum Event Watch](./flow-ethereum-event-watch)
 - This CorDapp provides a simple example of how to watch (retrieve) Ethereum Events from Corda Flow.
 
+P1+P4+V2: [Custom Notary Flow](./custom-notary-flow) that creates an ethereum tx and sends to the ethereum node
+- This CorDapp provides a simple example of how to propagate data from Corda to Ethereum by creating a Custom Notary Flow.
+
 ### How to run
 Please follow the README.md in each directory.
 
@@ -75,7 +78,6 @@ Cordage is licensed under [the Apache License, Version 2.0](./LICENSE).
 ## Maintainers
 - [shun-tak](https://github.com/shun-tak)
 - [etaroid](https://github.com/etaroid)
-- [yudetamago](https://github.com/yudetamago)
 
 ## Sponsors
 <a href="https://layerx.co.jp/en/"><img src="./docs/images/layerx.png" alt="LayerX" width="500"></a><br />
