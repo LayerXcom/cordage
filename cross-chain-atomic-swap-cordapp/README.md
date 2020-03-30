@@ -58,7 +58,7 @@ You can get linearId of Security State by the result.
 ### Transfer Security State
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityIssueFlow amount: 100, owner: "O=ParticipantB,L=New York,C=US", issuer: "O=ParticipantC,L=Paris,C=FR", name: "inPublic"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityTransferFlow linearId: "961ba806-e792-447f-a71e-8441f9ac8601", newOwner: "O=ParticipantA,L=London,C=GB"
 ```
 
 This flow returns linearId of SecurityState.
