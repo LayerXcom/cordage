@@ -31,7 +31,6 @@ open class ProposalContract: Contract {
                 // add some validations
             }
             is Commands.Consume -> requireThat {
-                "Output state should be only one state." using (tx.outputs.size == 1)
                 val inputs = tx.inputsOfType<ProposalState>()
                 val output = tx.outputsOfType<ProposalState>().single()
                 // add some validations

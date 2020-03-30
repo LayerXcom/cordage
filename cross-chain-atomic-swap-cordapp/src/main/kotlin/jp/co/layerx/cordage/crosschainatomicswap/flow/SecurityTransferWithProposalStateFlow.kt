@@ -32,13 +32,13 @@ class SecurityTransferWithProposalStateFlow(val proposalStateRef: StateAndRef<Pr
 
         val securitySigners = (inputSecurity.participants).map { it.owningKey }
         val proposalSigners = (inputProposal.participants).map { it.owningKey }
-        val transferCommand = Command(SecurityContract.Commands.Transfer(), securitySigners)
+        val transferWithProposalStateCommand = Command(SecurityContract.Commands.TransferWithProposalState(), securitySigners)
         val consumeCommand= Command(ProposalContract.Commands.Consume(), proposalSigners)
 
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
             .addInputState(securityStateAndRef)
             .addOutputState(outputSecurity, SecurityContract.contractID)
-            .addCommand(transferCommand)
+            .addCommand(transferWithProposalStateCommand)
             .addInputState(proposalStateRef)
             .addOutputState(outputProposal,ProposalContract.contractID)
             .addCommand(consumeCommand)

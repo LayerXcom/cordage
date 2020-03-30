@@ -58,10 +58,10 @@ class ProposeAtomicSwapFlow(private val securityLinearIdString: String,
 }
 
 @InitiatedBy(ProposeAtomicSwapFlow::class)
-class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession): FlowLogic<Unit>() {
+class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession): FlowLogic<SignedTransaction>() {
 
     @Suspendable
-    override fun call() {
+    override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(flowSession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
                 val output = stx.tx.outputs.single().data
@@ -72,8 +72,9 @@ class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession): FlowLogic<Un
 
         val txWeJustSignedId = subFlow(signedTransactionFlow)
 
-        val signedTx = subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txWeJustSignedId.id))
-        val signedProposalState = signedTx.coreTransaction.outputsOfType<ProposalState>().first()
-        subFlow(StartEventWatchFlow(signedProposalState.linearId))
+        return subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txWeJustSignedId.id))
+//        val signedTx = subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txWeJustSignedId.id))
+//        val signedProposalState = signedTx.coreTransaction.outputsOfType<ProposalState>().first()
+//        subFlow(StartEventWatchFlow(signedProposalState.linearId))
     }
 }

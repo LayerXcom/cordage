@@ -12,7 +12,7 @@ open class SecurityContract: Contract {
     interface Commands : CommandData {
         class Issue : Commands
         class Transfer : Commands
-        class TransferToOtherChain : Commands
+        class TransferWithProposalState : Commands
     }
 
     override fun verify(tx: LedgerTransaction) {
@@ -30,8 +30,7 @@ open class SecurityContract: Contract {
                 val output = tx.outputsOfType<SecurityState>().single()
                 // add some validations
             }
-            is Commands.TransferToOtherChain -> requireThat {
-            "Output state should be only one state." using (tx.outputs.size == 1)
+            is Commands.TransferWithProposalState -> requireThat {
             val inputs = tx.inputsOfType<SecurityState>()
             val output = tx.outputsOfType<SecurityState>().single()
             // add some validations
