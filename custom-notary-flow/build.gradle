@@ -58,6 +58,9 @@ cordapp {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    // web3j version should strictly equal to 4.5.11 due to its okhttp dependency conflict
+    // https://github.com/web3j/web3j/issues/1167#issuecomment-593369842
+    implementation "org.web3j:core:4.5.11"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation "junit:junit:$junit_version"
     testImplementation "org.assertj:assertj-core:3.15.0"
@@ -89,7 +92,18 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     }
 }
 
-task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
+def dependenciesDir = './build/dependencies'
+
+task deleteDependencies(type: Delete) {
+    delete dependenciesDir
+}
+
+task copyDependencies(type: Copy, dependsOn: deleteDependencies) {
+    from configurations.compileClasspath - configurations.cordaCompile - configurations.cordaRuntime
+    into dependenciesDir
+}
+
+task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar', 'copyDependencies']) {
     def nodesDir = "./build/nodes"
     delete nodesDir
     directory nodesDir
@@ -113,6 +127,7 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
             adminAddress "0.0.0.0:10103"
         }
         extraConfig = [
+            jarDirs: ["../../dependencies"],
             dataSourceProperties: [
                 dataSourceClassName : "org.postgresql.ds.PGSimpleDataSource",
                 'dataSource.url' : "jdbc:postgresql://localhost:5432/postgres",
