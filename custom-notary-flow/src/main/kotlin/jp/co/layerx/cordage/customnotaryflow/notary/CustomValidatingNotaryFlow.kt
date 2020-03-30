@@ -65,7 +65,7 @@ class CustomValidatingNotaryFlow(otherSide: FlowSession, service: CustomValidati
             "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",
             null,
             BigInteger.valueOf(1),
-            BigInteger.valueOf(21000),
+            BigInteger.valueOf(50000),
             "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0",
             BigInteger.valueOf(1_000_000_000_000_000_000),
             data.toByteArray(Charsets.UTF_8).toHex()
