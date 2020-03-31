@@ -1,4 +1,4 @@
-# ![Cordage](./docs/images/logo.png)
+# ![Cordage](./docs/images/cordage.png)
 
 Cordage makes the interoperability possible between [Corda](https://www.corda.net/) and other Blockchains
 by providing several modules that propagate, pull and verify information between Blockchains
