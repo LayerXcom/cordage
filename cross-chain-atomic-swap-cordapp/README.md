@@ -67,11 +67,11 @@ This flow returns linearId of SecurityState.
 Run ProposeAtomicSwapFlow from ParticipantA with ParticipantB's securityLinearId:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearIdString: "9247f952-7fe2-49e9-ae37-9d86cab0a000", securityAmount: 10, weiAmount: 1000000, swapId: "2", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearId: "699796e4-cb10-4a6d-9a70-0af013f68fe0", securityAmount: 10, weiAmount: 1000000, swapId: "2", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
 ```
 
-The proposer ParticipantA will transfer Ether to ParticipantB's ethereum address in subflow.
 The acceptor ParticipantB can validate this Proposal with `checkTransaction()` in `ProposeAtomicSwapFlowResponder`.
+The proposer ParticipantA will lock Ether to Settlement Contract in subflow.
 
 ### vaultQuery for Proposal State
 ```
@@ -94,7 +94,15 @@ You can now start monitoring the node's flow activity...
 
     xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    Event Watched. (fromBlockNumber: x, toBlockNumber: xxxx)
 
-...Or if aimed Ethereum Event was emitted on ethereum network, `EventWatch` flow will end with below log:
+...Or if aimed Ethereum Event was emitted on Ethereum network, `EventWatch` flow will end with below log:
 
-    xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    Ethereum Event with id: xx watched and send TX Completed
+    xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    SecurityTransferWithProposalStateFlow has executed with xxxx securities.
 
+### Abort Proposal State
+Run AbortAtomicSwapFlow from Proposer(ParticipantA) with ProposalState's linearId:
+
+```
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.AbortAtomicSwapFlow proposalLinearId: "1469ae31-6a13-46c8-a349-c668771d5de5"
+```
+
+The Notary will unlock Ether to ParticipantA's ethereum address.

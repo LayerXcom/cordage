@@ -14,7 +14,7 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class ProposeAtomicSwapFlow(private val securityLinearIdString: String,
+class ProposeAtomicSwapFlow(private val securityLinearId: String,
                             private val securityAmount: Int,
                             private val weiAmount: Int,
                             private val swapId: String,
@@ -24,9 +24,9 @@ class ProposeAtomicSwapFlow(private val securityLinearIdString: String,
     @Suspendable
     override fun call(): String {
         val proposer = ourIdentity
-        val securityLinearId = UniqueIdentifier.fromString(securityLinearIdString)
+        val linearId = UniqueIdentifier.fromString(securityLinearId)
         val status: ProposalStatus = ProposalStatus.PROPOSED
-        val state = ProposalState(securityLinearId,
+        val state = ProposalState(linearId,
             securityAmount.toBigInteger(),
             weiAmount.toBigInteger(),
             swapId,

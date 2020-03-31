@@ -15,10 +15,10 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class AbortAtomicSwapFlow(val linearId: UniqueIdentifier): FlowLogic<SignedTransaction>() {
+class AbortAtomicSwapFlow(val proposalLinearId: String): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
-
+        val linearId = UniqueIdentifier.fromString(proposalLinearId)
         val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
         val proposalStateAndRef =  serviceHub.vaultService.queryBy<ProposalState>(queryCriteria).states.single()
         val inputProposal = proposalStateAndRef.state.data
@@ -29,7 +29,7 @@ class AbortAtomicSwapFlow(val linearId: UniqueIdentifier): FlowLogic<SignedTrans
 
         val outputProposal = inputProposal.withNewStatus(ProposalStatus.ABORTED)
 
-        val signers = inputProposal.proposer.owningKey
+        val signers = (inputProposal.participants).map { it.owningKey }
         val abortCommand = Command(ProposalContract.ProposalCommands.Abort(), signers)
 
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
