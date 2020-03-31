@@ -117,7 +117,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val output = WatcherState(ourIdentity, newFromBlockNumber, recentBlockNumber, targetContractAddress, eventName, proposalStateAndRef)
 
         progressTracker.currentStep = GENERATING_TRANSACTION
-        val watchCmd = Command(WatcherContract.Commands.Watch(), ourIdentity.owningKey)
+        val watchCmd = Command(WatcherContract.WatcherCommands.Watch(), ourIdentity.owningKey)
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
                 .addInputState(input)
                 .addOutputState(output, contractID)

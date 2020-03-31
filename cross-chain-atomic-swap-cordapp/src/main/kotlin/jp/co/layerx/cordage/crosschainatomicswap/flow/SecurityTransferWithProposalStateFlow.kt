@@ -27,13 +27,14 @@ class SecurityTransferWithProposalStateFlow(val proposalStateRef: StateAndRef<Pr
             throw IllegalArgumentException("Security transfer can only be initiated by the Security Owner.")
         }
 
-        val outputSecurity = inputSecurity.withNewOwner(inputProposal.acceptor)
+        val newOwner = inputProposal.proposer
+        val outputSecurity = inputSecurity.withNewOwner(newOwner)
         val outputProposal = inputProposal.withNewStatus(ProposalStatus.CONSUMED)
 
-        val securitySigners = (inputSecurity.participants).map { it.owningKey }
+        val securitySigners = (inputSecurity.participants + newOwner).map { it.owningKey }
         val proposalSigners = (inputProposal.participants).map { it.owningKey }
-        val transferWithProposalStateCommand = Command(SecurityContract.Commands.TransferWithProposalState(), securitySigners)
-        val consumeCommand= Command(ProposalContract.Commands.Consume(), proposalSigners)
+        val transferWithProposalStateCommand = Command(SecurityContract.SecurityCommands.TransferWithProposalState(), securitySigners)
+        val consumeCommand= Command(ProposalContract.ProposalCommands.Consume(), proposalSigners)
 
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
             .addInputState(securityStateAndRef)
@@ -46,7 +47,7 @@ class SecurityTransferWithProposalStateFlow(val proposalStateRef: StateAndRef<Pr
         txBuilder.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(txBuilder)
 
-        val sessions = (inputSecurity.participants - ourIdentity + inputProposal.participants - ourIdentity).map { initiateFlow(it) }.toSet()
+        val sessions = (outputSecurity.participants).map { initiateFlow(it) }.toSet()
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
         return subFlow(FinalityFlow(stx, sessions))

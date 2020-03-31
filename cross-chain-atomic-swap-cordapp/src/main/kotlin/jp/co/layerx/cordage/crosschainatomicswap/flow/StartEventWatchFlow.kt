@@ -56,7 +56,7 @@ class StartEventWatchFlow(private val proposalStateLinearId: UniqueIdentifier) :
         val output = WatcherState(ourIdentity, fromBlockNumber, recentBlockNumber, TARGET_CONTRACT_ADDRESS, EVENT_NAME, signedProposalStateAndRef)
 
         progressTracker.currentStep = GENERATING_TRANSACTION
-        val cmd = Command(WatcherContract.Commands.Issue(), ourIdentity.owningKey)
+        val cmd = Command(WatcherContract.WatcherCommands.Issue(), ourIdentity.owningKey)
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
                 .addOutputState(output, WatcherContract.contractID)
                 .addCommand(cmd)

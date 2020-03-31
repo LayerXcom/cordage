@@ -9,31 +9,34 @@ open class ProposalContract: Contract {
         const val contractID = "jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract"
     }
 
-    interface Commands : CommandData {
-        class Propose : Commands
-        class Abort : Commands
-        class Consume : Commands
+    interface ProposalCommands : CommandData {
+        class Propose : ProposalCommands
+        class Abort : ProposalCommands
+        class Consume : ProposalCommands
     }
 
     override fun verify(tx: LedgerTransaction) {
-        val command = tx.commands.requireSingleCommand<Commands>()
-        when (command.value) {
-            is Commands.Propose -> requireThat {
+        val proposalCommand = tx.commandsOfType<ProposalCommands>().first()
+        when (proposalCommand.value) {
+            is ProposalCommands.Propose -> requireThat {
                 "No inputs should be consumed when issuing a Proposal." using (tx.inputs.isEmpty())
                 "Only one output state should be created when issuing a Proposal." using (tx.outputs.size == 1)
                 val proposal = tx.outputsOfType<ProposalState>().single()
                 // add some validations
+                // TODO "Propose Tx must have proposer's and acceptor's signature."
             }
-            is Commands.Abort -> requireThat {
+            is ProposalCommands.Abort -> requireThat {
                 "Output state should be only one state." using (tx.outputs.size == 1)
                 val inputs = tx.inputsOfType<ProposalState>()
                 val output = tx.outputsOfType<ProposalState>().single()
                 // add some validations
+                // TODO "Abort Tx must have proposer's signature."
             }
-            is Commands.Consume -> requireThat {
-                val inputs = tx.inputsOfType<ProposalState>()
-                val output = tx.outputsOfType<ProposalState>().single()
+            is ProposalCommands.Consume -> requireThat {
+//                val inputs = tx.inputsOfType<ProposalState>()
+//                val output = tx.outputsOfType<ProposalState>().first()
                 // add some validations
+                // TODO "Consume Tx must have proposer's and acceptor's signature. (maybe security issuer's signature)"
             }
         }
     }

@@ -30,7 +30,7 @@ class AbortAtomicSwapFlow(val linearId: UniqueIdentifier): FlowLogic<SignedTrans
         val outputProposal = inputProposal.withNewStatus(ProposalStatus.ABORTED)
 
         val signers = inputProposal.proposer.owningKey
-        val abortCommand = Command(ProposalContract.Commands.Abort(), signers)
+        val abortCommand = Command(ProposalContract.ProposalCommands.Abort(), signers)
 
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
             .addInputState(proposalStateAndRef)

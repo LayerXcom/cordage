@@ -18,12 +18,12 @@ class ProposeAtomicSwapFlow(private val securityLinearIdString: String,
                             private val securityAmount: Int,
                             private val weiAmount: Int,
                             private val swapId: String,
-                            private val proposer: Party,
                             private val acceptor: Party,
                             private val FromEthereumAddress: String,
                             private val ToEthereumAddress: String): FlowLogic<String>() {
     @Suspendable
     override fun call(): String {
+        val proposer = ourIdentity
         val securityLinearId = UniqueIdentifier.fromString(securityLinearIdString)
         val status: ProposalStatus = ProposalStatus.PROPOSED
         val state = ProposalState(securityLinearId,
@@ -37,7 +37,7 @@ class ProposeAtomicSwapFlow(private val securityLinearIdString: String,
             status)
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
-        val proposeCommand = Command(ProposalContract.Commands.Propose(), state.participants.map { it.owningKey })
+        val proposeCommand = Command(ProposalContract.ProposalCommands.Propose(), state.participants.map { it.owningKey })
 
         val builder = TransactionBuilder(notary = notary)
 

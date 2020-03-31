@@ -15,14 +15,14 @@ import net.corda.core.transactions.TransactionBuilder
 @StartableByRPC
 class SecurityIssueFlow(val amount: Int,
                         val owner: Party,
-                        val issuer: Party,
                         val name: String): FlowLogic<UniqueIdentifier>() {
     @Suspendable
     override fun call(): UniqueIdentifier {
+        val issuer = ourIdentity
         val state = SecurityState(amount, owner, issuer, name)
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
 
-        val issueCommand = Command(SecurityContract.Commands.Issue(), state.participants.map { it.owningKey })
+        val issueCommand = Command(SecurityContract.SecurityCommands.Issue(), state.participants.map { it.owningKey })
 
         val builder = TransactionBuilder(notary = notary)
 

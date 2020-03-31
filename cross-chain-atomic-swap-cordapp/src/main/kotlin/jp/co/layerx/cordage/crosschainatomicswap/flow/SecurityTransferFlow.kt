@@ -31,7 +31,7 @@ class SecurityTransferFlow(val linearId: UniqueIdentifier,
         val outputSecurity = inputSecurity.withNewOwner(newOwner)
 
         val signers = (inputSecurity.participants + newOwner).map { it.owningKey }
-        val transferCommand = Command(SecurityContract.Commands.Transfer(), signers)
+        val transferCommand = Command(SecurityContract.SecurityCommands.Transfer(), signers)
 
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
         val builder = TransactionBuilder(notary = notary)
