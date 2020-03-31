@@ -29,7 +29,7 @@ class AbortAtomicSwapFlow(val proposalLinearId: String): FlowLogic<SignedTransac
 
         val outputProposal = inputProposal.withNewStatus(ProposalStatus.ABORTED)
 
-        val signers = (inputProposal.participants).map { it.owningKey }
+        val signers = (inputProposal.participants).map { it.owningKey } - inputProposal.acceptor.owningKey
         val abortCommand = Command(ProposalContract.ProposalCommands.Abort(), signers)
 
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
@@ -39,7 +39,8 @@ class AbortAtomicSwapFlow(val proposalLinearId: String): FlowLogic<SignedTransac
 
         txBuilder.verify(serviceHub)
         val signedTx = serviceHub.signInitialTransaction(txBuilder)
-        return subFlow(FinalityFlow(signedTx, listOf()))
+        val sessions = (inputProposal.participants - ourIdentity).map { initiateFlow(it) }.toSet()
+        return subFlow(FinalityFlow(signedTx, sessions))
     }
 }
 

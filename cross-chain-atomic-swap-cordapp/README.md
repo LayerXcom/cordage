@@ -28,7 +28,7 @@ You can run ganache-cli and deploy sample Contract by following [Atomic Swap Eth
 
 ### Running the database:
 ```
-docker run --name postgres96 -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:9.6
+docker run --rm --name postgres96-rm -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:9.6
 ```
 
 ### Running the nodes:
@@ -67,7 +67,7 @@ This flow returns linearId of SecurityState.
 Run ProposeAtomicSwapFlow from ParticipantA with ParticipantB's securityLinearId:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearId: "699796e4-cb10-4a6d-9a70-0af013f68fe0", securityAmount: 10, weiAmount: 1000000, swapId: "2", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearId: "023865e4-813f-4817-9469-ab4f6357d87c", securityAmount: 10, weiAmount: 1000000, swapId: "2", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
 ```
 
 The acceptor ParticipantB can validate this Proposal with `checkTransaction()` in `ProposeAtomicSwapFlowResponder`.
@@ -84,7 +84,7 @@ You can get linearId of Proposal State by the result.
 
 Go to the CRaSH shell for ParticipantB, and run the `StartEventWatchFlow` with `proposalStateLinearId`:
 
-    flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "fa5580a2-a8a1-4397-bf49-00983e13b6f4"
+    flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "f72a4e43-17d3-4e31-b35a-228da5700df3"
 
 You can now start monitoring the node's flow activity...
 
@@ -102,7 +102,7 @@ You can now start monitoring the node's flow activity...
 Run AbortAtomicSwapFlow from Proposer(ParticipantA) with ProposalState's linearId:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.AbortAtomicSwapFlow proposalLinearId: "1469ae31-6a13-46c8-a349-c668771d5de5"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.AbortAtomicSwapFlow proposalLinearId: "6bdf6326-1769-44f1-a541-b96826da1148"
 ```
 
-The Notary will unlock Ether to ParticipantA's ethereum address.
+The Notary will unlock Ether to ParticipantA's Ethereum address.
