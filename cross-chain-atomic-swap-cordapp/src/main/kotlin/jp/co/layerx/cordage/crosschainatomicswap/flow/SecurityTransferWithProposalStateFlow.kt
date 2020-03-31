@@ -47,7 +47,8 @@ class SecurityTransferWithProposalStateFlow(val proposalStateRef: StateAndRef<Pr
         txBuilder.verify(serviceHub)
         val ptx = serviceHub.signInitialTransaction(txBuilder)
 
-        val sessions = (outputSecurity.participants).map { initiateFlow(it) }.toSet()
+        val sessionParties = outputSecurity.participants union inputProposal.participants - ourIdentity
+        val sessions = (sessionParties).map { initiateFlow(it) }.toSet()
         val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
 
         return subFlow(FinalityFlow(stx, sessions))
