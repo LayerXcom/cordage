@@ -60,8 +60,8 @@ class SecurityTransferWithProposalStateFlowResponder(val flowSession: FlowSessio
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(flowSession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                val output = stx.tx.outputs.single().data
-                "This must be an Security transaction" using (output is SecurityState)
+                val securityOutput = stx.tx.outputsOfType<SecurityState>().first()
+                val proposalOutput = stx.tx.outputsOfType<ProposalState>().first()
             }
         }
 

@@ -67,7 +67,7 @@ This flow returns linearId of SecurityState.
 Run ProposeAtomicSwapFlow from ParticipantA with ParticipantB's securityLinearId:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearIdString: "f4b130df-1e75-436f-aa7a-f0692dd60cbb", securityAmount: 10, weiAmount: 1000000, swapId: "2", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearIdString: "9247f952-7fe2-49e9-ae37-9d86cab0a000", securityAmount: 10, weiAmount: 1000000, swapId: "2", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
 ```
 
 The proposer ParticipantA will transfer Ether to ParticipantB's ethereum address in subflow.
@@ -84,7 +84,7 @@ You can get linearId of Proposal State by the result.
 
 Go to the CRaSH shell for ParticipantB, and run the `StartEventWatchFlow` with `proposalStateLinearId`:
 
-    flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "8b425611-27db-4ebe-9a9d-b707e709ac38"
+    flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "fa5580a2-a8a1-4397-bf49-00983e13b6f4"
 
 You can now start monitoring the node's flow activity...
 

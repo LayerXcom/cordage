@@ -33,8 +33,8 @@ open class ProposalContract: Contract {
                 // TODO "Abort Tx must have proposer's signature."
             }
             is ProposalCommands.Consume -> requireThat {
-//                val inputs = tx.inputsOfType<ProposalState>()
-//                val output = tx.outputsOfType<ProposalState>().first()
+                val inputs = tx.inputsOfType<ProposalState>()
+                val output = tx.outputsOfType<ProposalState>().first()
                 // add some validations
                 // TODO "Consume Tx must have proposer's and acceptor's signature. (maybe security issuer's signature)"
             }

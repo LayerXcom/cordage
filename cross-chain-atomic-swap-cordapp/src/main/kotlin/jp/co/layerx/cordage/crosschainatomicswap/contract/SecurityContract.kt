@@ -33,8 +33,8 @@ open class SecurityContract: Contract {
                 // TODO "SecurityTransfer Tx must have previous owner's, new owner's and issuer's signature signature."
             }
             is SecurityCommands.TransferWithProposalState -> requireThat {
-//            val inputs = tx.inputsOfType<SecurityState>()
-//            val output = tx.outputsOfType<SecurityState>().first()
+            val inputs = tx.inputsOfType<SecurityState>()
+            val output = tx.outputsOfType<SecurityState>().first()
             // add some validations
             // TODO "SecurityTransferWithProposalState Tx must have previous owner's, new owner's and issuer's signature."
         }
