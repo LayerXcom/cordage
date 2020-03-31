@@ -6,6 +6,7 @@ import jp.co.layerx.cordage.crosschainatomicswap.contract.SecurityContract
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
 import jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
 import jp.co.layerx.cordage.crosschainatomicswap.types.ProposalStatus
+import jp.co.layerx.cordage.crosschainatomicswap.types.SwapDetail
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
 import net.corda.core.node.services.queryBy
@@ -15,10 +16,12 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class SecurityTransferWithProposalStateFlow(val proposalStateRef: StateAndRef<ProposalState>): FlowLogic<SignedTransaction>() {
+class SecurityTransferWithProposalStateFlow(val proposalStateRef: StateAndRef<ProposalState>, val swapDetail: SwapDetail): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val inputProposal = proposalStateRef.state.data
+        // TODO Verify swapDetail against inputProposal(Verify Ethereum Event Content)
+
         val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(inputProposal.securityLinearId))
         val securityStateAndRef =  serviceHub.vaultService.queryBy<SecurityState>(queryCriteria).states.single()
         val inputSecurity = securityStateAndRef.state.data
