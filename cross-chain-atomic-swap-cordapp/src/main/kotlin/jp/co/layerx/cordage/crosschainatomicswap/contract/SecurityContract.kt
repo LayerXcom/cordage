@@ -14,7 +14,7 @@ open class SecurityContract: Contract {
     interface SecurityCommands : CommandData {
         class Issue : SecurityCommands
         class Transfer : SecurityCommands
-        class TransferWithProposalState : SecurityCommands
+        class TransferForSettle: SecurityCommands
     }
 
     override fun verify(tx: LedgerTransaction) {
@@ -35,20 +35,20 @@ open class SecurityContract: Contract {
                 val input = tx.inputsOfType<SecurityState>().single()
                 val output = tx.outputsOfType<SecurityState>().single()
                 "Only the owner property may change." using (input == output.withNewOwner(input.owner))
-                "The owner property must change in a transfer." using (input.owner != output.owner)
+                "The owner property must change in a Transfer." using (input.owner != output.owner)
                 // SecurityTransfer Tx must have previous owner's, new owner's and issuer's signature signature
                 "The issuer, old owner and new owner only must sign an Security transfer transaction" using
                     (securityCommand.signers.toSet() == (input.participants.map { it.owningKey }.toSet() `union`
                         output.participants.map { it.owningKey }.toSet()))
             }
-            is SecurityCommands.TransferWithProposalState -> requireThat {
-                "An Security TransferWithProposalState transaction should only consume two input state." using (tx.inputs.size == 2)
-                "An Security TransferWithProposalState transaction should only create two output state." using (tx.outputs.size == 2)
+            is SecurityCommands.TransferForSettle -> requireThat {
+                "An Security TransferForSettle transaction should only consume two input state." using (tx.inputs.size == 2)
+                "An Security TransferForSettle transaction should only create two output state." using (tx.outputs.size == 2)
 
                 val inputSecurity = tx.inputsOfType<SecurityState>().first()
                 val outputSecurity = tx.outputsOfType<SecurityState>().first()
                 "Only the owner property may change." using (inputSecurity == outputSecurity.withNewOwner(inputSecurity.owner))
-                "The owner property must change in a TransferWithProposalState." using (inputSecurity.owner != outputSecurity.owner)
+                "The owner property must change in a TransferForSettle." using (inputSecurity.owner != outputSecurity.owner)
 
                 val inputProposal = tx.inputsOfType<ProposalState>().first()
                 "InputProposalState's acceptor must equal to InputSecurityState's owner" using (inputProposal.acceptor == inputSecurity.owner)
@@ -57,8 +57,8 @@ open class SecurityContract: Contract {
                 "InputProposalState's fromEthereumAddress must equal to OutputSecurityState's owner ethAddress" using (inputProposal.fromEthereumAddress == outputSecurity.owner.ethAddress())
                 "InputProposalState's toEthereumAddress must equal to InputSecurityState's owner ethAddress" using (inputProposal.toEthereumAddress == inputSecurity.owner.ethAddress())
 
-                // SecurityTransferWithProposalState Tx must have previous owner's, new owner's and issuer's signature.
-                "The issuer, old owner and new owner must sign an Security TransferWithProposalState transaction" using
+                // TransferForSettle Tx must have previous owner's, new owner's and issuer's signature.
+                "The issuer, old owner and new owner must sign an Security TransferForSettle transaction" using
                     (securityCommand.signers.toSet() == (inputSecurity.participants.map { it.owningKey }.toSet() union
                         outputSecurity.participants.map { it.owningKey }.toSet()))
             }

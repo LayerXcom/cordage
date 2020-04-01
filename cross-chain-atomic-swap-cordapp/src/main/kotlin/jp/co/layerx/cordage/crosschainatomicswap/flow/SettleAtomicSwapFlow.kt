@@ -16,7 +16,7 @@ import net.corda.core.transactions.TransactionBuilder
 
 @InitiatingFlow
 @StartableByRPC
-class SecurityTransferWithProposalStateFlow(val proposalStateRef: StateAndRef<ProposalState>, val swapDetail: SwapDetail): FlowLogic<SignedTransaction>() {
+class SettleAtomicSwapFlow(val proposalStateRef: StateAndRef<ProposalState>, val swapDetail: SwapDetail): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val inputProposal = proposalStateRef.state.data
@@ -44,13 +44,13 @@ class SecurityTransferWithProposalStateFlow(val proposalStateRef: StateAndRef<Pr
 
         val securitySigners = (inputSecurity.participants + newOwner).map { it.owningKey }
         val proposalSigners = (inputProposal.participants).map { it.owningKey }
-        val transferWithProposalStateCommand = Command(SecurityContract.SecurityCommands.TransferWithProposalState(), securitySigners)
+        val transferForSettleCommand = Command(SecurityContract.SecurityCommands.TransferForSettle(), securitySigners)
         val consumeCommand= Command(ProposalContract.ProposalCommands.Consume(), proposalSigners)
 
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
             .addInputState(securityStateAndRef)
             .addOutputState(outputSecurity, SecurityContract.contractID)
-            .addCommand(transferWithProposalStateCommand)
+            .addCommand(transferForSettleCommand)
             .addInputState(proposalStateRef)
             .addOutputState(outputProposal,ProposalContract.contractID)
             .addCommand(consumeCommand)
@@ -66,8 +66,8 @@ class SecurityTransferWithProposalStateFlow(val proposalStateRef: StateAndRef<Pr
     }
 }
 
-@InitiatedBy(SecurityTransferWithProposalStateFlow::class)
-class SecurityTransferWithProposalStateFlowResponder(val flowSession: FlowSession): FlowLogic<SignedTransaction>() {
+@InitiatedBy(SettleAtomicSwapFlow::class)
+class SettleAtomicSwapFlowResponder(val flowSession: FlowSession): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(flowSession) {

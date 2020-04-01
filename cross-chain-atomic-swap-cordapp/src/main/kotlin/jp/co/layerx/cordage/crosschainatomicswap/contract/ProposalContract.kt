@@ -50,8 +50,8 @@ open class ProposalContract: Contract {
                     (proposalCommand.signers.toSet() == expectedSigners.toSet())
             }
             is ProposalCommands.Consume -> requireThat {
-                "An Security TransferWithProposalState transaction should only consume two input state." using (tx.inputs.size == 2)
-                "An Security TransferWithProposalState transaction should only create two output state." using (tx.outputs.size == 2)
+                "An Security TransferForSettle transaction should only consume two input state." using (tx.inputs.size == 2)
+                "An Security TransferForSettle transaction should only create two output state." using (tx.outputs.size == 2)
 
                 val inputProposal = tx.inputsOfType<ProposalState>().first()
                 val outputProposal = tx.outputsOfType<ProposalState>().first()

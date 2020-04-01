@@ -96,7 +96,7 @@ You can now start monitoring the node's flow activity...
 
 ...Or if aimed Ethereum Event was emitted on Ethereum network, `EventWatch` flow will end with below log:
 
-    xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    SecurityTransferWithProposalStateFlow has executed with xxxx securities.
+    xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    SettleAtomicSwapFlow has executed with xxxx securities.
 
 ### Abort Proposal State
 Run AbortAtomicSwapFlow from Proposer(ParticipantA) with ProposalState's linearId:

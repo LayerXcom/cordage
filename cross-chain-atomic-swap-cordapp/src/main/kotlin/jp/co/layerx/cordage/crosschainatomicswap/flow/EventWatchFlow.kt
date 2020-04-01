@@ -103,9 +103,10 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                         val stringEncodedSwapDetail = "0x" + encodedSwapDetail.toHex()
                         val decodedSwapDetailList = DefaultFunctionReturnDecoder.decode(stringEncodedSwapDetail, swapDetailType as MutableList<TypeReference<Type<Any>>>?)
                         val swapDetail = SwapDetail.listToSwapDetail(decodedSwapDetailList)
-                        subFlow(SecurityTransferWithProposalStateFlow(proposalStateAndRef, swapDetail))
+                        // Just pass the LockedEvent's swapDetail to SettleAtomicSwapFlow
+                        subFlow(SettleAtomicSwapFlow(proposalStateAndRef, swapDetail))
 
-                        return "SecurityTransferWithProposalStateFlow has executed with ${swapDetail.securityAmount} securities."
+                        return "SettleAtomicSwapFlow has executed with ${swapDetail.securityAmount} securities."
                     }
                 }
             }
