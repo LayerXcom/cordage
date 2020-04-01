@@ -23,7 +23,6 @@ import org.web3j.abi.datatypes.Event
 import org.web3j.abi.datatypes.Type
 import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.abi.datatypes.generated.Uint8
-import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.request.EthFilter
@@ -35,11 +34,10 @@ import java.util.*
 @SchedulableFlow
 class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
+        // TODO Some ethereum parameters should be imported by .env
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
 
-        // TODO credentials should be imported by .env
-        val credentials: Credentials = Credentials.create("0x6370fd033278c143179d81c5526140625662b8daa446c22ee2d73db3707e620c")
         val eventMapping = mapOf<String, Event>("Locked" to Settlement.LOCKED_EVENT)
 
         val swapDetailType = Arrays.asList<TypeReference<*>?>(

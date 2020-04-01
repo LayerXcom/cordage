@@ -2,6 +2,7 @@ package jp.co.layerx.cordage.crosschainatomicswap.flow
 
 import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract
+import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.Settlement
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
 import jp.co.layerx.cordage.crosschainatomicswap.state.WatcherState
 import net.corda.core.contracts.Command
@@ -22,10 +23,12 @@ import java.math.BigInteger
 @StartableByRPC
 class StartEventWatchFlow(private val proposalStateLinearId: UniqueIdentifier) : FlowLogic<Unit>() {
     companion object {
+        // TODO Some ethereum parameters should be imported by .env
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
-        val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-        const val TARGET_CONTRACT_ADDRESS = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
+        private const val ETHEREUM_NETWORK_ID = "5777"
         const val EVENT_NAME = "Locked"
+        val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+        val targetContractAddress = Settlement.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
         object VERIFYING_TRANSACTION : ProgressTracker.Step("Verifying a WatcherState transaction.")
@@ -53,7 +56,7 @@ class StartEventWatchFlow(private val proposalStateLinearId: UniqueIdentifier) :
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val fromBlockNumber = BigInteger.ZERO
         val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
-        val output = WatcherState(ourIdentity, fromBlockNumber, recentBlockNumber, TARGET_CONTRACT_ADDRESS, EVENT_NAME, signedProposalStateAndRef)
+        val output = WatcherState(ourIdentity, fromBlockNumber, recentBlockNumber, targetContractAddress, EVENT_NAME, signedProposalStateAndRef)
 
         progressTracker.currentStep = GENERATING_TRANSACTION
         val cmd = Command(WatcherContract.WatcherCommands.Issue(), ourIdentity.owningKey)

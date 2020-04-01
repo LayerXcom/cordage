@@ -11,6 +11,9 @@ import net.corda.core.flows.*
 import net.corda.core.identity.Party
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
+import net.corda.core.utilities.ProgressTracker
+import net.corda.core.utilities.ProgressTracker.Step
+
 
 @InitiatingFlow
 @StartableByRPC
@@ -21,12 +24,41 @@ class ProposeAtomicSwapFlow(private val securityLinearId: String,
                             private val acceptor: Party,
                             private val FromEthereumAddress: String,
                             private val ToEthereumAddress: String): FlowLogic<String>() {
+    companion object {
+        object CREATE_OUTPUTSTATE : Step("Creating Output ProposalState.")
+        object GENERATING_TRANSACTION : Step("Generating transaction based on new ProposalState.")
+        object VERIFYING_TRANSACTION : Step("Verifying contract constraints.")
+        object SIGNING_TRANSACTION : Step("Signing transaction with our private key.")
+        object GATHERING_SIGS : Step("Gathering the counterparty's signature.") {
+            override fun childProgressTracker() = CollectSignaturesFlow.tracker()
+        }
+        object FINALISING_TRANSACTION : Step("Obtaining notary signature and recording transaction.") {
+            override fun childProgressTracker() = FinalityFlow.tracker()
+        }
+        object SENDING_LOCK_ETH_TX : Step("Sending ether to Settlement Contract for locking.") {
+            override fun childProgressTracker() = LockEtherFlow.tracker()
+        }
+
+        fun tracker() = ProgressTracker(
+            CREATE_OUTPUTSTATE,
+            GENERATING_TRANSACTION,
+            VERIFYING_TRANSACTION,
+            SIGNING_TRANSACTION,
+            GATHERING_SIGS,
+            FINALISING_TRANSACTION,
+            SENDING_LOCK_ETH_TX
+        )
+    }
+
+    override val progressTracker = tracker()
+
     @Suspendable
     override fun call(): String {
+        progressTracker.currentStep = CREATE_OUTPUTSTATE
         val proposer = ourIdentity
         val linearId = UniqueIdentifier.fromString(securityLinearId)
-        val status: ProposalStatus = ProposalStatus.PROPOSED
-        val state = ProposalState(linearId,
+        val outputProposal = ProposalState(
+            linearId,
             securityAmount.toBigInteger(),
             weiAmount.toBigInteger(),
             swapId,
@@ -34,24 +66,31 @@ class ProposeAtomicSwapFlow(private val securityLinearId: String,
             acceptor,
             FromEthereumAddress,
             ToEthereumAddress,
-            status)
+            ProposalStatus.PROPOSED
+        )
+
+        progressTracker.currentStep = GENERATING_TRANSACTION
         val notary = serviceHub.networkMapCache.notaryIdentities.first()
+        val signers = outputProposal.participants.map { it.owningKey }
+        val proposeCommand = Command(ProposalContract.ProposalCommands.Propose(), signers)
+        val txBuilder = TransactionBuilder(notary = notary)
+            .addOutputState(outputProposal, ProposalContract.contractID)
+            .addCommand(proposeCommand)
 
-        val proposeCommand = Command(ProposalContract.ProposalCommands.Propose(), state.participants.map { it.owningKey })
+        progressTracker.currentStep = VERIFYING_TRANSACTION
+        txBuilder.verify(serviceHub)
 
-        val builder = TransactionBuilder(notary = notary)
+        progressTracker.currentStep = SIGNING_TRANSACTION
+        val partlySignedTx = serviceHub.signInitialTransaction(txBuilder)
 
-        builder.addOutputState(state, ProposalContract.contractID)
-        builder.addCommand(proposeCommand)
+        progressTracker.currentStep = GATHERING_SIGS
+        val otherPartySessions = (outputProposal.participants - ourIdentity).map { initiateFlow(it) }.toSet()
+        val fullySignedTx = subFlow(CollectSignaturesFlow(partlySignedTx, otherPartySessions))
 
-        builder.verify(serviceHub)
-        val ptx = serviceHub.signInitialTransaction(builder)
+        progressTracker.currentStep = FINALISING_TRANSACTION
+        val finalizedTx = subFlow(FinalityFlow(fullySignedTx, otherPartySessions))
 
-        val sessions = (state.participants - ourIdentity).map { initiateFlow(it) }.toSet()
-        val stx = subFlow(CollectSignaturesFlow(ptx, sessions))
-
-        val finalizedTx = subFlow(FinalityFlow(stx, sessions))
-
+        progressTracker.currentStep = SENDING_LOCK_ETH_TX
         val finalizedProposalState = finalizedTx.coreTransaction.outputsOfType<ProposalState>().first()
         return subFlow(LockEtherFlow(finalizedProposalState))
     }
@@ -70,11 +109,13 @@ class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession): FlowLogic<Si
             }
         }
 
-        val txWeJustSignedId = subFlow(signedTransactionFlow)
+        val txId = subFlow(signedTransactionFlow).id
 
-        return subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txWeJustSignedId.id))
-//        val signedTx = subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txWeJustSignedId.id))
-//        val signedProposalState = signedTx.coreTransaction.outputsOfType<ProposalState>().first()
-//        subFlow(StartEventWatchFlow(signedProposalState.linearId))
+        return subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txId))
+
+        // If you agree the Proposal in checkTransaction function, execute StartEventWatchFlow automatically as below.
+        // val signedTx = subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txWeJustSignedId.id))
+        // val signedProposalState = signedTx.coreTransaction.outputsOfType<ProposalState>().first()
+        // subFlow(StartEventWatchFlow(signedProposalState.linearId))
     }
 }

@@ -15,12 +15,15 @@ import java.math.BigInteger
 @StartableByRPC
 class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String>() {
     companion object {
+        // TODO Some ethereum parameters should be imported by .env
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
+        private const val ETHEREUM_NETWORK_ID = "5777"
+        private const val ETHEREUM_PRIVATE_KEY = "0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-        const val TARGET_CONTRACT_ADDRESS = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
-        // TODO credentials should be imported by .env
-        val credentials: Credentials = Credentials.create("0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1")
-        object SEND_TRANSACTION_TO_ETHEREUM_CONTRACT: ProgressTracker.Step("Send Tx to Ethereum Contract.")
+        val targetContractAddress = Settlement.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)
+        val credentials: Credentials = Credentials.create(ETHEREUM_PRIVATE_KEY)
+
+        object SEND_TRANSACTION_TO_ETHEREUM_CONTRACT: ProgressTracker.Step("Sending ether to Ethereum Contract for lock.")
 
         fun tracker() = ProgressTracker(
             SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
@@ -32,16 +35,14 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
     @Suspendable
     override fun call(): String {
         progressTracker.currentStep = SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
-
         val swapId = finalizedProposalState.swapId
         val transferFromAddress = finalizedProposalState.fromEthereumAddress
         val transferToAddress = finalizedProposalState.toEthereumAddress
         val weiAmount = finalizedProposalState.weiAmount
         val securityAmount = finalizedProposalState.securityAmount
-        // val weiValue = Convert.toWei(etherAmount, Convert.Unit.WEI)
 
         // load Smart Contract Wrapper
-        val settlement: Settlement = Settlement.load(TARGET_CONTRACT_ADDRESS, web3, credentials,
+        val settlement: Settlement = Settlement.load(targetContractAddress, web3, credentials,
             StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(50000000)))
         val response = settlement.lock(
              swapId,
