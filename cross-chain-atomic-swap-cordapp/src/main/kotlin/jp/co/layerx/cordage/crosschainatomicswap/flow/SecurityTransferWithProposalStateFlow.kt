@@ -20,7 +20,15 @@ class SecurityTransferWithProposalStateFlow(val proposalStateRef: StateAndRef<Pr
     @Suspendable
     override fun call(): SignedTransaction {
         val inputProposal = proposalStateRef.state.data
-        // TODO Verify swapDetail against inputProposal(Verify Ethereum Event Content)
+
+        // Verify swapDetail against inputProposal (Verify Ethereum Event Content)
+        requireThat {
+            "swapDetail from Ethereum Event must have the same fromEthereumAddress to ProposalState's." using (swapDetail.fromEthereumAddress.toString() == inputProposal.fromEthereumAddress)
+            "swapDetail from Ethereum Event must have the same toEthereumAddress to ProposalState's." using (swapDetail.toEthereumAddress.toString() == inputProposal.toEthereumAddress)
+            "swapDetail from Ethereum Event must have the same weiAmount to ProposalState's." using (swapDetail.weiAmount == inputProposal.weiAmount)
+            "swapDetail from Ethereum Event must have the same securityAmount to ProposalState's." using (swapDetail.securityAmount == inputProposal.securityAmount)
+            "swapDetail from Ethereum Event must have the same status to ProposalState's." using (swapDetail.status == inputProposal.status)
+        }
 
         val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(inputProposal.securityLinearId))
         val securityStateAndRef =  serviceHub.vaultService.queryBy<SecurityState>(queryCriteria).states.single()
