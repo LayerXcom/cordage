@@ -80,7 +80,9 @@ dependencies {
     cordaRuntime "$corda_release_distribution:corda:$corda_release_version"
 
     testCompile "$corda_release_distribution:corda-test-utils:$corda_release_version"
-    testCompile "$corda_release_distribution:corda-node-driver:$corda_release_version"
+    // TODO corda-node-driver 4.1 has a bug: https://github.com/corda/corda/issues/5055
+//    testCompile "$corda_release_distribution:corda-node-driver:$corda_release_version"
+    testCompile "$corda_release_distribution:corda-node-driver:4.0"
 
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'

@@ -10,7 +10,7 @@ import java.util.*
 
 
 class ProposalStateTest {
-    private val security = SecurityState(100, BOB.party, CHARLIE.party, "R3 Limited.")
+    private val security = SecurityState(100, BOB.party, CHARLIE.party, "R3")
     private val expectedUuid = UUID.randomUUID()
     private val actual = ProposalState(security, 1_000_000.toBigInteger(), "1", ALICE.party, BOB.party, "", "")
 

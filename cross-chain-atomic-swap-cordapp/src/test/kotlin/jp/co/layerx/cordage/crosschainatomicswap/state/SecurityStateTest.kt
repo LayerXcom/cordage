@@ -9,7 +9,7 @@ import java.util.*
 
 class SecurityStateTest {
     private val expectedUuid = UUID.randomUUID()
-    private val actual = SecurityState(100, ALICE.party, BOB.party, "R3 Limited.", UniqueIdentifier(id = expectedUuid))
+    private val actual = SecurityState(100, ALICE.party, BOB.party, "R3", UniqueIdentifier(id = expectedUuid))
 
     @Test
     fun amount() {
