@@ -20,9 +20,9 @@ You can run ganache-cli and deploy sample Contract by following [Atomic Swap Eth
 
 ### Create SmartContract Wrapper Class by web3j command
  
- ```
- web3j truffle generate ../atomic-swap-ethereum-env/build/contracts/Settlement.json -o ./src/main/java -p jp.co.layerx.cordage.crosschainatomicswap.ethWrapper
- ```
+```
+web3j truffle generate ../atomic-swap-ethereum-env/build/contracts/Settlement.json -o ./src/main/java -p jp.co.layerx.cordage.crosschainatomicswap.ethWrapper
+```
 
 ## Usage
 

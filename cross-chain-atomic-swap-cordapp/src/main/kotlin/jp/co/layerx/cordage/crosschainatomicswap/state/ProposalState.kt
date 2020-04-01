@@ -20,6 +20,16 @@ data class ProposalState(val securityLinearId: UniqueIdentifier,
                          val status: ProposalStatus = ProposalStatus.PROPOSED,
                          override val linearId: UniqueIdentifier = UniqueIdentifier()): LinearState {
 
+    constructor(
+        security: SecurityState,
+        weiAmount: BigInteger,
+        swapId: String,
+        proposer: Party,
+        acceptor: Party,
+        fromEthereumAddress: String,
+        toEthereumAddress: String
+    ) : this(security.linearId, security.amount.toBigInteger(), weiAmount, swapId, proposer, acceptor, fromEthereumAddress, toEthereumAddress)
+
     override val participants: List<Party> get() = listOf(proposer, acceptor)
 
     fun withNewStatus(newStatus: ProposalStatus) = copy(status = newStatus)
