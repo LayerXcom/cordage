@@ -23,7 +23,7 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
         val targetContractAddress = Settlement.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)
         val credentials: Credentials = Credentials.create(ETHEREUM_PRIVATE_KEY)
 
-        object SEND_TRANSACTION_TO_ETHEREUM_CONTRACT: ProgressTracker.Step("Sending ether to Ethereum Contract for lock.")
+        object SEND_TRANSACTION_TO_ETHEREUM_CONTRACT: ProgressTracker.Step("Sending ether to Settlement Contract for locking.")
 
         fun tracker() = ProgressTracker(
             SEND_TRANSACTION_TO_ETHEREUM_CONTRACT

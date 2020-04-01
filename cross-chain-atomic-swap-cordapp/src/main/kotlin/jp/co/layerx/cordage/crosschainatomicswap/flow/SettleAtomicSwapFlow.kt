@@ -15,6 +15,8 @@ import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.ProgressTracker.Step
+import org.web3j.abi.datatypes.Address
+import org.web3j.abi.datatypes.generated.Uint256
 
 @InitiatingFlow
 @StartableByRPC
@@ -54,10 +56,10 @@ class SettleAtomicSwapFlow(val proposalStateRef: StateAndRef<ProposalState>, val
         val inputProposal = proposalStateRef.state.data
 
         requireThat {
-            "swapDetail from Ethereum Event must have the same fromEthereumAddress to ProposalState's." using (swapDetail.fromEthereumAddress.toString() == inputProposal.fromEthereumAddress)
-            "swapDetail from Ethereum Event must have the same toEthereumAddress to ProposalState's." using (swapDetail.toEthereumAddress.toString() == inputProposal.toEthereumAddress)
-            "swapDetail from Ethereum Event must have the same weiAmount to ProposalState's." using (swapDetail.weiAmount == inputProposal.weiAmount)
-            "swapDetail from Ethereum Event must have the same securityAmount to ProposalState's." using (swapDetail.securityAmount == inputProposal.securityAmount)
+            "swapDetail from Ethereum Event must have the same fromEthereumAddress to ProposalState's." using (swapDetail.fromEthereumAddress == Address(inputProposal.fromEthereumAddress))
+            "swapDetail from Ethereum Event must have the same toEthereumAddress to ProposalState's." using (swapDetail.toEthereumAddress == Address(inputProposal.toEthereumAddress))
+            "swapDetail from Ethereum Event must have the same weiAmount to ProposalState's." using (swapDetail.weiAmount == Uint256(inputProposal.weiAmount))
+            "swapDetail from Ethereum Event must have the same securityAmount to ProposalState's." using (swapDetail.securityAmount == Uint256(inputProposal.securityAmount))
             "swapDetail from Ethereum Event must have the same status to ProposalState's." using (swapDetail.status == inputProposal.status)
         }
 

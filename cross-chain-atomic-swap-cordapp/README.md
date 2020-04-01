@@ -67,7 +67,7 @@ This flow returns linearId of SecurityState.
 Run ProposeAtomicSwapFlow from ParticipantA with ParticipantB's securityLinearId:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearId: "9d045271-e14a-4346-a624-f111666bbb82", securityAmount: 100, weiAmount: 1000000, swapId: "2", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearId: "48574134-491d-4a5b-92ee-bd3bdc4305d7", securityAmount: 100, weiAmount: 1000000, swapId: "3", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
 ```
 
 The acceptor ParticipantB can validate this Proposal with `checkTransaction()` in `ProposeAtomicSwapFlowResponder`.
@@ -84,7 +84,7 @@ You can get linearId of Proposal State by the result.
 
 Go to the CRaSH shell for ParticipantB, and run the `StartEventWatchFlow` with `proposalStateLinearId`:
 
-    flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "f72a4e43-17d3-4e31-b35a-228da5700df3"
+    flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "1f77abf7-e209-42e6-8327-a2279c85aab7"
 
 You can now start monitoring the node's flow activity...
 
@@ -102,7 +102,7 @@ You can now start monitoring the node's flow activity...
 Run AbortAtomicSwapFlow from Proposer(ParticipantA) with ProposalState's linearId:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.AbortAtomicSwapFlow proposalLinearId: "6bdf6326-1769-44f1-a541-b96826da1148"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.AbortAtomicSwapFlow proposalLinearId: "1f77abf7-e209-42e6-8327-a2279c85aab7"
 ```
 
 The Notary will unlock Ether to ParticipantA's Ethereum address.

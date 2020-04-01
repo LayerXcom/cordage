@@ -35,7 +35,7 @@ class ProposeAtomicSwapFlow(private val securityLinearId: String,
         object FINALISING_TRANSACTION : Step("Obtaining notary signature and recording transaction.") {
             override fun childProgressTracker() = FinalityFlow.tracker()
         }
-        object SENDING_LOCK_ETH_TX : Step("Sending ether to Settlement Contract for locking.") {
+        object EXECUTING_LOCKETHERFLOW : Step("Executing LockEtherFlow with finalized Proposal.") {
             override fun childProgressTracker() = LockEtherFlow.tracker()
         }
 
@@ -46,7 +46,7 @@ class ProposeAtomicSwapFlow(private val securityLinearId: String,
             SIGNING_TRANSACTION,
             GATHERING_SIGS,
             FINALISING_TRANSACTION,
-            SENDING_LOCK_ETH_TX
+            EXECUTING_LOCKETHERFLOW
         )
     }
 
@@ -90,7 +90,7 @@ class ProposeAtomicSwapFlow(private val securityLinearId: String,
         progressTracker.currentStep = FINALISING_TRANSACTION
         val finalizedTx = subFlow(FinalityFlow(fullySignedTx, otherPartySessions))
 
-        progressTracker.currentStep = SENDING_LOCK_ETH_TX
+        progressTracker.currentStep = EXECUTING_LOCKETHERFLOW
         val finalizedProposalState = finalizedTx.coreTransaction.outputsOfType<ProposalState>().first()
         return subFlow(LockEtherFlow(finalizedProposalState))
     }
