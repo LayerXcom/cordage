@@ -5,14 +5,15 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract Settlement is Ownable {
   enum SwapStatus {
+    Nonexistent,
     Locked,
     Unlocked,
     Aborted
   }
 
   struct SwapDetail {
-    address transferFromAddress;
-    address transferToAddress;
+    address payable transferFromAddress;
+    address payable transferToAddress;
     uint256 weiAmount;
     uint256 securityAmount;
     SwapStatus status;
@@ -46,8 +47,8 @@ contract Settlement is Ownable {
 
   function lock(
     string memory _swapId,
-    address _transferFromAddress,
-    address _transferToAddress,
+    address payable _transferFromAddress,
+    address payable _transferToAddress,
     uint256 _weiAmount,
     uint256 _securityAmount
   ) public payable {
@@ -71,20 +72,15 @@ contract Settlement is Ownable {
   }
 
   function unlock(
-    string memory _swapId,
-    address _transferFromAddress,
-    address payable _transferToAddress,
-    uint256 _weiAmount
+    string memory _swapId
   ) public onlyOwner {
     SwapDetail storage swapDetail = swapIdToDetailMap[_swapId];
+    require(swapDetail.status != SwapStatus.Nonexistent, "swapDetail does not exist");
 
     require(swapDetail.status == SwapStatus.Locked, "swapDetail.status is not Locked");
-    require(swapDetail.transferFromAddress == _transferFromAddress, "swapDetail.transferFromAddress is not equal to _transferFromAddress");
-    require(swapDetail.transferToAddress == _transferToAddress, "swapDetail.transferToAddress is not equal to _transferToAddress");
-    require(swapDetail.weiAmount == _weiAmount, "swapDetail.weiAmount is not equal to _weiAmount");
 
     // Try sending wei to targetAddress.
-    require(_transferToAddress.send(_weiAmount));
+    require(swapDetail.transferToAddress.send(swapDetail.weiAmount));
 
     swapDetail.status = SwapStatus.Unlocked;
 
@@ -98,20 +94,15 @@ contract Settlement is Ownable {
   }
 
   function abort(
-    string memory _swapId,
-    address payable _transferFromAddress,
-    address _transferToAddress,
-    uint256 _weiAmount
+    string memory _swapId
   ) public onlyOwner {
     SwapDetail storage swapDetail = swapIdToDetailMap[_swapId];
+    require(swapDetail.status != SwapStatus.Nonexistent, "swapDetail does not exist");
 
     require(swapDetail.status == SwapStatus.Locked, "swapDetail.status is not Locked");
-    require(swapDetail.transferFromAddress == _transferFromAddress, "swapDetail.transferFromAddress is not equal to _transferFromAddress");
-    require(swapDetail.transferToAddress == _transferToAddress, "swapDetail.transferToAddress is not equal to _transferToAddress");
-    require(swapDetail.weiAmount == _weiAmount, "swapDetail.weiAmount is not equal to _weiAmount");
 
     // Try sending wei to targetAddress.
-    require(_transferFromAddress.send(_weiAmount));
+    require(swapDetail.transferFromAddress.send(swapDetail.weiAmount));
 
     swapDetail.status = SwapStatus.Aborted;
 

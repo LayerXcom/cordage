@@ -9,12 +9,18 @@ contract('Settlement', accounts => {
   const deployerAddress = accounts[0];
   const proposerAddress = accounts[1];
   const acceptorAddress = accounts[2];
-  const swapId = '1';
+  let swapIdNumber = 1;
+  let swapId = '1';
   const weiAmount = new BN('100000000', 10);
   const securityAmount = new BN('1000', 10);
 
   beforeEach(async () => {
     this.settlement = await settlement.new({ from: deployerAddress });
+  });
+
+  afterEach(async () => {
+    swapIdNumber++;
+    swapId = swapIdNumber.toString(10);
   });
 
   describe('lock', () => {
@@ -31,6 +37,23 @@ contract('Settlement', accounts => {
       expect(eventName).to.equal('Locked');
       const args = tx.logs[0].args;
       expect(args.swapId).to.equal(swapId);
+
+      const actual = await this.settlement.swapIdToDetailMap.call(swapId);
+      const decodedSwapDetail = web3.eth.abi.decodeParameter({
+        SwapDetail: {
+          transferFromAddress: 'address',
+          transferToAddress: 'address',
+          weiAmount: 'uint256',
+          securityAmount: 'uint256',
+          status: 'uint8',
+        },
+      }, args.encodedSwapDetail);
+
+      expect(decodedSwapDetail.transferFromAddress).to.equal(actual.transferFromAddress);
+      expect(decodedSwapDetail.transferToAddress).to.equal(actual.transferToAddress);
+      expect(decodedSwapDetail.weiAmount).to.be.bignumber.equal(actual.weiAmount);
+      expect(decodedSwapDetail.securityAmount).to.be.bignumber.equal(actual.securityAmount);
+      expect(decodedSwapDetail.status).to.be.bignumber.equal(actual.status);
     });
 
     it('cannot execute when msg.sender is not equal to transferFromAddress', async () => {
@@ -77,9 +100,6 @@ contract('Settlement', accounts => {
     it('emits Unlocked event', async () => {
       const tx = await this.settlement.unlock(
         swapId,
-        proposerAddress,
-        acceptorAddress,
-        weiAmount,
         { from: deployerAddress },
       );
       const eventName = tx.logs[0].event;
@@ -109,25 +129,49 @@ contract('Settlement', accounts => {
       await truffleAssert.reverts(
         this.settlement.unlock(
           swapId,
-          proposerAddress,
-          acceptorAddress,
-          weiAmount,
           { from: acceptorAddress },
         ),
-        'msg.sender is not contract owner',
+        'caller is not the owner.',
       );
     });
 
-    it('cannot unlock non-existent swapId', async () => {
+    it('cannot unlock nonexistent swapId', async () => {
       await truffleAssert.reverts(
         this.settlement.unlock(
           'BAD_SWAPID',
-          proposerAddress,
-          acceptorAddress,
-          weiAmount,
           { from: deployerAddress },
         ),
-        'The swapId does not exist',
+        'swapDetail does not exist',
+      );
+    });
+
+    it('cannot unlock if the swapId status is Unlocked', async () => {
+      await this.settlement.unlock(
+        swapId,
+        { from: deployerAddress },
+      );
+
+      await truffleAssert.reverts(
+        this.settlement.unlock(
+          swapId,
+          { from: deployerAddress },
+        ),
+        'swapDetail.status is not Locked',
+      );
+    });
+
+    it('cannot unlock if the swapId status is Aborted', async () => {
+      await this.settlement.abort(
+        swapId,
+        { from: deployerAddress },
+      );
+
+      await truffleAssert.reverts(
+        this.settlement.unlock(
+          swapId,
+          { from: deployerAddress },
+        ),
+        'swapDetail.status is not Locked',
       );
     });
   });
@@ -147,40 +191,78 @@ contract('Settlement', accounts => {
     it('emits Aborted event', async () => {
       const tx = await this.settlement.abort(
         swapId,
-        proposerAddress,
-        acceptorAddress,
-        weiAmount,
         { from: deployerAddress },
       );
       const eventName = tx.logs[0].event;
       expect(eventName).to.equal('Aborted');
       const args = tx.logs[0].args;
       expect(args.swapId).to.equal(swapId);
+
+      const actual = await this.settlement.swapIdToDetailMap.call(swapId);
+      const decodedSwapDetail = web3.eth.abi.decodeParameter({
+        SwapDetail: {
+          transferFromAddress: 'address',
+          transferToAddress: 'address',
+          weiAmount: 'uint256',
+          securityAmount: 'uint256',
+          status: 'uint8',
+        },
+      }, args.encodedSwapDetail);
+
+      expect(decodedSwapDetail.transferFromAddress).to.equal(actual.transferFromAddress);
+      expect(decodedSwapDetail.transferToAddress).to.equal(actual.transferToAddress);
+      expect(decodedSwapDetail.weiAmount).to.be.bignumber.equal(actual.weiAmount);
+      expect(decodedSwapDetail.securityAmount).to.be.bignumber.equal(actual.securityAmount);
+      expect(decodedSwapDetail.status).to.be.bignumber.equal(actual.status);
     });
 
     it('cannot execute from not owner', async () => {
       await truffleAssert.reverts(
         this.settlement.abort(
           swapId,
-          proposerAddress,
-          acceptorAddress,
-          weiAmount,
           { from: proposerAddress },
         ),
-        'msg.sender is not contract owner',
+        'caller is not the owner.',
       );
     });
 
-    it('cannot unlock non-existent swapId', async () => {
+    it('cannot unlock nonexistent swapId', async () => {
       await truffleAssert.reverts(
         this.settlement.unlock(
           'BAD_SWAPID',
-          proposerAddress,
-          acceptorAddress,
-          weiAmount,
           { from: deployerAddress },
         ),
-        'The swapId does not exist',
+        'swapDetail does not exist',
+      );
+    });
+
+    it('cannot abort if the swapId status is Unlocked', async () => {
+      await this.settlement.unlock(
+        swapId,
+        { from: deployerAddress },
+      );
+
+      await truffleAssert.reverts(
+        this.settlement.abort(
+          swapId,
+          { from: deployerAddress },
+        ),
+        'swapDetail.status is not Locked',
+      );
+    });
+
+    it('cannot abort if the swapId status is Aborted', async () => {
+      await this.settlement.abort(
+        swapId,
+        { from: deployerAddress },
+      );
+
+      await truffleAssert.reverts(
+        this.settlement.abort(
+          swapId,
+          { from: deployerAddress },
+        ),
+        'swapDetail.status is not Locked',
       );
     });
   });
