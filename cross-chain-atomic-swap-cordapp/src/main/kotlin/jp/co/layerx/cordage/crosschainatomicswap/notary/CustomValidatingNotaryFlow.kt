@@ -1,7 +1,7 @@
 package jp.co.layerx.cordage.crosschainatomicswap.notary
 
 import co.paralleluniverse.fibers.Suspendable
-import jp.co.layerx.cordage.crosschainatomicswap.contract.SecurityContract
+import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
 import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.Settlement
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
 import net.corda.core.flows.FlowSession
@@ -64,10 +64,10 @@ class CustomValidatingNotaryFlow(otherSide: FlowSession, service: CustomValidati
     }
 
     private fun customVerify(stx: SignedTransaction) {
-        println("CUSTOM NOTARY FLOW: Commands are " + stx.tx.commands.toString())
+        val proposalCommands = stx.tx.commands.filter { it.value is ProposalContract.ProposalCommands }
 
-        if(!stx.tx.commands.map { it.value is SecurityContract.SecurityCommands.TransferForSettle }.contains(true)) {
-            // return unless tx commands contain type of SecurityCommands.TransferForSettle
+        // return if tx commands don't contain type of ProposalCommands
+        if (proposalCommands.isEmpty()) {
             return
         }
 
@@ -82,8 +82,14 @@ class CustomValidatingNotaryFlow(otherSide: FlowSession, service: CustomValidati
             StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(50000000))
         )
 
-        progressTracker.currentStep = SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
+        if (proposalCommands.single().value is ProposalContract.ProposalCommands.Consume) {
+            progressTracker.currentStep = SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
+            settlement.unlock(swapId).send()
+        }
 
-        settlement.unlock(swapId).send()
+        if (proposalCommands.single().value is ProposalContract.ProposalCommands.Abort) {
+            progressTracker.currentStep = SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
+            settlement.abort(swapId).send()
+        }
     }
 }
