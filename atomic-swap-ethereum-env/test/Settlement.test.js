@@ -80,16 +80,29 @@ contract('Settlement', accounts => {
         proposerAddress,
         acceptorAddress,
         weiAmount,
-        { from: deployerAddress }
+        { from: deployerAddress },
       );
       const eventName = tx.logs[0].event;
       expect(eventName).to.equal('Unlocked');
       const args = tx.logs[0].args;
       expect(args.swapId).to.equal(swapId);
 
-      const swapDetail = await this.settlement.swapIdToDetailMap.call(swapId)
+      const actual = await this.settlement.swapIdToDetailMap.call(swapId);
+      const decodedSwapDetail = web3.eth.abi.decodeParameter({
+        SwapDetail: {
+          transferFromAddress: 'address',
+          transferToAddress: 'address',
+          weiAmount: 'uint256',
+          securityAmount: 'uint256',
+          status: 'uint8',
+        },
+      }, args.encodedSwapDetail);
 
-      console.log(swapDetail)
+      expect(decodedSwapDetail.transferFromAddress).to.equal(actual.transferFromAddress);
+      expect(decodedSwapDetail.transferToAddress).to.equal(actual.transferToAddress);
+      expect(decodedSwapDetail.weiAmount).to.be.bignumber.equal(actual.weiAmount);
+      expect(decodedSwapDetail.securityAmount).to.be.bignumber.equal(actual.securityAmount);
+      expect(decodedSwapDetail.status).to.be.bignumber.equal(actual.status);
     });
 
     it('cannot execute from not owner', async () => {
