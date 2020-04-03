@@ -9,13 +9,14 @@ contract('Settlement', accounts => {
   const deployerAddress = accounts[0];
   const proposerAddress = accounts[1];
   const acceptorAddress = accounts[2];
+  const notaryAddress = accounts[3];
   let swapIdNumber = 1;
   let swapId = '1';
   const weiAmount = new BN('100000000', 10);
   const securityAmount = new BN('1000', 10);
 
   beforeEach(async () => {
-    this.settlement = await settlement.new({ from: deployerAddress });
+    this.settlement = await settlement.new(notaryAddress, { from: deployerAddress });
   });
 
   afterEach(async () => {
@@ -100,7 +101,7 @@ contract('Settlement', accounts => {
     it('emits Unlocked event', async () => {
       const tx = await this.settlement.unlock(
         swapId,
-        { from: deployerAddress },
+        { from: notaryAddress },
       );
       const eventName = tx.logs[0].event;
       expect(eventName).to.equal('Unlocked');
@@ -125,13 +126,13 @@ contract('Settlement', accounts => {
       expect(decodedSwapDetail.status).to.be.bignumber.equal(actual.status);
     });
 
-    it('cannot execute from not owner', async () => {
+    it('cannot execute unless it is from corda notary', async () => {
       await truffleAssert.reverts(
         this.settlement.unlock(
           swapId,
           { from: acceptorAddress },
         ),
-        'caller is not the owner.',
+        'caller is not the corda notary',
       );
     });
 
@@ -139,7 +140,7 @@ contract('Settlement', accounts => {
       await truffleAssert.reverts(
         this.settlement.unlock(
           'BAD_SWAPID',
-          { from: deployerAddress },
+          { from: notaryAddress },
         ),
         'swapDetail does not exist',
       );
@@ -148,13 +149,13 @@ contract('Settlement', accounts => {
     it('cannot unlock if the swapId status is Unlocked', async () => {
       await this.settlement.unlock(
         swapId,
-        { from: deployerAddress },
+        { from: notaryAddress },
       );
 
       await truffleAssert.reverts(
         this.settlement.unlock(
           swapId,
-          { from: deployerAddress },
+          { from: notaryAddress },
         ),
         'swapDetail.status is not Locked',
       );
@@ -163,13 +164,13 @@ contract('Settlement', accounts => {
     it('cannot unlock if the swapId status is Aborted', async () => {
       await this.settlement.abort(
         swapId,
-        { from: deployerAddress },
+        { from: notaryAddress },
       );
 
       await truffleAssert.reverts(
         this.settlement.unlock(
           swapId,
-          { from: deployerAddress },
+          { from: notaryAddress },
         ),
         'swapDetail.status is not Locked',
       );
@@ -191,7 +192,7 @@ contract('Settlement', accounts => {
     it('emits Aborted event', async () => {
       const tx = await this.settlement.abort(
         swapId,
-        { from: deployerAddress },
+        { from: notaryAddress },
       );
       const eventName = tx.logs[0].event;
       expect(eventName).to.equal('Aborted');
@@ -216,13 +217,13 @@ contract('Settlement', accounts => {
       expect(decodedSwapDetail.status).to.be.bignumber.equal(actual.status);
     });
 
-    it('cannot execute from not owner', async () => {
+    it('cannot execute unless it is from corda notary', async () => {
       await truffleAssert.reverts(
         this.settlement.abort(
           swapId,
           { from: proposerAddress },
         ),
-        'caller is not the owner.',
+        'caller is not the corda notary',
       );
     });
 
@@ -230,7 +231,7 @@ contract('Settlement', accounts => {
       await truffleAssert.reverts(
         this.settlement.unlock(
           'BAD_SWAPID',
-          { from: deployerAddress },
+          { from: notaryAddress },
         ),
         'swapDetail does not exist',
       );
@@ -239,13 +240,13 @@ contract('Settlement', accounts => {
     it('cannot abort if the swapId status is Unlocked', async () => {
       await this.settlement.unlock(
         swapId,
-        { from: deployerAddress },
+        { from: notaryAddress },
       );
 
       await truffleAssert.reverts(
         this.settlement.abort(
           swapId,
-          { from: deployerAddress },
+          { from: notaryAddress },
         ),
         'swapDetail.status is not Locked',
       );
@@ -254,13 +255,13 @@ contract('Settlement', accounts => {
     it('cannot abort if the swapId status is Aborted', async () => {
       await this.settlement.abort(
         swapId,
-        { from: deployerAddress },
+        { from: notaryAddress },
       );
 
       await truffleAssert.reverts(
         this.settlement.abort(
           swapId,
-          { from: deployerAddress },
+          { from: notaryAddress },
         ),
         'swapDetail.status is not Locked',
       );

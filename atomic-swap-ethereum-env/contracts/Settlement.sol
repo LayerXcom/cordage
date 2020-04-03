@@ -19,6 +19,10 @@ contract Settlement is Ownable {
     SwapStatus status;
   }
 
+  address cordaNotary;
+  mapping(string => SwapDetail) public swapIdToDetailMap;
+  uint256 settlementId;
+
   event Locked(
     uint256 settlementId,
     string swapId,
@@ -37,12 +41,14 @@ contract Settlement is Ownable {
     bytes encodedSwapDetail
   );
 
-  mapping (string => SwapDetail) public swapIdToDetailMap;
-
-  uint256 settlementId;
-
-  constructor() public {
+  constructor(address _cordaNotary) public {
+    cordaNotary = _cordaNotary;
     settlementId = 1;
+  }
+
+  modifier onlyCordaNotary {
+    require(msg.sender == cordaNotary, "caller is not the corda notary");
+    _;
   }
 
   function lock(
@@ -73,10 +79,10 @@ contract Settlement is Ownable {
 
   function unlock(
     string memory _swapId
-  ) public onlyOwner {
+  ) public onlyCordaNotary {
     SwapDetail storage swapDetail = swapIdToDetailMap[_swapId];
-    require(swapDetail.status != SwapStatus.Nonexistent, "swapDetail does not exist");
 
+    require(swapDetail.status != SwapStatus.Nonexistent, "swapDetail does not exist");
     require(swapDetail.status == SwapStatus.Locked, "swapDetail.status is not Locked");
 
     // Try sending wei to targetAddress.
@@ -95,10 +101,10 @@ contract Settlement is Ownable {
 
   function abort(
     string memory _swapId
-  ) public onlyOwner {
+  ) public onlyCordaNotary {
     SwapDetail storage swapDetail = swapIdToDetailMap[_swapId];
-    require(swapDetail.status != SwapStatus.Nonexistent, "swapDetail does not exist");
 
+    require(swapDetail.status != SwapStatus.Nonexistent, "swapDetail does not exist");
     require(swapDetail.status == SwapStatus.Locked, "swapDetail.status is not Locked");
 
     // Try sending wei to targetAddress.
