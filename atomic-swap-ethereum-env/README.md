@@ -52,3 +52,15 @@ Private Keys
 (8) 0x829e924fdf021ba3dbbc4225edfece9aca04b929d6e75613329ca6f1d31c0bb4
 (9) 0xb0057716d5917badaf911b193b12b910811c1497b5bada8d7711f758981c3773
 ```
+
+### Truffle console
+Log in to truffle console
+```
+yarn truffle console --network local
+```
+
+Get ether balances
+```
+web3.eth.getBalance('0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0') // Participant A
+web3.eth.getBalance('0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b') // Participant B
+```
