@@ -47,9 +47,8 @@ class SecurityIssueFlowTest {
         network.runNetwork()
         val response = future.getOrThrow()
 
-        val actualSignedTx = response.second
+        val actualSignedTx = response
         val expected = SecurityState(100, owner, issuer, "R3")
-        Assertions.assertThat(response.first == expected.linearId)
         Assertions.assertThat(actualSignedTx.inputs.isEmpty())
         Assertions.assertThat(actualSignedTx.tx.outputStates.single() == expected)
 
