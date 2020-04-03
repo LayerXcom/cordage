@@ -25,8 +25,7 @@ contract('Settlement', accounts => {
         acceptorAddress,
         weiAmount,
         securityAmount,
-        { value: weiAmount },
-        { from: proposerAddress },
+        { from: proposerAddress, value: weiAmount },
       );
       const eventName = tx.logs[0].event;
       expect(eventName).to.equal('Locked');
@@ -42,8 +41,7 @@ contract('Settlement', accounts => {
           acceptorAddress,
           weiAmount,
           securityAmount,
-          {value: weiAmount},
-          {from: acceptorAddress},
+          { from: acceptorAddress, value: weiAmount },
         ),
         'msg.sender is not _transferFromAddress',
       );
@@ -57,8 +55,7 @@ contract('Settlement', accounts => {
           acceptorAddress,
           weiAmount,
           securityAmount,
-          { value: new BN('50000', 10) },
-          { from: proposerAddress },
+          { from: proposerAddress, value: new BN('50000', 10) },
         ),
         'msg.value is not equivalent to _weiAmount',
       );
@@ -66,6 +63,17 @@ contract('Settlement', accounts => {
   });
 
   describe('unlock', () => {
+    beforeEach(async () => {
+      await this.settlement.lock(
+        swapId,
+        proposerAddress,
+        acceptorAddress,
+        weiAmount,
+        securityAmount,
+        { from: proposerAddress, value: weiAmount },
+      );
+    });
+
     it('emits Unlocked event', async () => {
       const tx = await this.settlement.unlock(
         swapId,
@@ -78,6 +86,10 @@ contract('Settlement', accounts => {
       expect(eventName).to.equal('Unlocked');
       const args = tx.logs[0].args;
       expect(args.swapId).to.equal(swapId);
+
+      const swapDetail = await this.settlement.swapIdToDetailMap.call(swapId)
+
+      console.log(swapDetail)
     });
 
     it('cannot execute from not owner', async () => {
@@ -108,6 +120,17 @@ contract('Settlement', accounts => {
   });
 
   describe('abort', () => {
+    beforeEach(async () => {
+      await this.settlement.lock(
+        swapId,
+        proposerAddress,
+        acceptorAddress,
+        weiAmount,
+        securityAmount,
+        { from: proposerAddress, value: weiAmount },
+      );
+    });
+
     it('emits Aborted event', async () => {
       const tx = await this.settlement.abort(
         swapId,

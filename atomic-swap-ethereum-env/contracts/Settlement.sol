@@ -36,7 +36,7 @@ contract Settlement is Ownable {
     bytes encodedSwapDetail
   );
 
-  mapping (string => SwapDetail) _swapIdToDetailMaps;
+  mapping (string => SwapDetail) public swapIdToDetailMap;
 
   uint256 settlementId;
 
@@ -54,7 +54,7 @@ contract Settlement is Ownable {
     require(msg.sender == _transferFromAddress, "msg.sender is not _transferFromAddress");
     require(msg.value == _weiAmount, "msg.value is not equivalent to _weiAmount");
 
-    SwapDetail storage swapDetail = _swapIdToDetailMaps[_swapId];
+    SwapDetail storage swapDetail = swapIdToDetailMap[_swapId];
     swapDetail.transferFromAddress = _transferFromAddress;
     swapDetail.transferToAddress = _transferToAddress;
     swapDetail.weiAmount = _weiAmount;
@@ -76,7 +76,7 @@ contract Settlement is Ownable {
     address payable _transferToAddress,
     uint256 _weiAmount
   ) public onlyOwner {
-    SwapDetail storage swapDetail = _swapIdToDetailMaps[_swapId];
+    SwapDetail storage swapDetail = swapIdToDetailMap[_swapId];
 
     require(swapDetail.status == SwapStatus.Locked, "swapDetail.status is not Locked");
     require(swapDetail.transferFromAddress == _transferFromAddress, "swapDetail.transferFromAddress is not equal to _transferFromAddress");
@@ -103,7 +103,7 @@ contract Settlement is Ownable {
     address _transferToAddress,
     uint256 _weiAmount
   ) public onlyOwner {
-    SwapDetail storage swapDetail = _swapIdToDetailMaps[_swapId];
+    SwapDetail storage swapDetail = swapIdToDetailMap[_swapId];
 
     require(swapDetail.status == SwapStatus.Locked, "swapDetail.status is not Locked");
     require(swapDetail.transferFromAddress == _transferFromAddress, "swapDetail.transferFromAddress is not equal to _transferFromAddress");
