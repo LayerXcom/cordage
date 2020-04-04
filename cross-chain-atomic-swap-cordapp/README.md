@@ -9,35 +9,40 @@ Be aware that support of HTTP requests in flows is currently limited:
 Also, be aware that there is [okhttp's dependency conflict between Corda Node v4 and web3j (later than 4.5.12)](https://github.com/web3j/web3j/issues/1167).
 
 
-## Pre-requisites:
+## Pre-requisites
   
 See https://docs.corda.net/getting-set-up.html.
 
-### Run ganache-cli
+### Run database
+```
+docker run --name postgres96 -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:9.6
+
+// clean up the container after stop
+docker run --rm --name postgres96-rm -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:9.6
+```
+
+### Deploy Settlement contract on Ethereum
 [ganache-cli](https://github.com/trufflesuite/ganache-cli) is a fast Ethereum RPC client for testing and development.
 
-You can run ganache-cli and deploy sample Contract by following [Atomic Swap Ethereum Environment](../atomic-swap-ethereum-env/README.md).
+You can run ganache-cli and deploy Settlement contract by following [Atomic Swap Ethereum Environment](../atomic-swap-ethereum-env/README.md).
 
 ### Create SmartContract Wrapper Class by web3j command
- 
+You need to install [Web3j CLI](https://docs.web3j.io/command_line_tools/) first.
+
+Then, you can generate the wrapper class
 ```
 web3j truffle generate ../atomic-swap-ethereum-env/build/contracts/Settlement.json -o ./src/main/java -p jp.co.layerx.cordage.crosschainatomicswap.ethWrapper
 ```
 
 ## Usage
-
-### Running the database:
-```
-docker run --rm --name postgres96-rm -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:9.6
-```
-
-### Running the nodes:
+### Running the nodes
 
 See https://docs.corda.net/tutorial-cordapp.html#running-the-example-cordapp.
 
 Use the `deployNodes` task and `./build/nodes/runnodes` script.
 
-## Interacting with the nodes:
+
+## Interacting with the nodes
 
 ### Issue Security State
 Run SecurityIssueFlow from Security Issuer ParticipantC:
