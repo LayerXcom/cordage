@@ -7,8 +7,7 @@ contract Settlement is Ownable {
   enum SwapStatus {
     Nonexistent,
     Locked,
-    Unlocked,
-    Aborted
+    Unlocked
   }
 
   struct SwapDetail {
@@ -30,12 +29,6 @@ contract Settlement is Ownable {
   );
 
   event Unlocked(
-    uint256 settlementId,
-    string swapId,
-    bytes encodedSwapDetail
-  );
-
-  event Aborted(
     uint256 settlementId,
     string swapId,
     bytes encodedSwapDetail
@@ -93,28 +86,6 @@ contract Settlement is Ownable {
     bytes memory encodedSwapDetail = abi.encode(swapDetail);
 
     emit Unlocked(
-      settlementId++,
-      _swapId,
-      encodedSwapDetail
-    );
-  }
-
-  function abort(
-    string memory _swapId
-  ) public onlyCordaNotary {
-    SwapDetail storage swapDetail = swapIdToDetailMap[_swapId];
-
-    require(swapDetail.status != SwapStatus.Nonexistent, "swapDetail does not exist");
-    require(swapDetail.status == SwapStatus.Locked, "swapDetail.status is not Locked");
-
-    // Try sending wei to targetAddress.
-    require(swapDetail.transferFromAddress.send(swapDetail.weiAmount));
-
-    swapDetail.status = SwapStatus.Aborted;
-
-    bytes memory encodedSwapDetail = abi.encode(swapDetail);
-
-    emit Aborted(
       settlementId++,
       _swapId,
       encodedSwapDetail

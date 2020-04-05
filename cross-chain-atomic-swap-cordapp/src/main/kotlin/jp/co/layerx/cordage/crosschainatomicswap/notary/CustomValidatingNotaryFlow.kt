@@ -86,10 +86,5 @@ class CustomValidatingNotaryFlow(otherSide: FlowSession, service: CustomValidati
             progressTracker.currentStep = SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
             settlement.unlock(swapId).send()
         }
-
-        if (proposalCommands.single().value is ProposalContract.ProposalCommands.Abort) {
-            progressTracker.currentStep = SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
-            settlement.abort(swapId).send()
-        }
     }
 }

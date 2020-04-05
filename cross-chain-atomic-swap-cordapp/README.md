@@ -110,12 +110,3 @@ xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    Event Watched. (fromBl
 ```
 xxxxxxxx-xxxx-xxxx-xx Event Watch xxxxxxxxxxxxxxxxxxxx    SettleAtomicSwapFlow has executed with xxxx securities.
 ```
-
-### Abort Proposal State
-Run AbortAtomicSwapFlow from Proposer(ParticipantA) with ProposalState's linearId:
-
-```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.AbortAtomicSwapFlow proposalLinearId: "1f77abf7-e209-42e6-8327-a2279c85aab7"
-```
-
-The Notary will unlock Ether to ParticipantA's Ethereum address.

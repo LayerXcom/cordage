@@ -5,7 +5,7 @@ import org.web3j.abi.datatypes.generated.Uint8
 
 @CordaSerializable
 enum class ProposalStatus {
-    NONEXISTENT, PROPOSED, CONSUMED, ABORTED;
+    NONEXISTENT, PROPOSED, CONSUMED;
 
     companion object {
         fun fromInt(index: Uint8): ProposalStatus {
