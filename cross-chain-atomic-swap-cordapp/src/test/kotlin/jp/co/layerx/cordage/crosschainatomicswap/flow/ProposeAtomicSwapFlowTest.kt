@@ -59,7 +59,7 @@ class ProposeAtomicSwapFlowTest {
 
         val expectedSecurityLinearId = (f1.getOrThrow().tx.outputStates.single() as SecurityState).linearId.id.toString()
         val expectedSecurityAmount = 100
-        val expectedWeiAmount = 100000
+        val expectedWeiAmount = 1_000_000_000_000_000_000
         val expectedSwapId = "test_swap_id_12345"
         val expectedFromEthAddress = "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0"
         val expectedToEthAddress = "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"

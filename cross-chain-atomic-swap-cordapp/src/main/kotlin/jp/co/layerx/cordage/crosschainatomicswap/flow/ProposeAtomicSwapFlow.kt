@@ -19,7 +19,7 @@ import net.corda.core.utilities.ProgressTracker.Step
 class ProposeAtomicSwapFlow(
     private val securityLinearId: String,
     private val securityAmount: Int,
-    private val weiAmount: Int,
+    private val weiAmount: Long,
     private val swapId: String,
     private val acceptor: Party,
     private val FromEthereumAddress: String,
