@@ -70,6 +70,7 @@ dependencies {
     testCompile "junit:junit:$junit_version"
     testCompile "org.assertj:assertj-core:3.15.0"
     testCompile group: 'io.netty', name: 'netty-common', version: '4.1.45.Final'
+    testImplementation "io.mockk:mockk:1.9.3.kotlin12"
 
     // Corda integration dependencies
     cordaCompile "$corda_release_distribution:corda-core:$corda_release_version"

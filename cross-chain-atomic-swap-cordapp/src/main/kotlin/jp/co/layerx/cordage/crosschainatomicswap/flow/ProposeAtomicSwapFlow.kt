@@ -14,16 +14,18 @@ import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.ProgressTracker.Step
 
-
 @InitiatingFlow
 @StartableByRPC
-class ProposeAtomicSwapFlow(private val securityLinearId: String,
-                            private val securityAmount: Int,
-                            private val weiAmount: Int,
-                            private val swapId: String,
-                            private val acceptor: Party,
-                            private val FromEthereumAddress: String,
-                            private val ToEthereumAddress: String): FlowLogic<String>() {
+class ProposeAtomicSwapFlow(
+    private val securityLinearId: String,
+    private val securityAmount: Int,
+    private val weiAmount: Int,
+    private val swapId: String,
+    private val acceptor: Party,
+    private val FromEthereumAddress: String,
+    private val ToEthereumAddress: String,
+    private val mockLockEtherFlow: LockEtherFlow? = null
+) : FlowLogic<Pair<SignedTransaction, String>>() {
     companion object {
         object CREATE_OUTPUTSTATE : Step("Creating Output ProposalState.")
         object GENERATING_TRANSACTION : Step("Generating transaction based on new ProposalState.")
@@ -32,9 +34,11 @@ class ProposeAtomicSwapFlow(private val securityLinearId: String,
         object GATHERING_SIGS : Step("Gathering the counterparty's signature.") {
             override fun childProgressTracker() = CollectSignaturesFlow.tracker()
         }
+
         object FINALISING_TRANSACTION : Step("Obtaining notary signature and recording transaction.") {
             override fun childProgressTracker() = FinalityFlow.tracker()
         }
+
         object EXECUTING_LOCKETHERFLOW : Step("Executing LockEtherFlow with finalized Proposal.") {
             override fun childProgressTracker() = LockEtherFlow.tracker()
         }
@@ -53,7 +57,7 @@ class ProposeAtomicSwapFlow(private val securityLinearId: String,
     override val progressTracker = tracker()
 
     @Suspendable
-    override fun call(): String {
+    override fun call(): Pair<SignedTransaction, String> {
         progressTracker.currentStep = CREATE_OUTPUTSTATE
         val proposer = ourIdentity
         val linearId = UniqueIdentifier.fromString(securityLinearId)
@@ -92,12 +96,14 @@ class ProposeAtomicSwapFlow(private val securityLinearId: String,
 
         progressTracker.currentStep = EXECUTING_LOCKETHERFLOW
         val finalizedProposalState = finalizedTx.coreTransaction.outputsOfType<ProposalState>().first()
-        return subFlow(LockEtherFlow(finalizedProposalState))
+
+        val txHash = subFlow(mockLockEtherFlow ?: LockEtherFlow(finalizedProposalState))
+        return Pair(finalizedTx, txHash)
     }
 }
 
 @InitiatedBy(ProposeAtomicSwapFlow::class)
-class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession): FlowLogic<SignedTransaction>() {
+class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession) : FlowLogic<SignedTransaction>() {
 
     @Suspendable
     override fun call(): SignedTransaction {
