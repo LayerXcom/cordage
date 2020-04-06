@@ -1,6 +1,7 @@
 package jp.co.layerx.cordage.crosschainatomicswap.state
 
 import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
+import jp.co.layerx.cordage.crosschainatomicswap.ethAddress
 import jp.co.layerx.cordage.crosschainatomicswap.types.ProposalStatus
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.LinearState
@@ -25,10 +26,8 @@ data class ProposalState(val securityLinearId: UniqueIdentifier,
         weiAmount: BigInteger,
         swapId: String,
         proposer: Party,
-        acceptor: Party,
-        fromEthereumAddress: String,
-        toEthereumAddress: String
-    ) : this(security.linearId, security.amount.toBigInteger(), weiAmount, swapId, proposer, acceptor, fromEthereumAddress, toEthereumAddress)
+        acceptor: Party
+    ) : this(security.linearId, security.amount.toBigInteger(), weiAmount, swapId, proposer, acceptor, proposer.ethAddress(), acceptor.ethAddress())
 
     override val participants: List<Party> get() = listOf(proposer, acceptor)
 

@@ -13,7 +13,10 @@ import java.math.BigInteger
 
 @InitiatingFlow
 @StartableByRPC
-class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String>() {
+class LockEtherFlow(
+    val finalizedProposalState: ProposalState,
+    val settlement: Settlement = Settlement.load(targetContractAddress, web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(50000000)))
+) : FlowLogic<String>() {
     companion object {
         // TODO Some ethereum parameters should be imported by .env
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
@@ -23,7 +26,7 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
         val targetContractAddress = Settlement.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)
         val credentials: Credentials = Credentials.create(ETHEREUM_PRIVATE_KEY)
 
-        object SEND_TRANSACTION_TO_ETHEREUM_CONTRACT: ProgressTracker.Step("Sending ether to Settlement Contract for locking.")
+        object SEND_TRANSACTION_TO_ETHEREUM_CONTRACT : ProgressTracker.Step("Sending ether to Settlement Contract for locking.")
 
         fun tracker() = ProgressTracker(
             SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
@@ -42,15 +45,13 @@ class LockEtherFlow(val finalizedProposalState: ProposalState): FlowLogic<String
         val securityAmount = finalizedProposalState.securityAmount
 
         // load Smart Contract Wrapper
-        val settlement: Settlement = Settlement.load(targetContractAddress, web3, credentials,
-            StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(50000000)))
         val response = settlement.lock(
-             swapId,
-             transferFromAddress,
-             transferToAddress,
-             weiAmount,
-             securityAmount,
-             weiAmount
+            swapId,
+            transferFromAddress,
+            transferToAddress,
+            weiAmount,
+            securityAmount,
+            weiAmount
         ).send()
 
         return response.transactionHash
