@@ -14,7 +14,7 @@ class SecurityContractTransferTest {
 
     @Test
     fun `normal scenario`() {
-        val input = SecurityState(100, ALICE.party, CHARLIE.party, "R3")
+        val input = SecurityState(100, ALICE.party, CHARLIE.party, "LayerX")
         val output = input.withNewOwner(BOB.party)
 
         ledgerServices.ledger {
