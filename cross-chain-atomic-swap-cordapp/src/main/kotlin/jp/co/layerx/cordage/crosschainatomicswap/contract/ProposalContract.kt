@@ -29,9 +29,9 @@ open class ProposalContract: Contract {
                 "A newly issued Proposal must have a positive securityAmount." using (proposal.securityAmount > BigInteger.ZERO)
                 "A newly issued Proposal must have a positive weiAmount." using (proposal.weiAmount > BigInteger.ZERO)
                 "A newly issued Proposal must have a not-empty swapId." using (proposal.swapId.isNotEmpty())
-                "fromEthereumAddress must equal to proposer's ethAddress" using (proposal.fromEthereumAddress == proposal.proposer.ethAddress())
-                "toEthereumAddress must equal to acceptor's ethAddress" using (proposal.toEthereumAddress == proposal.acceptor.ethAddress())
-                "Proposal status must be PROPOSED" using (proposal.status == ProposalStatus.PROPOSED)
+                "fromEthereumAddress must equal to proposer's ethAddress." using (proposal.fromEthereumAddress == proposal.proposer.ethAddress())
+                "toEthereumAddress must equal to acceptor's ethAddress." using (proposal.toEthereumAddress == proposal.acceptor.ethAddress())
+                "Proposal status must be PROPOSED." using (proposal.status == ProposalStatus.PROPOSED)
                 // Propose Tx must have proposer's and acceptor's signature.
                 "Both proposer and acceptor together only may sign Proposal issue transaction." using
                     (proposalCommand.signers.toSet() == proposal.participants.map { it.owningKey }.toSet())
@@ -47,14 +47,14 @@ open class ProposalContract: Contract {
 
                 val inputSecurity = tx.inputsOfType<SecurityState>().first()
                 val outputSecurity = tx.outputsOfType<SecurityState>().first()
-                "InputProposalState's acceptor must equal to InputSecurityState's owner" using (inputProposal.acceptor == inputSecurity.owner)
-                "InputProposalState's proposer must equal to OutputSecurityState's owner" using (inputProposal.proposer == outputSecurity.owner)
-                "InputProposalState's securityAmount must equal to OutputSecurityState's amount" using (inputProposal.securityAmount == outputSecurity.amount.toBigInteger())
-                "InputProposalState's fromEthereumAddress must equal to OutputSecurityState's owner ethAddress" using (inputProposal.fromEthereumAddress == outputSecurity.owner.ethAddress())
-                "InputProposalState's toEthereumAddress must equal to InputSecurityState's owner ethAddress" using (inputProposal.toEthereumAddress == inputSecurity.owner.ethAddress())
+                "InputProposalState's acceptor must equal to InputSecurityState's owner." using (inputProposal.acceptor == inputSecurity.owner)
+                "InputProposalState's proposer must equal to OutputSecurityState's owner." using (inputProposal.proposer == outputSecurity.owner)
+                "InputProposalState's securityAmount must equal to OutputSecurityState's amount." using (inputProposal.securityAmount == outputSecurity.amount.toBigInteger())
+                "InputProposalState's fromEthereumAddress must equal to OutputSecurityState's owner ethAddress." using (inputProposal.fromEthereumAddress == outputSecurity.owner.ethAddress())
+                "InputProposalState's toEthereumAddress must equal to InputSecurityState's owner ethAddress." using (inputProposal.toEthereumAddress == inputSecurity.owner.ethAddress())
 
                 // Consume Tx must have proposer's and acceptor's signature.
-                "The proposer, acceptor must sign an Proposal Consume transaction" using
+                "The proposer, acceptor must sign an Proposal Consume transaction." using
                     (proposalCommand.signers.toSet() == (inputProposal.participants).map { it.owningKey }.toSet())
             }
         }

@@ -37,7 +37,7 @@ open class SecurityContract: Contract {
                 "Only the owner property may change." using (input == output.withNewOwner(input.owner))
                 "The owner property must change in a Transfer." using (input.owner != output.owner)
                 // SecurityTransfer Tx must have previous owner's, new owner's and issuer's signature signature
-                "The issuer, old owner and new owner only must sign an Security transfer transaction" using
+                "The issuer, old owner and new owner only must sign an Security transfer transaction." using
                     (securityCommand.signers.toSet() == (input.participants.map { it.owningKey }.toSet() `union`
                         output.participants.map { it.owningKey }.toSet()))
             }
@@ -51,14 +51,14 @@ open class SecurityContract: Contract {
                 "The owner property must change in a TransferForSettle." using (inputSecurity.owner != outputSecurity.owner)
 
                 val inputProposal = tx.inputsOfType<ProposalState>().first()
-                "InputProposalState's acceptor must equal to InputSecurityState's owner" using (inputProposal.acceptor == inputSecurity.owner)
-                "InputProposalState's proposer must equal to OutputSecurityState's owner" using (inputProposal.proposer == outputSecurity.owner)
-                "InputProposalState's securityAmount must equal to OutputSecurityState's amount" using (inputProposal.securityAmount == outputSecurity.amount.toBigInteger())
-                "InputProposalState's fromEthereumAddress must equal to OutputSecurityState's owner ethAddress" using (inputProposal.fromEthereumAddress == outputSecurity.owner.ethAddress())
-                "InputProposalState's toEthereumAddress must equal to InputSecurityState's owner ethAddress" using (inputProposal.toEthereumAddress == inputSecurity.owner.ethAddress())
+                "InputProposalState's acceptor must equal to InputSecurityState's owner." using (inputProposal.acceptor == inputSecurity.owner)
+                "InputProposalState's proposer must equal to OutputSecurityState's owner." using (inputProposal.proposer == outputSecurity.owner)
+                "InputProposalState's securityAmount must equal to OutputSecurityState's amount." using (inputProposal.securityAmount == outputSecurity.amount.toBigInteger())
+                "InputProposalState's fromEthereumAddress must equal to OutputSecurityState's owner ethAddress." using (inputProposal.fromEthereumAddress == outputSecurity.owner.ethAddress())
+                "InputProposalState's toEthereumAddress must equal to InputSecurityState's owner ethAddress." using (inputProposal.toEthereumAddress == inputSecurity.owner.ethAddress())
 
                 // TransferForSettle Tx must have previous owner's, new owner's and issuer's signature.
-                "The issuer, old owner and new owner must sign an Security TransferForSettle transaction" using
+                "The issuer, old owner and new owner must sign an Security TransferForSettle transaction." using
                     (securityCommand.signers.toSet() == (inputSecurity.participants.map { it.owningKey }.toSet() union
                         outputSecurity.participants.map { it.owningKey }.toSet()))
             }
