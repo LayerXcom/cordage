@@ -9,8 +9,7 @@ Be aware that support of HTTP requests in flows is currently limited:
 Also, be aware that there is [okhttp's dependency conflict between Corda Node v4 and web3j (later than 4.5.12)](https://github.com/web3j/web3j/issues/1167).
 
 
-## Pre-requisites
-  
+## Pre-requisites  
 See https://docs.corda.net/getting-set-up.html.
 
 ### Run database
@@ -34,22 +33,32 @@ Then, you can generate the wrapper class
 web3j truffle generate ../atomic-swap-ethereum-env/build/contracts/Settlement.json -o ./src/main/java -p jp.co.layerx.cordage.crosschainatomicswap.ethWrapper
 ```
 
+
 ## Usage
 ### Running the nodes
-
 See https://docs.corda.net/tutorial-cordapp.html#running-the-example-cordapp.
 
 Use the `deployNodes` task and `./build/nodes/runnodes` script.
 
 
-## Interacting with the nodes
+## UAT normal scenario
+### Assumptions and constraints
+Party A wants to buy 100 amount of security that is owned by Party B.
 
-### Issue Security State
+- Party A pays 1 ether to Party B
+- Party B pays 100 amount of security to Party A
+
+This is expected to happen in atomic way.
+
+### Setup
+
+#### Issue Security State
 Run SecurityIssueFlow from Security Issuer ParticipantC:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityIssueFlow amount: 100, owner: "O=ParticipantB,L=New York,C=US", name: "inPublic"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityIssueFlow amount: 100, owner: "O=ParticipantB,L=New York,C=US", name: "LayerX"
 ```
+
 This flow returns linearId of SecurityState
 
 ### vaultQuery for Security State
@@ -58,6 +67,7 @@ Run vaultQuery from ParticipantB:
 ```
 run vaultQuery contractStateType: jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
 ```
+
 You can get linearId of Security State by the result.
 
 ### Transfer Security State
@@ -72,7 +82,7 @@ This flow returns linearId of SecurityState.
 Run ProposeAtomicSwapFlow from ParticipantA with ParticipantB's securityLinearId:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearId: "48574134-491d-4a5b-92ee-bd3bdc4305d7", securityAmount: 100, weiAmount: 999000000, swapId: "3", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearId: "b78cb920-f957-447e-b0bd-937341d99065", securityAmount: 100, weiAmount: 1000000000000000000, swapId: "3", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b", mockLockEtherFlow: null
 ```
 
 The acceptor ParticipantB can validate this Proposal with `checkTransaction()` in `ProposeAtomicSwapFlowResponder`.
