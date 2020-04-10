@@ -1,6 +1,8 @@
 package jp.co.layerx.cordage.crosschainatomicswap
 
 import net.corda.core.identity.Party
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 
 private val HEX_CHARS = "0123456789ABCDEF".toCharArray()
@@ -23,7 +25,15 @@ private val ethAddress = Properties()
 
 fun Party.ethAddress(): String {
     if (ethAddress.isEmpty) {
-        ethAddress.load(this::class.java.getResource("/ethAddress.properties").openStream())
+        val url = javaClass.classLoader.getResource("ethAddress.properties")
+        if (url != null) {
+            ethAddress.load(url.openStream())
+        }
+        val root = System.getProperty("user.dir")
+        val path = Paths.get("$root/cordapps/config/cross-chain-atomic-swap-cordapp-0.1.conf")
+        if (Files.isReadable(path)) {
+            ethAddress.load(Files.newInputStream(path))
+        }
     }
 
     return ethAddress.getProperty(this.name.toString(), "0x0")
