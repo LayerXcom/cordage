@@ -42,8 +42,8 @@ open class SecurityContract: Contract {
                         output.participants.map { it.owningKey }.toSet()))
             }
             is SecurityCommands.TransferForSettle -> requireThat {
-                "An Security TransferForSettle transaction should only consume two input state." using (tx.inputs.size == 2)
-                "An Security TransferForSettle transaction should only create two output state." using (tx.outputs.size == 2)
+                "An Security TransferForSettle transaction should only consume two input states." using (tx.inputs.size == 2)
+                "An Security TransferForSettle transaction should only create two output states." using (tx.outputs.size == 2)
 
                 val inputSecurity = tx.inputsOfType<SecurityState>().first()
                 val outputSecurity = tx.outputsOfType<SecurityState>().first()

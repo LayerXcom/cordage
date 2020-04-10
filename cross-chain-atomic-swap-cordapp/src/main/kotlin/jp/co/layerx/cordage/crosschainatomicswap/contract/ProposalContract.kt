@@ -36,13 +36,13 @@ open class ProposalContract: Contract {
                     (proposalCommand.signers.toSet() == proposal.participants.map { it.owningKey }.toSet())
             }
             is ProposalCommands.Consume -> requireThat {
-                "An Security TransferForSettle transaction should only consume two input state." using (tx.inputs.size == 2)
-                "An Security TransferForSettle transaction should only create two output state." using (tx.outputs.size == 2)
+                "An Proposal Consume transaction should only consume two input states." using (tx.inputs.size == 2)
+                "An Proposal Consume transaction should only create two output states." using (tx.outputs.size == 2)
 
                 val inputProposal = tx.inputsOfType<ProposalState>().first()
                 val outputProposal = tx.outputsOfType<ProposalState>().first()
                 "Input ProposalState's status must be PROPOSED." using (inputProposal.status == ProposalStatus.PROPOSED)
-                "Only the owner property may change." using (outputProposal == inputProposal.withNewStatus(ProposalStatus.CONSUMED))
+                "Only the status property may change." using (outputProposal == inputProposal.withNewStatus(ProposalStatus.CONSUMED))
 
                 val inputSecurity = tx.inputsOfType<SecurityState>().first()
                 val outputSecurity = tx.outputsOfType<SecurityState>().first()
@@ -53,7 +53,7 @@ open class ProposalContract: Contract {
                 "InputProposalState's toEthereumAddress must equal to InputSecurityState's owner ethAddress." using (inputProposal.toEthereumAddress == inputSecurity.owner.ethAddress())
 
                 // Consume Tx must have proposer's and acceptor's signature.
-                "The proposer, acceptor must sign an Proposal Consume transaction." using
+                "Both proposer and acceptor together only may sign Proposal consume transaction." using
                     (proposalCommand.signers.toSet() == (inputProposal.participants).map { it.owningKey }.toSet())
             }
         }

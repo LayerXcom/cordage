@@ -41,7 +41,7 @@ class ProposalContractProposeTest {
     }
 
     @Test
-    fun `Propose transaction must have no inputs`() {
+    fun `propose transaction must have no inputs`() {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val input = ProposalState(
             security.linearId,
@@ -67,7 +67,7 @@ class ProposalContractProposeTest {
     }
 
     @Test
-    fun `Propose transaction must have one output`() {
+    fun `propose transaction must have one output`() {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
@@ -92,7 +92,7 @@ class ProposalContractProposeTest {
     }
 
     @Test
-    fun `Propose transaction's output state must have positive securityAmount`() {
+    fun `propose transaction's output state must have positive securityAmount`() {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val zeroOutput = ProposalState(
             security.linearId,
@@ -132,7 +132,7 @@ class ProposalContractProposeTest {
     }
 
     @Test
-    fun `Propose transaction's output state must have positive weiAmount`() {
+    fun `propose transaction's output state must have positive weiAmount`() {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val zeroOutput = ProposalState(
             security.linearId,
@@ -172,7 +172,7 @@ class ProposalContractProposeTest {
     }
 
     @Test
-    fun `Propose transaction's output state must have not empty swapId`() {
+    fun `propose transaction's output state must have not empty swapId`() {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
@@ -196,7 +196,7 @@ class ProposalContractProposeTest {
     }
 
     @Test
-    fun `Output's fromEthereumAddress must equal to proposer's ethAddress`() {
+    fun `output's fromEthereumAddress must equal to proposer's ethAddress`() {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
@@ -220,7 +220,7 @@ class ProposalContractProposeTest {
     }
 
     @Test
-    fun `Output's toEthereumAddress must equal to acceptor's ethAddress`() {
+    fun `output's toEthereumAddress must equal to acceptor's ethAddress`() {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
@@ -244,7 +244,7 @@ class ProposalContractProposeTest {
     }
 
     @Test
-    fun `Propose transaction's output state must have PROPOSED status`() {
+    fun `propose transaction's output state must have PROPOSED status`() {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
@@ -268,7 +268,7 @@ class ProposalContractProposeTest {
     }
 
     @Test
-    fun `Proposer and acceptor together only must sign Propose transaction`() {
+    fun `proposer and acceptor together only must sign Propose transaction`() {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
