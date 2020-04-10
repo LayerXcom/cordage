@@ -25,7 +25,6 @@ open class ProposalContract: Contract {
                 "No inputs should be consumed when issuing a Proposal." using (tx.inputs.isEmpty())
                 "Only one output state should be created when issuing a Proposal." using (tx.outputs.size == 1)
                 val proposal = tx.outputsOfType<ProposalState>().single()
-                "A newly issued Proposal must have a not-null securityLinearId." using (proposal.securityLinearId !== UniqueIdentifier(""))
                 "A newly issued Proposal must have a positive securityAmount." using (proposal.securityAmount > BigInteger.ZERO)
                 "A newly issued Proposal must have a positive weiAmount." using (proposal.weiAmount > BigInteger.ZERO)
                 "A newly issued Proposal must have a not-empty swapId." using (proposal.swapId.isNotEmpty())
