@@ -58,12 +58,12 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         }
 
         fun tracker() = ProgressTracker(
-                CREATING_WATCHERSTATE,
-                WATCHING_EVENT,
-                GENERATING_TRANSACTION,
-                VERIFYING_TRANSACTION,
-                SIGNING_TRANSACTION,
-                FINALISING_TRANSACTION
+            WATCHING_EVENT,
+            CREATING_WATCHERSTATE,
+            GENERATING_TRANSACTION,
+            VERIFYING_TRANSACTION,
+            SIGNING_TRANSACTION,
+            FINALISING_TRANSACTION
         )
     }
 
