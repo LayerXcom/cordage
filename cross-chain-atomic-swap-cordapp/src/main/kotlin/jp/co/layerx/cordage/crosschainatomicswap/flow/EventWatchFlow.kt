@@ -5,7 +5,6 @@ import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract
 import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract.Companion.contractID
 import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.Settlement
 import jp.co.layerx.cordage.crosschainatomicswap.state.WatcherState
-import jp.co.layerx.cordage.crosschainatomicswap.toHex
 import jp.co.layerx.cordage.crosschainatomicswap.types.LockedEvent
 import jp.co.layerx.cordage.crosschainatomicswap.types.SwapDetail
 import net.corda.core.contracts.Command
@@ -20,7 +19,6 @@ import org.web3j.abi.DefaultFunctionReturnDecoder
 import org.web3j.abi.TypeReference
 import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Event
-import org.web3j.abi.datatypes.Type
 import org.web3j.abi.datatypes.generated.Uint256
 import org.web3j.abi.datatypes.generated.Uint8
 import org.web3j.protocol.Web3j
@@ -28,7 +26,6 @@ import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.http.HttpService
-import java.util.*
 
 @InitiatingFlow
 @SchedulableFlow
@@ -98,10 +95,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                 if (eventValues != null && eventValues.isNotEmpty()) {
                     val lockedEvent = LockedEvent.listToLockedEvent(eventValues)
                     if (lockedEvent.swapId == searchId) {
-                        val encodedSwapDetail = lockedEvent.encodedSwapDetail
-                        val stringEncodedSwapDetail = "0x" + encodedSwapDetail.toHex()
-                        val decodedSwapDetailList = DefaultFunctionReturnDecoder.decode(stringEncodedSwapDetail, swapDetailType as MutableList<TypeReference<Type<Any>>>?)
-                        val swapDetail = SwapDetail.listToSwapDetail(decodedSwapDetailList)
+                        val swapDetail = SwapDetail.fromLockedEvent(lockedEvent)
                         // Just pass the LockedEvent's swapDetail to SettleAtomicSwapFlow
                         subFlow(SettleAtomicSwapFlow(proposalStateAndRef, swapDetail))
 
