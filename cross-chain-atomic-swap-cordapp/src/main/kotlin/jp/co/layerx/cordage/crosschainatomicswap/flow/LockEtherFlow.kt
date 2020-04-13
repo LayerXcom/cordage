@@ -42,7 +42,7 @@ class LockEtherFlow(
         val transferFromAddress = finalizedProposalState.fromEthereumAddress
         val transferToAddress = finalizedProposalState.toEthereumAddress
         val weiAmount = finalizedProposalState.weiAmount
-        val securityAmount = finalizedProposalState.securityAmount
+        val securityAmount = finalizedProposalState.securityAmount.toBigInteger()
 
         // load Smart Contract Wrapper
         val response = settlement.lock(

@@ -25,7 +25,7 @@ open class ProposalContract: Contract {
                 "No inputs should be consumed when issuing a Proposal." using (tx.inputs.isEmpty())
                 "Only one output state should be created when issuing a Proposal." using (tx.outputs.size == 1)
                 val proposal = tx.outputsOfType<ProposalState>().single()
-                "A newly issued Proposal must have a positive securityAmount." using (proposal.securityAmount > BigInteger.ZERO)
+                "A newly issued Proposal must have a positive securityAmount." using (proposal.securityAmount > 0)
                 "A newly issued Proposal must have a positive weiAmount." using (proposal.weiAmount > BigInteger.ZERO)
                 "A newly issued Proposal must have a not-empty swapId." using (proposal.swapId.isNotEmpty())
                 "fromEthereumAddress must equal to proposer's ethAddress." using (proposal.fromEthereumAddress == proposal.proposer.ethAddress())
@@ -48,7 +48,7 @@ open class ProposalContract: Contract {
                 val outputSecurity = tx.outputsOfType<SecurityState>().first()
                 "InputProposalState's acceptor must equal to InputSecurityState's owner." using (inputProposal.acceptor == inputSecurity.owner)
                 "InputProposalState's proposer must equal to OutputSecurityState's owner." using (inputProposal.proposer == outputSecurity.owner)
-                "InputProposalState's securityAmount must equal to OutputSecurityState's amount." using (inputProposal.securityAmount == outputSecurity.amount.toBigInteger())
+                "InputProposalState's securityAmount must equal to OutputSecurityState's amount." using (inputProposal.securityAmount == outputSecurity.amount)
                 "InputProposalState's fromEthereumAddress must equal to OutputSecurityState's owner ethAddress." using (inputProposal.fromEthereumAddress == outputSecurity.owner.ethAddress())
                 "InputProposalState's toEthereumAddress must equal to InputSecurityState's owner ethAddress." using (inputProposal.toEthereumAddress == inputSecurity.owner.ethAddress())
 

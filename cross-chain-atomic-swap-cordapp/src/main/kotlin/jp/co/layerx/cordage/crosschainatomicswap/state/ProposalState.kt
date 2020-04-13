@@ -11,7 +11,7 @@ import java.math.BigInteger
 
 @BelongsToContract(ProposalContract::class)
 data class ProposalState(val securityLinearId: UniqueIdentifier,
-                         val securityAmount: BigInteger,
+                         val securityAmount: Int,
                          val weiAmount: BigInteger,
                          val swapId: String,
                          val proposer: Party,
@@ -27,7 +27,7 @@ data class ProposalState(val securityLinearId: UniqueIdentifier,
         swapId: String,
         proposer: Party,
         acceptor: Party
-    ) : this(security.linearId, security.amount.toBigInteger(), weiAmount, swapId, proposer, acceptor, proposer.ethAddress(), acceptor.ethAddress())
+    ) : this(security.linearId, security.amount, weiAmount, swapId, proposer, acceptor, proposer.ethAddress(), acceptor.ethAddress())
 
     override val participants: List<Party> get() = listOf(proposer, acceptor)
 

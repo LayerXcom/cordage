@@ -53,7 +53,7 @@ open class SecurityContract: Contract {
                 val inputProposal = tx.inputsOfType<ProposalState>().first()
                 "InputProposalState's acceptor must equal to InputSecurityState's owner." using (inputProposal.acceptor == inputSecurity.owner)
                 "InputProposalState's proposer must equal to OutputSecurityState's owner." using (inputProposal.proposer == outputSecurity.owner)
-                "InputProposalState's securityAmount must equal to OutputSecurityState's amount." using (inputProposal.securityAmount == outputSecurity.amount.toBigInteger())
+                "InputProposalState's securityAmount must equal to OutputSecurityState's amount." using (inputProposal.securityAmount == outputSecurity.amount)
                 "InputProposalState's fromEthereumAddress must equal to OutputSecurityState's owner ethAddress." using (inputProposal.fromEthereumAddress == outputSecurity.owner.ethAddress())
                 "InputProposalState's toEthereumAddress must equal to InputSecurityState's owner ethAddress." using (inputProposal.toEthereumAddress == inputSecurity.owner.ethAddress())
 

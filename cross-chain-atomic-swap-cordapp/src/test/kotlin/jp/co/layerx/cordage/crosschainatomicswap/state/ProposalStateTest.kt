@@ -15,7 +15,7 @@ class ProposalStateTest {
     private val expectedUuid = UUID.randomUUID()
     private val actual = ProposalState(
         security.linearId,
-        security.amount.toBigInteger(),
+        security.amount,
         1_000_000.toBigInteger(),
         "1",
         ALICE.party,
@@ -33,7 +33,7 @@ class ProposalStateTest {
 
     @Test
     fun securityAmount() {
-        Assertions.assertThat(actual.securityAmount == security.amount.toBigInteger())
+        Assertions.assertThat(actual.securityAmount == security.amount)
     }
 
     @Test

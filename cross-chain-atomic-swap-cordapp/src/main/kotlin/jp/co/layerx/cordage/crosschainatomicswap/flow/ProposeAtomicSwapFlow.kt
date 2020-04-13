@@ -63,7 +63,7 @@ class ProposeAtomicSwapFlow(
         val linearId = UniqueIdentifier.fromString(securityLinearId)
         val outputProposal = ProposalState(
             linearId,
-            securityAmount.toBigInteger(),
+            securityAmount,
             weiAmount.toBigInteger(),
             swapId,
             proposer,

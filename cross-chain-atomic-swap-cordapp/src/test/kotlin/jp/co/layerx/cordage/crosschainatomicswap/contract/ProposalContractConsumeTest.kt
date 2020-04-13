@@ -23,7 +23,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -53,7 +53,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -92,7 +92,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -131,7 +131,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -161,7 +161,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -178,7 +178,7 @@ class ProposalContractConsumeTest  {
                 output(ProposalContract.contractID,
                     ProposalState(
                         UniqueIdentifier(id = UUID.randomUUID()),
-                        inputSecurity.amount.toBigInteger(),
+                        inputSecurity.amount,
                         10000.toBigInteger(),
                         "1",
                         ALICE.party,
@@ -199,7 +199,7 @@ class ProposalContractConsumeTest  {
                 output(ProposalContract.contractID,
                     ProposalState(
                         inputSecurity.linearId,
-                        99.toBigInteger(),
+                        99,
                         10000.toBigInteger(),
                         "1",
                         ALICE.party,
@@ -220,7 +220,7 @@ class ProposalContractConsumeTest  {
                 output(ProposalContract.contractID,
                     ProposalState(
                         inputSecurity.linearId,
-                        inputSecurity.amount.toBigInteger(),
+                        inputSecurity.amount,
                         99.toBigInteger(),
                         "1",
                         ALICE.party,
@@ -241,7 +241,7 @@ class ProposalContractConsumeTest  {
                 output(ProposalContract.contractID,
                     ProposalState(
                         inputSecurity.linearId,
-                        inputSecurity.amount.toBigInteger(),
+                        inputSecurity.amount,
                         10000.toBigInteger(),
                         "99",
                         ALICE.party,
@@ -262,7 +262,7 @@ class ProposalContractConsumeTest  {
                 output(ProposalContract.contractID,
                     ProposalState(
                         inputSecurity.linearId,
-                        inputSecurity.amount.toBigInteger(),
+                        inputSecurity.amount,
                         10000.toBigInteger(),
                         "1",
                         CHARLIE.party,
@@ -283,7 +283,7 @@ class ProposalContractConsumeTest  {
                 output(ProposalContract.contractID,
                     ProposalState(
                         inputSecurity.linearId,
-                        inputSecurity.amount.toBigInteger(),
+                        inputSecurity.amount,
                         10000.toBigInteger(),
                         "1",
                         ALICE.party,
@@ -304,7 +304,7 @@ class ProposalContractConsumeTest  {
                 output(ProposalContract.contractID,
                     ProposalState(
                         inputSecurity.linearId,
-                        inputSecurity.amount.toBigInteger(),
+                        inputSecurity.amount,
                         10000.toBigInteger(),
                         "1",
                         ALICE.party,
@@ -325,7 +325,7 @@ class ProposalContractConsumeTest  {
                 output(ProposalContract.contractID,
                     ProposalState(
                         inputSecurity.linearId,
-                        inputSecurity.amount.toBigInteger(),
+                        inputSecurity.amount,
                         10000.toBigInteger(),
                         "1",
                         ALICE.party,
@@ -349,7 +349,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -379,7 +379,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -409,7 +409,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             CHARLIE.party,
@@ -439,7 +439,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            999.toBigInteger(),
+            999,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -469,7 +469,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -499,7 +499,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -529,7 +529,7 @@ class ProposalContractConsumeTest  {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,

@@ -80,7 +80,7 @@ class ProposeAtomicSwapFlowTest {
         Assertions.assertThat(actualProposalTx.inputs.isEmpty())
 
         val actualProposalState = actualProposalTx.tx.outputsOfType<ProposalState>().single()
-        Assertions.assertThat(actualProposalState.securityAmount == expectedSecurityAmount.toBigInteger())
+        Assertions.assertThat(actualProposalState.securityAmount == expectedSecurityAmount)
         Assertions.assertThat(actualProposalState.weiAmount == expectedWeiAmount.toBigInteger())
         Assertions.assertThat(actualProposalState.swapId == expectedSwapId)
         Assertions.assertThat(actualProposalState.status == ProposalStatus.PROPOSED)

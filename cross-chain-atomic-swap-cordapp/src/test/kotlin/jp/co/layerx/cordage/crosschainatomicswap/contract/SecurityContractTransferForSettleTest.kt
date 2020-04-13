@@ -18,7 +18,7 @@ class SecurityContractTransferForSettleTest {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -48,7 +48,7 @@ class SecurityContractTransferForSettleTest {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -89,7 +89,7 @@ class SecurityContractTransferForSettleTest {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -129,7 +129,7 @@ class SecurityContractTransferForSettleTest {
         val inputSecurity = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -178,7 +178,7 @@ class SecurityContractTransferForSettleTest {
         val inputSecurity = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -210,7 +210,7 @@ class SecurityContractTransferForSettleTest {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -240,7 +240,7 @@ class SecurityContractTransferForSettleTest {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             CHARLIE.party,
@@ -270,7 +270,7 @@ class SecurityContractTransferForSettleTest {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            999.toBigInteger(),
+            999,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -300,7 +300,7 @@ class SecurityContractTransferForSettleTest {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -330,7 +330,7 @@ class SecurityContractTransferForSettleTest {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -360,7 +360,7 @@ class SecurityContractTransferForSettleTest {
         val outputSecurity = inputSecurity.withNewOwner(ALICE.party)
         val inputProposal = ProposalState(
             inputSecurity.linearId,
-            inputSecurity.amount.toBigInteger(),
+            inputSecurity.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,

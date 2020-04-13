@@ -21,7 +21,7 @@ class ProposalContractProposeTest {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
-            security.amount.toBigInteger(),
+            security.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -45,7 +45,7 @@ class ProposalContractProposeTest {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val input = ProposalState(
             security.linearId,
-            security.amount.toBigInteger(),
+            security.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -71,7 +71,7 @@ class ProposalContractProposeTest {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
-            security.amount.toBigInteger(),
+            security.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -96,7 +96,7 @@ class ProposalContractProposeTest {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val zeroOutput = ProposalState(
             security.linearId,
-            BigInteger.ZERO,
+            0,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -107,7 +107,7 @@ class ProposalContractProposeTest {
         )
         val negativeOutput = ProposalState(
             security.linearId,
-            (-100).toBigInteger(),
+            -100,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -136,7 +136,7 @@ class ProposalContractProposeTest {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val zeroOutput = ProposalState(
             security.linearId,
-            security.amount.toBigInteger(),
+            security.amount,
             BigInteger.ZERO,
             "1",
             ALICE.party,
@@ -147,7 +147,7 @@ class ProposalContractProposeTest {
         )
         val negativeOutput = ProposalState(
             security.linearId,
-            security.amount.toBigInteger(),
+            security.amount,
             (-100).toBigInteger(),
             "1",
             ALICE.party,
@@ -176,7 +176,7 @@ class ProposalContractProposeTest {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
-            security.amount.toBigInteger(),
+            security.amount,
             10000.toBigInteger(),
             "",
             ALICE.party,
@@ -200,7 +200,7 @@ class ProposalContractProposeTest {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
-            security.amount.toBigInteger(),
+            security.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -224,7 +224,7 @@ class ProposalContractProposeTest {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
-            security.amount.toBigInteger(),
+            security.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -248,7 +248,7 @@ class ProposalContractProposeTest {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
-            security.amount.toBigInteger(),
+            security.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,
@@ -272,7 +272,7 @@ class ProposalContractProposeTest {
         val security = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
         val output = ProposalState(
             security.linearId,
-            security.amount.toBigInteger(),
+            security.amount,
             10000.toBigInteger(),
             "1",
             ALICE.party,

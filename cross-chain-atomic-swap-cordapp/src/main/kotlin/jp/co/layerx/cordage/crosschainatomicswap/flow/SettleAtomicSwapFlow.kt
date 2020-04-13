@@ -59,7 +59,7 @@ class SettleAtomicSwapFlow(val proposalStateRef: StateAndRef<ProposalState>, val
             "swapDetail from Ethereum Event must have the same fromEthereumAddress to ProposalState's." using (swapDetail.fromEthereumAddress == Address(inputProposal.fromEthereumAddress))
             "swapDetail from Ethereum Event must have the same toEthereumAddress to ProposalState's." using (swapDetail.toEthereumAddress == Address(inputProposal.toEthereumAddress))
             "swapDetail from Ethereum Event must have the same weiAmount to ProposalState's." using (swapDetail.weiAmount == Uint256(inputProposal.weiAmount))
-            "swapDetail from Ethereum Event must have the same securityAmount to ProposalState's." using (swapDetail.securityAmount == Uint256(inputProposal.securityAmount))
+            "swapDetail from Ethereum Event must have the same securityAmount to ProposalState's." using (swapDetail.securityAmount == Uint256(inputProposal.securityAmount.toBigInteger()))
             "swapDetail from Ethereum Event must have the same status to ProposalState's." using (swapDetail.status == inputProposal.status)
         }
 
