@@ -40,7 +40,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
 
         val eventMapping = mapOf<String, Event>("Locked" to Settlement.LOCKED_EVENT)
 
-        val swapDetailType = Arrays.asList<TypeReference<*>?>(
+        val swapDetailType = listOf(
             object : TypeReference<Address?>() {},
             object : TypeReference<Address?>() {},
             object : TypeReference<Uint256?>() {},
@@ -96,7 +96,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                 val eventValues = abiTypes?.map { it.value }
                 if (eventValues != null && eventValues.isNotEmpty()) {
                     val lockedEvent = eventValues?.let { LockedEvent.listToLockedEvent(it) }
-                    if (lockedEvent.swapId.equals(searchId)) {
+                    if (lockedEvent.swapId == searchId) {
                         val encodedSwapDetail = lockedEvent.encodedSwapDetail
                         val stringEncodedSwapDetail = "0x" + encodedSwapDetail.toHex()
                         val decodedSwapDetailList = DefaultFunctionReturnDecoder.decode(stringEncodedSwapDetail, swapDetailType as MutableList<TypeReference<Type<Any>>>?)
