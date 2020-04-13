@@ -73,11 +73,12 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     override fun call(): String {
         progressTracker.currentStep = WATCHING_EVENT
         val input = serviceHub.toStateAndRef<WatcherState>(stateRef)
-        val fromBlockNumber = input.state.data.fromBlockNumber
-        val toBlockNumber = input.state.data.toBlockNumber
-        val targetContractAddress = input.state.data.targetContractAddress
-        val eventName = input.state.data.eventName
-        val proposalStateAndRef = input.state.data.proposalStateAndRef
+        val watcherState = input.state.data
+        val fromBlockNumber = watcherState.fromBlockNumber
+        val toBlockNumber = watcherState.toBlockNumber
+        val targetContractAddress = watcherState.targetContractAddress
+        val eventName = watcherState.eventName
+        val proposalStateAndRef = watcherState.proposalStateAndRef
         val proposalState = proposalStateAndRef.state.data
         val searchId = proposalState.swapId
         val event = eventMapping[eventName]
