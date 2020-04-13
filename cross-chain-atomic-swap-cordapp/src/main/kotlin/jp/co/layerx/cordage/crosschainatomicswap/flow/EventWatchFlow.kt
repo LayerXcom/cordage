@@ -95,7 +95,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                 // find event values by searchId
                 val eventValues = abiTypes?.map { it.value }
                 if (eventValues != null && eventValues.isNotEmpty()) {
-                    val lockedEvent = eventValues?.let { LockedEvent.listToLockedEvent(it) }
+                    val lockedEvent = LockedEvent.listToLockedEvent(eventValues)
                     if (lockedEvent.swapId == searchId) {
                         val encodedSwapDetail = lockedEvent.encodedSwapDetail
                         val stringEncodedSwapDetail = "0x" + encodedSwapDetail.toHex()
