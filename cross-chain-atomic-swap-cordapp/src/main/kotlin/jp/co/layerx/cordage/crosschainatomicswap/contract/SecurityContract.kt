@@ -38,7 +38,7 @@ open class SecurityContract: Contract {
                 "The owner property must change in a Transfer." using (input.owner != output.owner)
                 // SecurityTransfer Tx must have previous owner's, new owner's and issuer's signature signature
                 "The issuer, old owner and new owner only must sign an Security transfer transaction." using
-                    (securityCommand.signers.toSet() == (input.participants.map { it.owningKey }.toSet() `union`
+                    (securityCommand.signers.toSet() == (input.participants.map { it.owningKey }.toSet() union
                         output.participants.map { it.owningKey }.toSet()))
             }
             is SecurityCommands.TransferForSettle -> requireThat {
