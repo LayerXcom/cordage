@@ -44,13 +44,17 @@ open class SecurityContract: Contract {
             is SecurityCommands.TransferForSettle -> requireThat {
                 "An Security TransferForSettle transaction should only consume two input states." using (tx.inputs.size == 2)
                 "An Security TransferForSettle transaction should only create two output states." using (tx.outputs.size == 2)
+                "An Security TransferForSettle transaction should consume only one input proposal state." using (tx.inputsOfType<ProposalState>().size == 1)
+                "An Security TransferForSettle transaction should create only one output proposal state." using (tx.outputsOfType<ProposalState>().size == 1)
+                "An Security TransferForSettle transaction should consume only one input security state." using (tx.inputsOfType<SecurityState>().size == 1)
+                "An Security TransferForSettle transaction should create only one output security state." using (tx.outputsOfType<SecurityState>().size == 1)
 
-                val inputSecurity = tx.inputsOfType<SecurityState>().first()
-                val outputSecurity = tx.outputsOfType<SecurityState>().first()
+                val inputSecurity = tx.inputsOfType<SecurityState>().single()
+                val outputSecurity = tx.outputsOfType<SecurityState>().single()
                 "Only the owner property may change." using (inputSecurity == outputSecurity.withNewOwner(inputSecurity.owner))
                 "The owner property must change in a TransferForSettle." using (inputSecurity.owner != outputSecurity.owner)
 
-                val inputProposal = tx.inputsOfType<ProposalState>().first()
+                val inputProposal = tx.inputsOfType<ProposalState>().single()
                 "InputProposalState's acceptor must equal to InputSecurityState's owner." using (inputProposal.acceptor == inputSecurity.owner)
                 "InputProposalState's proposer must equal to OutputSecurityState's owner." using (inputProposal.proposer == outputSecurity.owner)
                 "InputProposalState's securityAmount must equal to OutputSecurityState's amount." using (inputProposal.securityAmount == outputSecurity.amount)
