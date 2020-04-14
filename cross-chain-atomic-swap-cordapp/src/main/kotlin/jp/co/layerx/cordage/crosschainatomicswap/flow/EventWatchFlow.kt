@@ -71,18 +71,13 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         progressTracker.currentStep = WATCHING_EVENT
         val input = serviceHub.toStateAndRef<WatcherState>(stateRef)
         val watcherState = input.state.data
-        val fromBlockNumber = watcherState.fromBlockNumber
-        val toBlockNumber = watcherState.toBlockNumber
-        val targetContractAddress = watcherState.targetContractAddress
-        val eventName = watcherState.eventName
-        val proposalStateAndRef = watcherState.proposalStateAndRef
-        val proposalState = proposalStateAndRef.state.data
+        val proposalState = watcherState.proposalStateAndRef.state.data
         val searchId = proposalState.swapId
-        val event = eventMapping[eventName]
+        val event = eventMapping[watcherState.eventName]
 
-        val filter = EthFilter(DefaultBlockParameter.valueOf(fromBlockNumber),
-                DefaultBlockParameter.valueOf(toBlockNumber),
-                targetContractAddress)
+        val filter = EthFilter(DefaultBlockParameter.valueOf(watcherState.fromBlockNumber),
+                DefaultBlockParameter.valueOf(watcherState.toBlockNumber),
+                watcherState.targetContractAddress)
 
         val ethLogs = web3.ethGetLogs(filter).send()
 
@@ -97,7 +92,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
                     if (lockedEvent.swapId == searchId) {
                         val swapDetail = SwapDetail.fromLockedEvent(lockedEvent)
                         // Just pass the LockedEvent's swapDetail to SettleAtomicSwapFlow
-                        subFlow(SettleAtomicSwapFlow(proposalStateAndRef, swapDetail))
+                        subFlow(SettleAtomicSwapFlow(watcherState.proposalStateAndRef, swapDetail))
 
                         return "SettleAtomicSwapFlow has executed with ${swapDetail.securityAmount} securities."
                     }
@@ -107,8 +102,14 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
 
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
-        val newFromBlockNumber = toBlockNumber.inc()
-        val output = WatcherState(ourIdentity, newFromBlockNumber, recentBlockNumber, targetContractAddress, eventName, proposalStateAndRef)
+        val output = WatcherState(
+            ourIdentity,
+            watcherState.toBlockNumber.inc(),
+            recentBlockNumber,
+            watcherState.targetContractAddress,
+            watcherState.eventName,
+            watcherState.proposalStateAndRef
+        )
 
         progressTracker.currentStep = GENERATING_TRANSACTION
         val watchCmd = Command(WatcherContract.WatcherCommands.Watch(), ourIdentity.owningKey)
@@ -126,6 +127,6 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         progressTracker.currentStep = FINALISING_TRANSACTION
         subFlow(FinalityFlow(signedTx, listOf(), FINALISING_TRANSACTION.childProgressTracker()))
 
-        return "Event Watched. (fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber})"
+        return "Event Watched. (fromBlockNumber: ${watcherState.fromBlockNumber}, toBlockNumber: ${watcherState.toBlockNumber})"
     }
 }
