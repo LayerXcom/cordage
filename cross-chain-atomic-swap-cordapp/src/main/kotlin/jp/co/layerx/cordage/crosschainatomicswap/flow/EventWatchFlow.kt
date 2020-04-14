@@ -1,9 +1,12 @@
-package jp.co.layerx.cordage.flowethereumeventwatch.flow
+package jp.co.layerx.cordage.crosschainatomicswap.flow
 
 import co.paralleluniverse.fibers.Suspendable
-import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
-import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract.Companion.contractID
-import jp.co.layerx.cordage.flowethereumeventwatch.state.WatcherState
+import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract
+import jp.co.layerx.cordage.crosschainatomicswap.contract.WatcherContract.Companion.contractID
+import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.Settlement
+import jp.co.layerx.cordage.crosschainatomicswap.state.WatcherState
+import jp.co.layerx.cordage.crosschainatomicswap.types.LockedEvent
+import jp.co.layerx.cordage.crosschainatomicswap.types.SwapDetail
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateRef
 import net.corda.core.flows.FinalityFlow
@@ -13,25 +16,35 @@ import net.corda.core.flows.SchedulableFlow
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import org.web3j.abi.DefaultFunctionReturnDecoder
+import org.web3j.abi.TypeReference
+import org.web3j.abi.datatypes.Address
 import org.web3j.abi.datatypes.Event
-import org.web3j.crypto.Credentials
+import org.web3j.abi.datatypes.generated.Uint256
+import org.web3j.abi.datatypes.generated.Uint8
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.Log
 import org.web3j.protocol.http.HttpService
-import org.web3j.tx.gas.StaticGasProvider
-import java.math.BigInteger
 
 @InitiatingFlow
 @SchedulableFlow
 class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
+        // TODO Some ethereum parameters should be imported by .env
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-        // TODO credentials should be imported by .env
-        val credentials: Credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
-        val eventMapping = mapOf<String, Event>("Set" to SimpleStorage.SET_EVENT)
+
+        val eventMapping = mapOf<String, Event>("Locked" to Settlement.LOCKED_EVENT)
+
+        val swapDetailType = listOf(
+            object : TypeReference<Address?>() {},
+            object : TypeReference<Address?>() {},
+            object : TypeReference<Uint256?>() {},
+            object : TypeReference<Uint256?>() {},
+            object : TypeReference<Uint8?>() {}
+        )
+
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
@@ -42,12 +55,12 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         }
 
         fun tracker() = ProgressTracker(
-                CREATING_WATCHERSTATE,
-                WATCHING_EVENT,
-                GENERATING_TRANSACTION,
-                VERIFYING_TRANSACTION,
-                SIGNING_TRANSACTION,
-                FINALISING_TRANSACTION
+            WATCHING_EVENT,
+            CREATING_WATCHERSTATE,
+            GENERATING_TRANSACTION,
+            VERIFYING_TRANSACTION,
+            SIGNING_TRANSACTION,
+            FINALISING_TRANSACTION
         )
     }
 
@@ -57,16 +70,14 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     override fun call(): String {
         progressTracker.currentStep = WATCHING_EVENT
         val input = serviceHub.toStateAndRef<WatcherState>(stateRef)
-        val fromBlockNumber = input.state.data.fromBlockNumber
-        val toBlockNumber = input.state.data.toBlockNumber
-        val targetContractAddress = input.state.data.targetContractAddress
-        val eventName = input.state.data.eventName
-        val searchId = input.state.data.searchId
-        val event = eventMapping[eventName]
+        val watcherState = input.state.data
+        val proposalState = watcherState.proposalStateAndRef.state.data
+        val searchId = proposalState.swapId
+        val event = eventMapping[watcherState.eventName]
 
-        val filter = EthFilter(DefaultBlockParameter.valueOf(fromBlockNumber),
-                DefaultBlockParameter.valueOf(toBlockNumber),
-                targetContractAddress)
+        val filter = EthFilter(DefaultBlockParameter.valueOf(watcherState.fromBlockNumber),
+                DefaultBlockParameter.valueOf(watcherState.toBlockNumber),
+                watcherState.targetContractAddress)
 
         val ethLogs = web3.ethGetLogs(filter).send()
 
@@ -75,22 +86,33 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         if (decodedLogs != null && decodedLogs.isNotEmpty()) {
             decodedLogs.forEach { abiTypes ->
                 // find event values by searchId
-                val eventValues = abiTypes?.map { it.value as BigInteger }
-                val filteredEventValues = eventValues?.filter { e -> e == searchId }
-                if (filteredEventValues != null && filteredEventValues.isNotEmpty()) {
-                    doSomething(input.state.data)
-                    return "Ethereum Event with id: $searchId watched and send TX Completed"
+                val eventValues = abiTypes?.map { it.value }
+                if (eventValues != null && eventValues.isNotEmpty()) {
+                    val lockedEvent = LockedEvent.listToLockedEvent(eventValues)
+                    if (lockedEvent.swapId == searchId) {
+                        val swapDetail = SwapDetail.fromLockedEvent(lockedEvent)
+                        // Just pass the LockedEvent's swapDetail to SettleAtomicSwapFlow
+                        subFlow(SettleAtomicSwapFlow(watcherState.proposalStateAndRef, swapDetail))
+
+                        return "SettleAtomicSwapFlow has executed with ${swapDetail.securityAmount} securities."
+                    }
                 }
             }
         }
 
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
-        val newFromBlockNumber = toBlockNumber.inc()
-        val output = WatcherState(ourIdentity, newFromBlockNumber, recentBlockNumber, targetContractAddress, eventName, searchId)
+        val output = WatcherState(
+            ourIdentity,
+            watcherState.toBlockNumber.inc(),
+            recentBlockNumber,
+            watcherState.targetContractAddress,
+            watcherState.eventName,
+            watcherState.proposalStateAndRef
+        )
 
         progressTracker.currentStep = GENERATING_TRANSACTION
-        val watchCmd = Command(WatcherContract.Commands.Watch(), ourIdentity.owningKey)
+        val watchCmd = Command(WatcherContract.WatcherCommands.Watch(), ourIdentity.owningKey)
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
                 .addInputState(input)
                 .addOutputState(output, contractID)
@@ -105,12 +127,6 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         progressTracker.currentStep = FINALISING_TRANSACTION
         subFlow(FinalityFlow(signedTx, listOf(), FINALISING_TRANSACTION.childProgressTracker()))
 
-        return "Event Watched. (fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber})"
-    }
-
-    private fun doSomething(input: WatcherState) {
-        val simpleStorage: SimpleStorage = SimpleStorage.load(input.targetContractAddress, web3, credentials,
-                StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
-        simpleStorage.set(input.searchId.inc()).send()
+        return "Event Watched. (fromBlockNumber: ${watcherState.fromBlockNumber}, toBlockNumber: ${watcherState.toBlockNumber})"
     }
 }
