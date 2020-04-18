@@ -34,6 +34,9 @@ It enables payment-versus-payment and payment-versus-delivery settlement.
 This pattern also includes asset encumbrance.
 It realizes various applications such as liens, collateral in finance, clawbacks, etc.
 
+## Cordage sample applications
+- [Cross-chain atomic swap](./cross-chain-atomic-swap-cordapp)
+
 ## Cordage modules
 In the first stage, we focus on Corda and EVM based blockchain interoperability,
 especially, Ethereum PoW and Quorum IBFT.
