@@ -3,6 +3,7 @@ package jp.co.layerx.cordage.flowethereumeventwatch.flow
 import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
 import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract.Companion.contractID
+import jp.co.layerx.cordage.flowethereumeventwatch.ethWrapper.SimpleStorage
 import jp.co.layerx.cordage.flowethereumeventwatch.state.WatcherState
 import net.corda.core.contracts.Command
 import net.corda.core.contracts.StateRef

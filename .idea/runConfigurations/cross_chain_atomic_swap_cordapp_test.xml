@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="cross-chain-atomic-swap-cordapp" type="JUnit" factoryName="JUnit">
+  <configuration default="false" name="cross-chain-atomic-swap-cordapp test" type="JUnit" factoryName="JUnit">
     <module name="cross-chain-atomic-swap-cordapp.test" />
     <useClassPathOnly />
     <option name="PACKAGE_NAME" value="jp.co.layerx.cordage.crosschainatomicswap" />
