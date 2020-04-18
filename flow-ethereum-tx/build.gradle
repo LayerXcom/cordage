@@ -1,11 +1,21 @@
 buildscript {
-    ext.corda_release_version = '4.0'
-    ext.corda_release_distribution = 'net.corda'
-    ext.corda_gradle_plugins_version = '4.0.42'
-    ext.kotlin_version = '1.2.71'
-    ext.junit_version = '4.12'
-    ext.quasar_version = '0.7.10'
-    ext.jolokia_version = '1.3.7'
+    Properties constants = new Properties()
+    file("$projectDir/../constants.properties").withInputStream { constants.load(it) }
+
+    ext {
+        corda_release_group = constants.getProperty("cordaReleaseGroup")
+        corda_core_release_group =  constants.getProperty("cordaCoreReleaseGroup")
+        corda_release_version = constants.getProperty("cordaVersion")
+        corda_core_release_version = constants.getProperty("cordaCoreVersion")
+        corda_gradle_plugins_version = constants.getProperty("gradlePluginsVersion")
+        kotlin_version = constants.getProperty("kotlinVersion")
+        junit_version = constants.getProperty("junitVersion")
+        quasar_version = constants.getProperty("quasarVersion")
+        log4j_version = constants.getProperty("log4jVersion")
+        slf4j_version = constants.getProperty("slf4jVersion")
+        corda_platform_version = constants.getProperty("platformVersion").toInteger()
+        corda_minimum_platform_version = constants.getProperty("minimumPlatformVersion").toInteger()
+    }
 
     repositories {
         mavenLocal()
@@ -17,41 +27,25 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "net.corda.plugins:cordapp:$corda_gradle_plugins_version"
-        classpath "net.corda.plugins:publish-utils:$corda_gradle_plugins_version"
         classpath "net.corda.plugins:cordformation:$corda_gradle_plugins_version"
         classpath "net.corda.plugins:quasar-utils:$corda_gradle_plugins_version"
     }
 }
 
-repositories {
-    mavenLocal()
-    jcenter()
-    mavenCentral()
-    maven { url 'https://dl.bintray.com/kotlin/exposed' }
-    maven { url 'https://jitpack.io' }
-    maven { url 'https://ci-artifactory.corda.r3cev.com/artifactory/corda-releases' }
-}
+apply from: "${rootProject.projectDir}/../repositories.gradle"
 
 apply plugin: 'kotlin'
 apply plugin: 'idea'
 apply plugin: 'net.corda.plugins.cordapp'
-apply plugin: 'net.corda.plugins.publish-utils'
 apply plugin: 'net.corda.plugins.cordformation'
 apply plugin: 'net.corda.plugins.quasar-utils'
-apply plugin: 'maven-publish'
 
 cordapp {
     signing {
         enabled false
     }
-    targetPlatformVersion 4
-    minimumPlatformVersion 4
-    contract {
-        name "Ethereum Tx"
-        vendor "LayerX Inc"
-        licence "Apache 2.0"
-        versionId 1
-    }
+    targetPlatformVersion corda_platform_version
+    minimumPlatformVersion corda_minimum_platform_version
     workflow {
         name "Ethereum Tx"
         vendor "LayerX Inc"
@@ -62,36 +56,25 @@ cordapp {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    // web3j version should strictly equal to 4.5.11 due to its okhttp dependency conflict
-    // https://github.com/web3j/web3j/issues/1167#issuecomment-593369842
-    implementation "org.web3j:core:4.5.11"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation "junit:junit:$junit_version"
     testImplementation "org.assertj:assertj-core:3.15.0"
-    testImplementation group: 'io.netty', name: 'netty-common', version: '4.1.45.Final'
 
-    // Corda integration dependencies
-    cordaCompile "$corda_release_distribution:corda-core:$corda_release_version"
-    cordaCompile "$corda_release_distribution:corda-jackson:$corda_release_version"
-    cordaCompile "$corda_release_distribution:corda-rpc:$corda_release_version"
-    cordaCompile "$corda_release_distribution:corda-node-api:$corda_release_version"
-    cordaCompile "$corda_release_distribution:corda-webserver-impl:$corda_release_version"
-    cordaRuntime "$corda_release_distribution:corda:$corda_release_version"
-    cordaRuntime "$corda_release_distribution:corda-webserver:$corda_release_version"
+    // web3j version should strictly equal to 4.5.11 due to its okhttp dependency conflict
+    // https://github.com/web3j/web3j/issues/1167#issuecomment-593369842
+    compile "org.web3j:core:4.5.11"
 
-    testImplementation "$corda_release_distribution:corda-test-utils:$corda_release_version"
-    testImplementation "$corda_release_distribution:corda-node-driver:$corda_release_version"
+    // Corda dependencies.
+    cordaCompile "$corda_core_release_group:corda-core:$corda_core_release_version"
+    cordaRuntime "$corda_release_group:corda-node-api:$corda_release_version"
+    cordaRuntime "$corda_release_group:corda:$corda_release_version"
 
+    testImplementation "$corda_release_group:corda-test-utils:$corda_release_version"
+    testImplementation "$corda_release_group:corda-node-driver:$corda_release_version"
 
-    // GraphStream: For visualisation (required by TemplateClientRPC app)
-    implementation "org.graphstream:gs-core:1.3"
-    implementation("org.graphstream:gs-ui:1.3") {
-        exclude group: "bouncycastle"
-    }
-
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.0'
+    cordaCompile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version"
+    cordaCompile "org.apache.logging.log4j:log4j-web:$log4j_version"
+    cordaCompile "org.slf4j:jul-to-slf4j:$slf4j_version"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -103,18 +86,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     }
 }
 
-def dependenciesDir = './build/dependencies'
-
-task deleteDependencies(type: Delete) {
-    delete dependenciesDir
-}
-
-task copyDependencies(type: Copy, dependsOn: deleteDependencies) {
-    from configurations.compileClasspath - configurations.cordaCompile - configurations.cordaRuntime
-    into dependenciesDir
-}
-
-task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar', 'copyDependencies']) {
+task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
     def nodesDir = "./build/nodes"
     delete nodesDir
     directory nodesDir
@@ -128,30 +100,14 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar', 'copyDepen
     }
 
     node {
-        name "O=Notary,L=London,C=GB"
-        notary = [validating: false]
-        p2pPort 10002
-        rpcSettings {
-            useSsl false
-            standAloneBroker false
-            address "0.0.0.0:10003"
-            adminAddress "0.0.0.0:10103"
-        }
-    }
-    node {
         name "O=ParticipantA,L=London,C=GB"
         p2pPort 10007
-//        webPort 10009
         rpcSettings {
             useSsl false
             standAloneBroker false
             address "0.0.0.0:10008"
             adminAddress "0.0.0.0:10108"
         }
-
-        extraConfig = [
-                "jarDirs": ["../../dependencies"]
-        ]
     }
 }
 
