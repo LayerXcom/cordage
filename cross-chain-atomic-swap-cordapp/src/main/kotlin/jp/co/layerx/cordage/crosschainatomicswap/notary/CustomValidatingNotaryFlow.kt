@@ -21,6 +21,7 @@ import java.math.BigInteger
 
 class CustomValidatingNotaryFlow(otherSide: FlowSession, service: CustomValidatingNotaryService) : ValidatingNotaryFlow(otherSide, service) {
     companion object {
+        // TODO Use Node Configuration https://github.com/LayerXcom/cordage/issues/20
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
         private const val ETHEREUM_NETWORK_ID = "5777"
         private const val ETHEREUM_PRIVATE_KEY = "0x646f1ce2fdad0e6deeeb5c7e8e5543bdde65e86029e2fd9fc169899c440a7913"

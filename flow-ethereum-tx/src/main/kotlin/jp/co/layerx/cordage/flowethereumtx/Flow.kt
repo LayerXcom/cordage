@@ -10,6 +10,7 @@ import org.web3j.protocol.core.methods.request.Transaction
 import org.web3j.protocol.http.HttpService
 import java.math.BigInteger
 
+// TODO Use Node Configuration https://github.com/LayerXcom/cordage/issues/20
 const val ETHEREUM_RPC_URL = "http://localhost:8545"
 
 @InitiatingFlow

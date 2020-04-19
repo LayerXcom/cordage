@@ -23,7 +23,7 @@ import java.math.BigInteger
 @StartableByRPC
 class StartEventWatchFlow(private val proposalStateLinearId: UniqueIdentifier) : FlowLogic<Unit>() {
     companion object {
-        // TODO Some ethereum parameters should be imported by .env
+        // TODO Use Node Configuration https://github.com/LayerXcom/cordage/issues/20
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
         private const val ETHEREUM_NETWORK_ID = "5777"
         const val EVENT_NAME = "Locked"
