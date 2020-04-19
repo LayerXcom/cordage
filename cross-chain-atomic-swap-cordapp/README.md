@@ -43,46 +43,43 @@ Use the `deployNodes` task and `./build/nodes/runnodes` script.
 
 ## UAT normal scenario
 ### Assumptions and constraints
-Party A wants to buy 100 amount of security that is owned by Party B.
+Party C is an issuer of CorporateBond.
 
-- Party A pays 1 ether to Party B
-- Party B pays 100 amount of security to Party A
+Party A wants to buy 100 amount of corporate bond that is owned by Party B.
 
-This is expected to happen in atomic way.
+- Party A remits by ether to Party B (The unit price is specified with the initial CorporateBond registration)
+- Party B transfers 100 amount of corporate bond to Party A
+
+This is expected to happen in an atomic way.
 
 ### Setup
-
-#### Issue Security State
-Run SecurityIssueFlow from Security Issuer ParticipantC:
-
+#### Register CorporateBond from Party C
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityIssueFlow amount: 100, owner: "O=ParticipantB,L=New York,C=US", name: "LayerX"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.CorporateBondRegisterFlow name: "LayerX", unitPriceEther: "0.012345678901234567", observer: "O=ParticipantA,L=London,C=GB"
 ```
 
-This flow returns linearId of SecurityState
+at the same time, CorporateBond state is shared to Party A to notify the unit price of the corporate bond.
 
-### vaultQuery for Security State
-Run vaultQuery from ParticipantB:
-
+Then, get the linearId of CorporateBond
 ```
-run vaultQuery contractStateType: jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
+run vaultQuery contractStateType: jp.co.layerx.cordage.crosschainatomicswap.state.CorporateBond
 ```
 
-You can get linearId of Security State by the result.
-
-### Transfer Security State
-
+#### Issue CorporateBond from PartyC to Party B
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityTransferFlow linearId: "961ba806-e792-447f-a71e-8441f9ac8601", newOwner: "O=ParticipantA,L=London,C=GB"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.CorporateBondIssueFlow linearId: "90de74ea-117d-4be0-b709-84b75410b1aa", quantity: 1000, holder: "O=ParticipantB,L=New York,C=US"
 ```
 
-This flow returns linearId of SecurityState.
+Then, get the linearId of issued CorporateBond token by running below from Party B
+```
+run vaultQuery contractStateType: com.r3.corda.lib.tokens.contracts.states.FungibleToken
+```
 
 ### Propose Cross-Chain Atomic Swap
 Run ProposeAtomicSwapFlow from ParticipantA with ParticipantB's securityLinearId:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearId: "b78cb920-f957-447e-b0bd-937341d99065", securityAmount: 100, weiAmount: 1000000000000000000, swapId: "3", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b", mockLockEtherFlow: null
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow corporateBondLinearId: "90de74ea-117d-4be0-b709-84b75410b1aa", quantity: 100, swapId: "3", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b", mockLockEtherFlow: null
 ```
 
 The acceptor ParticipantB can validate this Proposal with `checkTransaction()` in `ProposeAtomicSwapFlowResponder`.

@@ -53,9 +53,9 @@ class LockEtherFlowTest {
                 proposalState.swapId,
                 proposalState.fromEthereumAddress,
                 proposalState.toEthereumAddress,
-                proposalState.weiAmount,
-                proposalState.securityAmount.toBigInteger(),
-                proposalState.weiAmount
+                proposalState.priceWei,
+                proposalState.quantity.toBigInteger(),
+                proposalState.priceWei
             ).send()
         } returns TransactionReceipt("0x0", "", "", "", "", "", "", "", "", "", "", listOf(), "")
 

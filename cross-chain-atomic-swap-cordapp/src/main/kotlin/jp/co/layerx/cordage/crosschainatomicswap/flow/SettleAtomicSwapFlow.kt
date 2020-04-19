@@ -58,13 +58,13 @@ class SettleAtomicSwapFlow(val proposalStateRef: StateAndRef<ProposalState>, val
         requireThat {
             "swapDetail from Ethereum Event must have the same fromEthereumAddress to ProposalState's." using (swapDetail.fromEthereumAddress == Address(inputProposal.fromEthereumAddress))
             "swapDetail from Ethereum Event must have the same toEthereumAddress to ProposalState's." using (swapDetail.toEthereumAddress == Address(inputProposal.toEthereumAddress))
-            "swapDetail from Ethereum Event must have the same weiAmount to ProposalState's." using (swapDetail.weiAmount == Uint256(inputProposal.weiAmount))
-            "swapDetail from Ethereum Event must have the same securityAmount to ProposalState's." using (swapDetail.securityAmount == Uint256(inputProposal.securityAmount.toBigInteger()))
+            "swapDetail from Ethereum Event must have the same weiAmount to ProposalState's." using (swapDetail.weiAmount == Uint256(inputProposal.priceWei))
+            "swapDetail from Ethereum Event must have the same securityAmount to ProposalState's." using (swapDetail.securityAmount == Uint256(inputProposal.quantity.toBigInteger()))
             "swapDetail from Ethereum Event must have the same status to ProposalState's." using (swapDetail.status == inputProposal.status)
         }
 
         progressTracker.currentStep = PREPARE_INPUTSTATES
-        val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(inputProposal.securityLinearId))
+        val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(inputProposal.corporateBondLinearId))
         val securityStateAndRef =  serviceHub.vaultService.queryBy<SecurityState>(queryCriteria).states.single()
         val inputSecurity = securityStateAndRef.state.data
 

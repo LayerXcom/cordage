@@ -28,17 +28,17 @@ class ProposalStateTest {
 
     @Test
     fun securityLinearId() {
-        Assertions.assertThat(actual.securityLinearId == security.linearId)
+        Assertions.assertThat(actual.corporateBondLinearId == security.linearId)
     }
 
     @Test
     fun securityAmount() {
-        Assertions.assertThat(actual.securityAmount == security.amount)
+        Assertions.assertThat(actual.quantity == security.amount)
     }
 
     @Test
     fun weiAmount() {
-        Assertions.assertThat(actual.weiAmount == 1_000_000.toBigInteger())
+        Assertions.assertThat(actual.priceWei == 1_000_000.toBigInteger())
     }
 
     @Test

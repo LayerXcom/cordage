@@ -10,9 +10,9 @@ import net.corda.core.identity.Party
 import java.math.BigInteger
 
 @BelongsToContract(ProposalContract::class)
-data class ProposalState(val securityLinearId: UniqueIdentifier,
-                         val securityAmount: Int,
-                         val weiAmount: BigInteger,
+data class ProposalState(val corporateBondLinearId: UniqueIdentifier,
+                         val quantity: Int,
+                         val priceWei: BigInteger,
                          val swapId: String,
                          val proposer: Party,
                          val acceptor: Party,
@@ -23,11 +23,11 @@ data class ProposalState(val securityLinearId: UniqueIdentifier,
 
     constructor(
         security: SecurityState,
-        weiAmount: BigInteger,
+        priceWei: BigInteger,
         swapId: String,
         proposer: Party,
         acceptor: Party
-    ) : this(security.linearId, security.amount, weiAmount, swapId, proposer, acceptor, proposer.ethAddress(), acceptor.ethAddress())
+    ) : this(security.linearId, security.amount, priceWei, swapId, proposer, acceptor, proposer.ethAddress(), acceptor.ethAddress())
 
     override val participants: List<Party> get() = listOf(proposer, acceptor)
 

@@ -2,6 +2,7 @@ package jp.co.layerx.cordage.crosschainatomicswap.flow
 
 import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
+import jp.co.layerx.cordage.crosschainatomicswap.state.CorporateBond
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
 import jp.co.layerx.cordage.crosschainatomicswap.types.ProposalStatus
 import net.corda.core.contracts.Command
@@ -9,17 +10,20 @@ import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
+import net.corda.core.node.services.queryBy
+import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.ProgressTracker.Step
+import org.web3j.utils.Convert
+import java.math.BigDecimal
 
 @InitiatingFlow
 @StartableByRPC
 class ProposeAtomicSwapFlow(
-    private val securityLinearId: String,
-    private val securityAmount: Int,
-    private val weiAmount: Long,
+    private val corporateBondLinearId: UniqueIdentifier,
+    private val quantity: Int,
     private val swapId: String,
     private val acceptor: Party,
     private val FromEthereumAddress: String,
@@ -58,13 +62,18 @@ class ProposeAtomicSwapFlow(
 
     @Suspendable
     override fun call(): Pair<SignedTransaction, String> {
+        val criteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(corporateBondLinearId))
+        val corporateBond = serviceHub.vaultService.queryBy<CorporateBond>(criteria).states.single().state.data
+
+        val priceEther = corporateBond.unitPriceEther.multiply(BigDecimal(quantity))
+        val priceWei = Convert.toWei(priceEther, Convert.Unit.ETHER).toBigInteger()
+
         progressTracker.currentStep = CREATE_OUTPUTSTATE
         val proposer = ourIdentity
-        val linearId = UniqueIdentifier.fromString(securityLinearId)
         val outputProposal = ProposalState(
-            linearId,
-            securityAmount,
-            weiAmount.toBigInteger(),
+            corporateBondLinearId,
+            quantity,
+            priceWei,
             swapId,
             proposer,
             acceptor,

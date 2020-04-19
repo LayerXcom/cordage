@@ -14,16 +14,16 @@ import java.math.BigInteger
 @InitiatingFlow
 @StartableByRPC
 class LockEtherFlow(
-    val finalizedProposalState: ProposalState,
-    val settlement: Settlement = Settlement.load(targetContractAddress, web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(50000000)))
+    private val proposalState: ProposalState,
+    private val settlement: Settlement = Settlement.load(targetContractAddress, web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(50000000)))
 ) : FlowLogic<String>() {
     companion object {
-        // TODO Some ethereum parameters should be imported by .env
+        // TODO Use Node Configuration https://github.com/LayerXcom/cordage/issues/20
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
         private const val ETHEREUM_NETWORK_ID = "5777"
         private const val ETHEREUM_PRIVATE_KEY = "0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-        val targetContractAddress = Settlement.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)
+        val targetContractAddress = Settlement.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)!!
         val credentials: Credentials = Credentials.create(ETHEREUM_PRIVATE_KEY)
 
         object SEND_TRANSACTION_TO_ETHEREUM_CONTRACT : ProgressTracker.Step("Sending ether to Settlement Contract for locking.")
@@ -38,20 +38,15 @@ class LockEtherFlow(
     @Suspendable
     override fun call(): String {
         progressTracker.currentStep = SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
-        val swapId = finalizedProposalState.swapId
-        val transferFromAddress = finalizedProposalState.fromEthereumAddress
-        val transferToAddress = finalizedProposalState.toEthereumAddress
-        val weiAmount = finalizedProposalState.weiAmount
-        val securityAmount = finalizedProposalState.securityAmount.toBigInteger()
 
-        // load Smart Contract Wrapper
+        // load Smart Contract Wrapper then send the transaction
         val response = settlement.lock(
-            swapId,
-            transferFromAddress,
-            transferToAddress,
-            weiAmount,
-            securityAmount,
-            weiAmount
+            proposalState.swapId,
+            proposalState.fromEthereumAddress,
+            proposalState.toEthereumAddress,
+            proposalState.priceWei,
+            proposalState.quantity.toBigInteger(),
+            proposalState.priceWei
         ).send()
 
         return response.transactionHash
