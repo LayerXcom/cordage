@@ -41,8 +41,10 @@ See https://docs.corda.net/tutorial-cordapp.html#running-the-example-cordapp.
 Use the `deployNodes` task and `./build/nodes/runnodes` script.
 
 
-## UAT normal scenario
-### Assumptions and constraints
+## UAT scenario
+### Assumption to participants
+There are 3 participants.
+
 Party C is an issuer of CorporateBond.
 
 Party A wants to buy 100 amount of corporate bond that is owned by Party B.
@@ -51,6 +53,18 @@ Party A wants to buy 100 amount of corporate bond that is owned by Party B.
 - Party B transfers 100 amount of corporate bond to Party A
 
 This is expected to happen in an atomic way.
+
+### Existing processes (nodes)
+Several processes (nodes) exist in this scenario.
+
+- Party A's Corda Node
+- Party B's Corda Node
+- Party C's Corda Node
+- Corda Notary; run with PostgreSQL
+- Ethereum Node; you may easily run by Ganache CLI
+
+Every Data propagation between Corda and Ethereum is executed by Corda Nodes or Notary.
+Other processes are not required.
 
 ### Setup
 #### Register CorporateBond from Party C
