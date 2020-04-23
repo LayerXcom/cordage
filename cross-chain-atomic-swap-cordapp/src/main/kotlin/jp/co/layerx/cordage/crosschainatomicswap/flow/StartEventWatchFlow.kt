@@ -28,7 +28,7 @@ class StartEventWatchFlow(private val proposalStateLinearId: UniqueIdentifier) :
         private const val ETHEREUM_NETWORK_ID = "5777"
         const val EVENT_NAME = "Locked"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-        val targetContractAddress = Settlement.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)
+        val targetContractAddress = Settlement.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)!!
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
         object VERIFYING_TRANSACTION : ProgressTracker.Step("Verifying a WatcherState transaction.")
