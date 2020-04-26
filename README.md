@@ -1,5 +1,8 @@
 # ![Cordage](./docs/images/cordage.png)
 
+- [English](./README.md)
+- [日本語](./README.ja.md)
+
 Cordage makes the interoperability possible between [Corda](https://www.corda.net/) and other Blockchains
 by providing several modules that propagate, pull and verify information between Blockchains
 without further trusted third party.
@@ -18,7 +21,7 @@ Data propagation is a feature that propagates data to each other between blockch
 Data verification is a feature that verifies propagated data.
 
 Cordage provides these features as executable modules
-that does not require additional components except Corda and the other Blockchain.
+that do not require additional components except Corda and the other Blockchain.
 A combination of these modules enables you to build concrete cross-chain applications.
 
 ## Cordage use cases
@@ -38,10 +41,11 @@ It realizes various applications such as liens, collateral in finance, clawbacks
 - [Cross-chain atomic swap](./cross-chain-atomic-swap-cordapp)
 
 ## Cordage modules
-In the first stage, we focus on Corda and EVM based blockchain interoperability,
-especially, Ethereum PoW and Quorum IBFT.
+In the first stage, we focus on Corda and EVM based blockchain interoperability.
+Then, we will be connecting with Hyperledger Fabric.
 
-In this combination, data propagation and data verification features are consists of subdivided features as follow:
+Data propagation and data verification features, that are explained in the section of How Cordage makes the interoperability possible,
+are consists of subdivided features as follow:
 
 Data propagation
 - P1: Feature to create and send Ethereum Tx from Corda
