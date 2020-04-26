@@ -3,6 +3,7 @@ package jp.co.layerx.cordage.crosschainatomicswap.flow
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
+import jp.co.layerx.cordage.crosschainatomicswap.ethAddress
 import jp.co.layerx.cordage.crosschainatomicswap.state.CorporateBond
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
 import jp.co.layerx.cordage.crosschainatomicswap.types.ProposalStatus
@@ -27,8 +28,8 @@ class ProposeAtomicSwapFlow(
     private val quantity: Long,
     private val swapId: String,
     private val acceptor: Party,
-    private val FromEthereumAddress: String,
-    private val ToEthereumAddress: String,
+    private val fromEthereumAddress: String,
+    private val toEthereumAddress: String,
     private val mockLockEtherFlow: LockEtherFlow? = null
 ) : FlowLogic<Pair<SignedTransaction, String>>() {
     companion object {
@@ -78,8 +79,8 @@ class ProposeAtomicSwapFlow(
             swapId,
             proposer,
             acceptor,
-            FromEthereumAddress,
-            ToEthereumAddress,
+            fromEthereumAddress,
+            toEthereumAddress,
             ProposalStatus.PROPOSED
         )
 
@@ -92,6 +93,10 @@ class ProposeAtomicSwapFlow(
             .addCommand(proposeCommand)
 
         progressTracker.currentStep = VERIFYING_TRANSACTION
+        requireThat {
+            "ourIdentity's address must equal to fromEthereumAddress." using (outputProposal.fromEthereumAddress == proposer.ethAddress())
+            "Acceptor's address must equal to toEthereumAddress." using (outputProposal.toEthereumAddress == acceptor.ethAddress())
+        }
         txBuilder.verify(serviceHub)
 
         progressTracker.currentStep = SIGNING_TRANSACTION
@@ -119,19 +124,16 @@ class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession) : FlowLogic<S
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(flowSession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                val output = stx.tx.outputs.single().data
-                "This must be an Proposal transaction" using (output is ProposalState)
-                // add any validation by yourself
+                val proposalState = stx.tx.outputs.single().data
+                "This must be an Proposal transaction" using (proposalState is ProposalState)
+                proposalState as ProposalState
+                "Proposer's address must equal to fromEthereumAddress." using (proposalState.fromEthereumAddress == proposalState.proposer.ethAddress())
+                "ourIdentity's address must equal to toEthereumAddress." using (proposalState.toEthereumAddress == ourIdentity.ethAddress())
             }
         }
 
         val txId = subFlow(signedTransactionFlow).id
 
         return subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txId))
-
-        // If you agree the Proposal in checkTransaction function, execute StartEventWatchFlow automatically as below.
-        // val signedTx = subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txWeJustSignedId.id))
-        // val signedProposalState = signedTx.coreTransaction.outputsOfType<ProposalState>().first()
-        // subFlow(StartEventWatchFlow(signedProposalState.linearId))
     }
 }

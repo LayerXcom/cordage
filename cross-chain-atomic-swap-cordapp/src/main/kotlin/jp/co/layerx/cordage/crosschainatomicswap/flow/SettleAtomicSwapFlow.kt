@@ -1,8 +1,11 @@
 package jp.co.layerx.cordage.crosschainatomicswap.flow
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.lib.tokens.contracts.states.FungibleToken
+import com.r3.corda.lib.tokens.contracts.utilities.sumTokenStatesOrThrow
 import com.r3.corda.lib.tokens.workflows.flows.move.addMoveFungibleTokens
 import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
+import jp.co.layerx.cordage.crosschainatomicswap.ethAddress
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
 import jp.co.layerx.cordage.crosschainatomicswap.types.ProposalStatus
 import jp.co.layerx.cordage.crosschainatomicswap.types.SwapDetail
@@ -59,6 +62,8 @@ class SettleAtomicSwapFlow(
         val inputProposal = proposalStateRef.state.data
 
         requireThat {
+            "Proposer's address must equal to fromEthereumAddress." using (inputProposal.fromEthereumAddress == inputProposal.proposer.ethAddress())
+            "ourIdentity's address must equal to toEthereumAddress." using (inputProposal.toEthereumAddress == ourIdentity.ethAddress())
             "swapDetail from Ethereum Event must have the same fromEthereumAddress to ProposalState's." using (swapDetail.fromEthereumAddress == Address(inputProposal.fromEthereumAddress))
             "swapDetail from Ethereum Event must have the same toEthereumAddress to ProposalState's." using (swapDetail.toEthereumAddress == Address(inputProposal.toEthereumAddress))
             "swapDetail from Ethereum Event must have the same weiAmount to ProposalState's." using (swapDetail.weiAmount == Uint256(inputProposal.priceWei))
@@ -88,7 +93,11 @@ class SettleAtomicSwapFlow(
         addMoveFungibleTokens(txBuilder, serviceHub, proposalStateRef.state.data.amount, newOwner, ourIdentity)
 
         progressTracker.currentStep = VERIFYING_TRANSACTION
-        txBuilder.verify(serviceHub)
+        txBuilder.apply {
+            require(outputProposal.amount.quantity == outputStates().map { it.data }.filterIsInstance<FungibleToken>()
+                .filter { it.holder == newOwner }.sumTokenStatesOrThrow().quantity)
+            verify(serviceHub)
+        }
 
         progressTracker.currentStep = SIGNING_TRANSACTION
         val partlySignedTx = serviceHub.signInitialTransaction(txBuilder)
@@ -109,9 +118,14 @@ class SettleAtomicSwapFlowResponder(val flowSession: FlowSession) : FlowLogic<Si
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(flowSession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                // add any validation by yourself
-                // val securityOutput = stx.tx.outputsOfType<SecurityState>().first()
-                // val proposalOutput = stx.tx.outputsOfType<ProposalState>().first()
+                val proposalState = stx.tx.outputsOfType<ProposalState>().single()
+                val fungibleTokens = stx.tx.outputsOfType<FungibleToken>()
+                requireThat {
+                    "ourIdentity's address must equal to fromEthereumAddress." using (proposalState.fromEthereumAddress == ourIdentity.ethAddress())
+                    "Acceptor's address must equal to toEthereumAddress." using (proposalState.toEthereumAddress == proposalState.acceptor.ethAddress())
+                    "The Sum of tokens belong to us must equal to the proposed amount." using
+                        (proposalState.amount.quantity == fungibleTokens.filter { it.holder == ourIdentity }.sumTokenStatesOrThrow().quantity)
+                }
             }
         }
 
@@ -120,4 +134,3 @@ class SettleAtomicSwapFlowResponder(val flowSession: FlowSession) : FlowLogic<Si
         return subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txId))
     }
 }
-
