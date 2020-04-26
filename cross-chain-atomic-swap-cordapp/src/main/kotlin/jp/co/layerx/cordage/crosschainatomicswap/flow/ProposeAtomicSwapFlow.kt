@@ -24,7 +24,7 @@ import java.math.BigDecimal
 @StartableByRPC
 class ProposeAtomicSwapFlow(
     private val corporateBondLinearId: UniqueIdentifier,
-    private val quantity: Int,
+    private val quantity: Long,
     private val swapId: String,
     private val acceptor: Party,
     private val FromEthereumAddress: String,
