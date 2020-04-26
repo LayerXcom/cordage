@@ -2,8 +2,8 @@ package jp.co.layerx.cordage.flowethereumeventwatch.flow
 
 import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
-import jp.co.layerx.cordage.flowethereumeventwatch.ethWrapper.SimpleStorage
 import jp.co.layerx.cordage.flowethereumeventwatch.state.WatcherState
+import jp.co.layerx.cordage.flowethereumeventwatch.types.EventParameters
 import net.corda.core.contracts.Command
 import net.corda.core.flows.FinalityFlow
 import net.corda.core.flows.FlowLogic
@@ -11,20 +11,29 @@ import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
+import org.web3j.abi.datatypes.Event
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
+import org.web3j.tx.Contract
 import java.math.BigInteger
+import java.time.Instant
 
 @InitiatingFlow
 @StartableByRPC
-class StartEventWatchFlow(private val searchId: Int) : FlowLogic<Unit>() {
+class StartEventWatchFlow(
+    private val targetContract: Contract,
+    private val event: Event,
+    private val eventParameters: Class<EventParameters>,
+    private val searchId: String,
+    private val followingFlow: Class<FlowLogic<Any>>,
+    private val fromBlockNumber: BigInteger = BigInteger.ZERO,
+    private val pollingInterbal: Long = 10
+) : FlowLogic<Unit>() {
     companion object {
         // TODO Some ethereum parameters should be imported by .env
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
-        private const val ETHEREUM_NETWORK_ID = "5777"
-        const val EVENT_NAME = "Set"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-        val targetContractAddress = SimpleStorage.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)
+
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
         object VERIFYING_TRANSACTION : ProgressTracker.Step("Verifying a WatcherState transaction.")
@@ -47,9 +56,20 @@ class StartEventWatchFlow(private val searchId: Int) : FlowLogic<Unit>() {
     @Suspendable
     override fun call() {
         progressTracker.currentStep = CREATING_WATCHERSTATE
-        val fromBlockNumber = BigInteger.ZERO
+        // toBlockNumber is always recentBlockNumber
         val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
-        val output = WatcherState(ourIdentity, fromBlockNumber, recentBlockNumber, targetContractAddress, EVENT_NAME, searchId.toBigInteger())
+        val nextActivityTime = Instant.now().plusSeconds(pollingInterbal)
+        val output = WatcherState(
+            ourIdentity,
+            fromBlockNumber,
+            recentBlockNumber,
+            targetContract,
+            event,
+            eventParameters,
+            searchId,
+            followingFlow,
+            nextActivityTime
+        )
 
         progressTracker.currentStep = GENERATING_TRANSACTION
         val cmd = Command(WatcherContract.Commands.Issue(), ourIdentity.owningKey)

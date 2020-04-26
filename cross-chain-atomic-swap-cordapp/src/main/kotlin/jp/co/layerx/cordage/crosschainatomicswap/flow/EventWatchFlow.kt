@@ -102,13 +102,9 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
 
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
-        val output = WatcherState(
-            ourIdentity,
-            watcherState.toBlockNumber.inc(),
-            recentBlockNumber,
-            watcherState.targetContractAddress,
-            watcherState.eventName,
-            watcherState.proposalStateAndRef
+        val output = watcherState.copy(
+            fromBlockNumber = watcherState.toBlockNumber.inc(),
+            toBlockNumber = recentBlockNumber
         )
 
         progressTracker.currentStep = GENERATING_TRANSACTION

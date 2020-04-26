@@ -8,17 +8,23 @@ import net.corda.core.flows.FlowLogicRefFactory
 import net.corda.core.identity.Party
 import jp.co.layerx.cordage.flowethereumeventwatch.contract.WatcherContract
 import jp.co.layerx.cordage.flowethereumeventwatch.flow.EventWatchFlow
+import jp.co.layerx.cordage.flowethereumeventwatch.types.EventParameters
+import net.corda.core.flows.FlowLogic
+import org.web3j.abi.datatypes.Event
+import org.web3j.tx.Contract
 import java.math.BigInteger
 import java.time.Instant
 
 @BelongsToContract(WatcherContract::class)
-class WatcherState(
+data class WatcherState(
         val me: Party,
         val fromBlockNumber: BigInteger,
         val toBlockNumber: BigInteger,
-        val targetContractAddress: String,
-        val eventName: String,
-        val searchId: BigInteger,
+        val targetContract: Contract,
+        val event: Event,
+        val eventParameters: Class<EventParameters>,
+        val searchId: String,
+        val followingFlow: Class<FlowLogic<Any>>,
         private val nextActivityTime: Instant = Instant.now().plusSeconds(10)
 ) : SchedulableState {
 

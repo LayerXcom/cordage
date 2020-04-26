@@ -7,10 +7,9 @@ import jp.co.layerx.cordage.crosschainatomicswap.flow.EventWatchFlow
 import net.corda.core.contracts.*
 import java.math.BigInteger
 import java.time.Instant
-import javax.swing.plaf.nimbus.State
 
 @BelongsToContract(WatcherContract::class)
-class WatcherState(
+data class WatcherState(
         val me: Party,
         val fromBlockNumber: BigInteger,
         val toBlockNumber: BigInteger,
