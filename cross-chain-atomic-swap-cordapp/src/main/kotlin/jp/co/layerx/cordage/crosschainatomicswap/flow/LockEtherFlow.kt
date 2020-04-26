@@ -45,7 +45,7 @@ class LockEtherFlow(
             proposalState.fromEthereumAddress,
             proposalState.toEthereumAddress,
             proposalState.priceWei,
-            proposalState.quantity.toBigInteger(),
+            proposalState.amount.quantity.toBigInteger(),
             proposalState.priceWei
         ).send()
 

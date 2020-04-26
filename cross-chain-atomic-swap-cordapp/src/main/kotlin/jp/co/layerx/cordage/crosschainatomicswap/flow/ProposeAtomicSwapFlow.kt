@@ -1,6 +1,7 @@
 package jp.co.layerx.cordage.crosschainatomicswap.flow
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.lib.tokens.contracts.utilities.of
 import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
 import jp.co.layerx.cordage.crosschainatomicswap.state.CorporateBond
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
@@ -72,7 +73,7 @@ class ProposeAtomicSwapFlow(
         val proposer = ourIdentity
         val outputProposal = ProposalState(
             corporateBondLinearId,
-            quantity,
+            quantity of corporateBond.toPointer<CorporateBond>(),
             priceWei,
             swapId,
             proposer,

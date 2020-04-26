@@ -81,7 +81,7 @@ run vaultQuery contractStateType: jp.co.layerx.cordage.crosschainatomicswap.stat
 
 #### Issue CorporateBond from PartyC to Party B
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.CorporateBondIssueFlow linearId: "90de74ea-117d-4be0-b709-84b75410b1aa", quantity: 1000, holder: "O=ParticipantB,L=New York,C=US"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.CorporateBondIssueFlow linearId: "360da351-31c4-405f-b529-7a4c53f95b9a", quantity: 1000, holder: "O=ParticipantB,L=New York,C=US"
 ```
 
 Then, get the linearId of issued CorporateBond token by running below from Party B
@@ -90,10 +90,10 @@ run vaultQuery contractStateType: com.r3.corda.lib.tokens.contracts.states.Fungi
 ```
 
 ### Propose Cross-Chain Atomic Swap
-Run ProposeAtomicSwapFlow from ParticipantA with ParticipantB's securityLinearId:
+Run ProposeAtomicSwapFlow from ParticipantA with corporateBondLinearId:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow corporateBondLinearId: "90de74ea-117d-4be0-b709-84b75410b1aa", quantity: 100, swapId: "3", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b", mockLockEtherFlow: null
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow corporateBondLinearId: "360da351-31c4-405f-b529-7a4c53f95b9a", quantity: 100, swapId: "3", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b", mockLockEtherFlow: null
 ```
 
 The acceptor ParticipantB can validate this Proposal with `checkTransaction()` in `ProposeAtomicSwapFlowResponder`.
@@ -111,7 +111,7 @@ You can get linearId of Proposal State by the result.
 Go to the CRaSH shell for ParticipantB, and run the `StartEventWatchFlow` with `proposalStateLinearId`:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "1f77abf7-e209-42e6-8327-a2279c85aab7"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "16a9df48-05e6-4d93-940b-de895c87103e"
 ```
 
 You can now start monitoring the node's flow activity...
