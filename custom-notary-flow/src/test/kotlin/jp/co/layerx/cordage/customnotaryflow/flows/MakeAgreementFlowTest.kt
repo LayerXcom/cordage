@@ -40,22 +40,25 @@ internal class MakeAgreementFlowTest {
 
     @Test
     fun `normal scenario`() {
-        val target = b.info.legalIdentities.single()
-        val agreementBody = "RESIDENTIAL LEASE AGREEMENT"
-        val flow = MakeAgreementFlow(target, agreementBody)
+        val expectedOrigin = a.info.legalIdentities.single()
+        val expectedTarget = b.info.legalIdentities.single()
+        val expectedAgreementBody = "RESIDENTIAL LEASE AGREEMENT"
+        val flow = MakeAgreementFlow(expectedTarget, expectedAgreementBody)
         val future = a.startFlow(flow)
         network.runNetwork()
         val tx = future.getOrThrow()
 
-        val origin = a.info.legalIdentities.single()
-        val expected = Agreement(origin, target, AgreementStatus.MADE, agreementBody)
-
-        Assertions.assertThat(tx.inputs.isEmpty())
-        Assertions.assertThat(tx.tx.outputStates.single() == expected)
+        Assertions.assertThat(tx.inputs).hasSize(0)
+        tx.tx.outputsOfType<Agreement>().single().apply {
+            Assertions.assertThat(origin).isEqualTo(expectedOrigin)
+            Assertions.assertThat(target).isEqualTo(expectedTarget)
+            Assertions.assertThat(status).isEqualTo(AgreementStatus.MADE)
+            Assertions.assertThat(agreementBody).isEqualTo(expectedAgreementBody)
+        }
 
         val command = tx.tx.commands.single()
-        Assertions.assertThat(command.value is AgreementContract.AgreementCommand.Make)
-        Assertions.assertThat(command.signers.toSet() == expected.participants.map { it.owningKey }.toSet())
+        Assertions.assertThat(command.value).isInstanceOf(AgreementContract.AgreementCommand.Make::class.java)
+        Assertions.assertThat(command.signers.toSet()).isEqualTo(listOf(expectedOrigin.owningKey, expectedTarget.owningKey).toSet())
         tx.verifyRequiredSignatures()
     }
 }

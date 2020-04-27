@@ -124,9 +124,9 @@ class SettleAtomicSwapFlowTest {
         stx.verifyRequiredSignatures()
 
         val actualProposalState = stx.tx.outputsOfType<ProposalState>().single()
-        Assertions.assertThat(actualProposalState == proposalState.withNewStatus(ProposalStatus.CONSUMED))
+        Assertions.assertThat(actualProposalState).isEqualTo(proposalState.withNewStatus(ProposalStatus.CONSUMED))
 
         val actualFungibleTokens = stx.tx.outputsOfType<FungibleToken>()
-        Assertions.assertThat(expectedQuantity == actualFungibleTokens.filter { it.holder == proposer }.sumTokenStatesOrThrow().quantity)
+        Assertions.assertThat(expectedQuantity).isEqualTo(actualFungibleTokens.filter { it.holder == proposer }.sumTokenStatesOrThrow().quantity)
     }
 }

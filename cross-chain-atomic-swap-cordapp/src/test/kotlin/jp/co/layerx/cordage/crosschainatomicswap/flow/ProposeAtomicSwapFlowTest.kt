@@ -94,20 +94,20 @@ class ProposeAtomicSwapFlowTest {
         network.runNetwork()
 
         val response = f2.getOrThrow()
-        Assertions.assertThat(response.second == expectedTxHash)
+        Assertions.assertThat(response.second).isEqualTo(expectedTxHash)
 
         val actualProposalTx = response.first
-        Assertions.assertThat(actualProposalTx.inputs.isEmpty())
+        Assertions.assertThat(actualProposalTx.inputs).hasSize(0)
 
         val actualProposalState = actualProposalTx.tx.outputsOfType<ProposalState>().single()
-        Assertions.assertThat(actualProposalState.amount.quantity == expectedQuantity)
-        Assertions.assertThat(actualProposalState.priceWei == expectedPriceWei)
-        Assertions.assertThat(actualProposalState.swapId == expectedSwapId)
-        Assertions.assertThat(actualProposalState.status == ProposalStatus.PROPOSED)
+        Assertions.assertThat(actualProposalState.amount.quantity).isEqualTo(expectedQuantity)
+        Assertions.assertThat(actualProposalState.priceWei).isEqualTo(expectedPriceWei)
+        Assertions.assertThat(actualProposalState.swapId).isEqualTo(expectedSwapId)
+        Assertions.assertThat(actualProposalState.status).isEqualTo(ProposalStatus.PROPOSED)
 
         val command = actualProposalTx.tx.commands.single()
-        Assertions.assertThat(command.value is ProposalContract.ProposalCommands.Propose)
-        Assertions.assertThat(command.signers.toSet() == setOf(proposer.owningKey, acceptor.owningKey))
+        Assertions.assertThat(command.value).isInstanceOf(ProposalContract.ProposalCommands.Propose::class.java)
+        Assertions.assertThat(command.signers.toSet()).isEqualTo(setOf(proposer.owningKey, acceptor.owningKey))
         actualProposalTx.verifyRequiredSignatures()
     }
 }

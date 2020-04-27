@@ -21,17 +21,17 @@ contract StringBytesEmitter {
      */
     @Test
     fun `bytes to string`() {
-        val hex = "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001c4f3d5061727469636970616e74412c4c3d4c6f6e646f6e2c433d474200000000"
+        val hex = "4F3D5061727469636970616E74412C4C3D4C6F6E646F6E2C433D4742"
         val byteArray = hex.toUpperCase().hexStringToByteArray()
         val actual = byteArray.toString(Charsets.UTF_8)
-        Assertions.assertThat(actual == "O=ParticipantA,L=London,C=GB")
+        Assertions.assertThat(actual).isEqualTo("O=ParticipantA,L=London,C=GB")
     }
 
     @Test
     fun `string to hex bytes`() {
         val str = "O=ParticipantA,L=London,C=GB"
         val actual = str.toByteArray(Charsets.UTF_8).toHex()
-        Assertions.assertThat(actual == "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000001c4f3d5061727469636970616e74412c4c3d4c6f6e646f6e2c433d474200000000")
+        Assertions.assertThat(actual).isEqualTo("4F3D5061727469636970616E74412C4C3D4C6F6E646F6E2C433D4742")
     }
 }
 

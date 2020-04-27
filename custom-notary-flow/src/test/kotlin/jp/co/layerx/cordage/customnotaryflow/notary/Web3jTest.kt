@@ -27,6 +27,9 @@ class Web3jTest {
 
         val response = web3.ethSendTransaction(tx).send()
         Assertions.assertThat(response.transactionHash).startsWith("0x")
-        Assertions.assertThat(data == tx.data.toUpperCase().hexStringToByteArray().toString(Charsets.UTF_8))
+
+        val actualHex = tx.data.removePrefix("0x")
+        val actualData = actualHex.hexStringToByteArray().toString(Charsets.UTF_8)
+        Assertions.assertThat(actualData).isEqualTo(data)
     }
 }
