@@ -18,10 +18,10 @@ jobs:
         java-package: jdk
         architecture: x86
 
-    - name: Run a one-line script
+    - name: gradlew test
       run: cd cross-chain-atomic-swap-cordapp && ./gradlew test
 
     - uses: actions/upload-artifact@v1
       with:
-        name: test report
+        name: upload a test report
         path: build/reports/tests/test
