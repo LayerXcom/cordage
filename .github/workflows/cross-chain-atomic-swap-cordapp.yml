@@ -24,4 +24,4 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
         name: upload a test report
-        path: build/reports/tests/test
+        path: cross-chain-atomic-swap-cordapp/build/reports/tests/test
