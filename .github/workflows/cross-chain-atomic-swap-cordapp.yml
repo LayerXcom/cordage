@@ -26,7 +26,7 @@ jobs:
         path: ~/.gradle/wrapper
         key: cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-${{ hashFiles('cross-chain-atomic-swap-cordapp/gradle/wrapper/gradle-wrapper.properties') }}
         restore-keys: |
-          cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-${{ hashFiles('cross-chain-atomic-swap-cordapp/gradle/wrapper/gradle-wrapper.properties')
+          cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-${{ hashFiles('cross-chain-atomic-swap-cordapp/gradle/wrapper/gradle-wrapper.properties') }}
           cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-
 
     - name: cache dependencies
@@ -37,7 +37,7 @@ jobs:
         path: ~/.gradle/caches
         key: cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-${{ hashFiles('cross-chain-atomic-swap-cordapp/build.gradle') }}
         restore-keys: |
-          cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-${{ hashFiles('cross-chain-atomic-swap-cordapp/build.gradle')
+          cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-${{ hashFiles('cross-chain-atomic-swap-cordapp/build.gradle') }}
           cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-
 
     - name: gradlew test
