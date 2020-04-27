@@ -1,4 +1,4 @@
-name: CI for cross-chain atomic swap cordapp
+name: test for cross-chain-atomic-swap-cordapp
 
 on:
   push:
@@ -17,6 +17,18 @@ jobs:
         java-version: '8'
         java-package: jdk
         architecture: x86
+
+    - name: cache dependencies
+      uses: actions/cache@v1
+      env:
+        cache-name: gradle-caches
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-${{ hashFiles('cross-chain-atomic-swap-cordapp/build.gradle') }}
+        restore-keys: |
+          ${{ runner.os }}-cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-
+          ${{ runner.os }}-cross-chain-atomic-swap-cordapp-test-
+          ${{ runner.os }}-
 
     - name: gradlew test
       run: cd cross-chain-atomic-swap-cordapp && ./gradlew test
