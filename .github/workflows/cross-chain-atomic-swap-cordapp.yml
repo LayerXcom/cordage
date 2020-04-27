@@ -1,0 +1,27 @@
+name: CI for cross-chain atomic swap cordapp
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '8'
+        java-package: jdk
+        architecture: x86
+
+    - name: Run a one-line script
+      run: cd cross-chain-atomic-swap-cordapp && ./gradlew test
+
+    - uses: actions/upload-artifact@v1
+      with:
+        name: test report
+        path: build/reports/tests/test
