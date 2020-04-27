@@ -121,6 +121,7 @@ class SettleAtomicSwapFlowResponder(val flowSession: FlowSession) : FlowLogic<Si
                 val proposalState = stx.tx.outputsOfType<ProposalState>().single()
                 val fungibleTokens = stx.tx.outputsOfType<FungibleToken>()
                 requireThat {
+                    "ourIdentity must be a proposer." using (proposalState.proposer == ourIdentity)
                     "ourIdentity's address must equal to fromEthereumAddress." using (proposalState.fromEthereumAddress == ourIdentity.ethAddress())
                     "Acceptor's address must equal to toEthereumAddress." using (proposalState.toEthereumAddress == proposalState.acceptor.ethAddress())
                     "The Sum of tokens belong to us must equal to the proposed amount." using

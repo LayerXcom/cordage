@@ -127,6 +127,7 @@ class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession) : FlowLogic<S
                 val proposalState = stx.tx.outputs.single().data
                 "This must be an Proposal transaction" using (proposalState is ProposalState)
                 proposalState as ProposalState
+                "ourIdentity must be an acceptor." using (proposalState.acceptor == ourIdentity)
                 "Proposer's address must equal to fromEthereumAddress." using (proposalState.fromEthereumAddress == proposalState.proposer.ethAddress())
                 "ourIdentity's address must equal to toEthereumAddress." using (proposalState.toEthereumAddress == ourIdentity.ethAddress())
             }
