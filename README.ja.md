@@ -36,7 +36,9 @@ PvP (Payment vs Payment) およびDvP (Payment vs Delivery) での決済が可�
 先取特権、金融担保、クローバックなどのさまざまなアプリケーションを実現します。
 
 ## Cordageサンプルアプリケーション
-- [Cross-chain atomic swap](./cross-chain-atomic-swap-cordapp)
+![test for cross-chain-atomic-swap-cordapp](https://github.com/LayerXcom/cordage/workflows/test%20for%20cross-chain-atomic-swap-cordapp/badge.svg)
+
+- [クロスチェーンアトミックスワップ](./cross-chain-atomic-swap-cordapp)
 
 ## Cordageモジュール
 最初の段階では、CordaおよびEVMベースのブロックチェーンとの相互運用性に焦点を当てます。
@@ -51,8 +53,8 @@ PvP (Payment vs Payment) およびDvP (Payment vs Delivery) での決済が可�
 - P4：CordaでファイナライズされたTxをEthereumにインポートする機能
 
 データ検証
-- V1：P3でインポートされたEthereum Tx、イベント、ブロックを検証し、ブロックの最終性を検証する機能
-- V2：P4でインポートされたTx値を検証し、Corda Txの最終性を検証する機能
+- V1：P3でインポートされたEthereum Tx、イベント、ブロックを検証し、ブロックのファイナリティを検証する機能
+- V2：P4でインポートされたTx値を検証し、Corda Txのファイナリティを検証する機能
 
 ### 実装ステータス
 これまでに以下のモジュールを実装しました。

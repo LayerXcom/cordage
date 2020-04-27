@@ -1,4 +1,6 @@
 # Cross-Chain Atomic Swap Cordapp
+![test for cross-chain-atomic-swap-cordapp](https://github.com/LayerXcom/cordage/workflows/test%20for%20cross-chain-atomic-swap-cordapp/badge.svg)
+
 This CorDapp provides a simple example of Cross-Chain Atomic Swap between Corda and EVM based Blockchain without trusted third party.
 
 Be aware that support of HTTP requests in flows is currently limited:

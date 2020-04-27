@@ -38,6 +38,8 @@ This pattern also includes asset encumbrance.
 It realizes various applications such as liens, collateral in finance, clawbacks, etc.
 
 ## Cordage sample applications
+![test for cross-chain-atomic-swap-cordapp](https://github.com/LayerXcom/cordage/workflows/test%20for%20cross-chain-atomic-swap-cordapp/badge.svg)
+
 - [Cross-chain atomic swap](./cross-chain-atomic-swap-cordapp)
 
 ## Cordage modules
