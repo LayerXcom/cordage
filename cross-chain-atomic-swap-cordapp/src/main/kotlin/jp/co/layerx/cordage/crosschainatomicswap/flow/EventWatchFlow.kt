@@ -31,7 +31,7 @@ import org.web3j.protocol.http.HttpService
 @SchedulableFlow
 class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
-        // TODO Some ethereum parameters should be imported by .env
+        // TODO Use Node Configuration https://github.com/LayerXcom/cordage/issues/20
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
 

@@ -62,12 +62,12 @@ class TerminateAgreementFlowTest {
 
         val expected = input.terminate()
 
-        Assertions.assertThat(tx.inputs.single() == StateRef(stx.id, 0))
-        Assertions.assertThat(tx.tx.outputStates.single() == expected)
+        Assertions.assertThat(tx.inputs.single()).isEqualTo(StateRef(stx.id, 0))
+        Assertions.assertThat(tx.tx.outputStates.single()).isEqualTo(expected)
 
         val command = tx.tx.commands.single()
-        Assertions.assertThat(command.value is AgreementContract.AgreementCommand.Terminate)
-        Assertions.assertThat(command.signers.toSet() == expected.participants.map { it.owningKey }.toSet())
+        Assertions.assertThat(command.value).isInstanceOf(AgreementContract.AgreementCommand.Terminate::class.java)
+        Assertions.assertThat(command.signers.toSet()).isEqualTo(expected.participants.map { it.owningKey }.toSet())
         tx.verifyRequiredSignatures()
     }
 }

@@ -1,13 +1,15 @@
 package jp.co.layerx.cordage.crosschainatomicswap.flow
 
+import com.r3.corda.lib.tokens.contracts.utilities.of
 import io.mockk.every
 import io.mockk.mockk
 import jp.co.layerx.cordage.crosschainatomicswap.ALICE
 import jp.co.layerx.cordage.crosschainatomicswap.BOB
 import jp.co.layerx.cordage.crosschainatomicswap.CHARLIE
 import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.Settlement
+import jp.co.layerx.cordage.crosschainatomicswap.state.CorporateBond
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
-import jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
+import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.core.ALICE_NAME
@@ -20,6 +22,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.web3j.protocol.core.methods.response.TransactionReceipt
+import org.web3j.utils.Convert
+import java.math.BigDecimal
 
 
 class LockEtherFlowTest {
@@ -44,8 +48,18 @@ class LockEtherFlowTest {
 
     @Test
     fun `normal scenario`() {
-        val securityState = SecurityState(100, BOB.party, CHARLIE.party, "LayerX")
-        val proposalState = ProposalState(securityState, 1_000_000.toBigInteger(), "test_swap_id_123", ALICE.party, BOB.party)
+        val corporateBond = CorporateBond("LayerX", BigDecimal(1.1), listOf(CHARLIE.party))
+        val expectedQuantity = 100L
+        val priceEther = corporateBond.unitPriceEther.multiply(BigDecimal(expectedQuantity))
+        val expectedPriceWei = Convert.toWei(priceEther, Convert.Unit.ETHER).toBigInteger()
+
+        val proposalState = ProposalState(
+            UniqueIdentifier(),
+            expectedQuantity of corporateBond.toPointer<CorporateBond>(),
+            expectedPriceWei,
+            "test_swap_id_123",
+            ALICE.party,
+            BOB.party)
 
         val mockSettlement = mockk<Settlement>(relaxed = true)
         every {
@@ -53,9 +67,9 @@ class LockEtherFlowTest {
                 proposalState.swapId,
                 proposalState.fromEthereumAddress,
                 proposalState.toEthereumAddress,
-                proposalState.weiAmount,
-                proposalState.securityAmount.toBigInteger(),
-                proposalState.weiAmount
+                proposalState.priceWei,
+                proposalState.amount.quantity.toBigInteger(),
+                proposalState.priceWei
             ).send()
         } returns TransactionReceipt("0x0", "", "", "", "", "", "", "", "", "", "", listOf(), "")
 

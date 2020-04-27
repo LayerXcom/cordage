@@ -30,7 +30,7 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
         private const val ETHEREUM_RPC_URL = "http://localhost:8545"
         val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-        // TODO credentials should be imported by .env
+        // TODO Use Node Configuration https://github.com/LayerXcom/cordage/issues/20
         val credentials: Credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
         val eventMapping = mapOf<String, Event>("Set" to SimpleStorage.SET_EVENT)
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")

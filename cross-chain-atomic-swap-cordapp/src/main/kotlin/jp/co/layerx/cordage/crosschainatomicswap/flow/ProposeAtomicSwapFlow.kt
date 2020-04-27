@@ -1,7 +1,10 @@
 package jp.co.layerx.cordage.crosschainatomicswap.flow
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.lib.tokens.contracts.utilities.of
 import jp.co.layerx.cordage.crosschainatomicswap.contract.ProposalContract
+import jp.co.layerx.cordage.crosschainatomicswap.ethAddress
+import jp.co.layerx.cordage.crosschainatomicswap.state.CorporateBond
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
 import jp.co.layerx.cordage.crosschainatomicswap.types.ProposalStatus
 import net.corda.core.contracts.Command
@@ -9,21 +12,24 @@ import net.corda.core.contracts.UniqueIdentifier
 import net.corda.core.contracts.requireThat
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
+import net.corda.core.node.services.queryBy
+import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
 import net.corda.core.utilities.ProgressTracker.Step
+import org.web3j.utils.Convert
+import java.math.BigDecimal
 
 @InitiatingFlow
 @StartableByRPC
 class ProposeAtomicSwapFlow(
-    private val securityLinearId: String,
-    private val securityAmount: Int,
-    private val weiAmount: Long,
+    private val corporateBondLinearId: UniqueIdentifier,
+    private val quantity: Long,
     private val swapId: String,
     private val acceptor: Party,
-    private val FromEthereumAddress: String,
-    private val ToEthereumAddress: String,
+    private val fromEthereumAddress: String,
+    private val toEthereumAddress: String,
     private val mockLockEtherFlow: LockEtherFlow? = null
 ) : FlowLogic<Pair<SignedTransaction, String>>() {
     companion object {
@@ -58,18 +64,23 @@ class ProposeAtomicSwapFlow(
 
     @Suspendable
     override fun call(): Pair<SignedTransaction, String> {
+        val criteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(corporateBondLinearId))
+        val corporateBond = serviceHub.vaultService.queryBy<CorporateBond>(criteria).states.single().state.data
+
+        val priceEther = corporateBond.unitPriceEther.multiply(BigDecimal(quantity))
+        val priceWei = Convert.toWei(priceEther, Convert.Unit.ETHER).toBigInteger()
+
         progressTracker.currentStep = CREATE_OUTPUTSTATE
         val proposer = ourIdentity
-        val linearId = UniqueIdentifier.fromString(securityLinearId)
         val outputProposal = ProposalState(
-            linearId,
-            securityAmount,
-            weiAmount.toBigInteger(),
+            corporateBondLinearId,
+            quantity of corporateBond.toPointer<CorporateBond>(),
+            priceWei,
             swapId,
             proposer,
             acceptor,
-            FromEthereumAddress,
-            ToEthereumAddress,
+            fromEthereumAddress,
+            toEthereumAddress,
             ProposalStatus.PROPOSED
         )
 
@@ -82,6 +93,10 @@ class ProposeAtomicSwapFlow(
             .addCommand(proposeCommand)
 
         progressTracker.currentStep = VERIFYING_TRANSACTION
+        requireThat {
+            "ourIdentity's address must equal to fromEthereumAddress." using (outputProposal.fromEthereumAddress == proposer.ethAddress())
+            "Acceptor's address must equal to toEthereumAddress." using (outputProposal.toEthereumAddress == acceptor.ethAddress())
+        }
         txBuilder.verify(serviceHub)
 
         progressTracker.currentStep = SIGNING_TRANSACTION
@@ -109,19 +124,17 @@ class ProposeAtomicSwapFlowResponder(val flowSession: FlowSession) : FlowLogic<S
     override fun call(): SignedTransaction {
         val signedTransactionFlow = object : SignTransactionFlow(flowSession) {
             override fun checkTransaction(stx: SignedTransaction) = requireThat {
-                val output = stx.tx.outputs.single().data
-                "This must be an Proposal transaction" using (output is ProposalState)
-                // add any validation by yourself
+                val proposalState = stx.tx.outputs.single().data
+                "This must be an Proposal transaction" using (proposalState is ProposalState)
+                proposalState as ProposalState
+                "ourIdentity must be an acceptor." using (proposalState.acceptor == ourIdentity)
+                "Proposer's address must equal to fromEthereumAddress." using (proposalState.fromEthereumAddress == proposalState.proposer.ethAddress())
+                "ourIdentity's address must equal to toEthereumAddress." using (proposalState.toEthereumAddress == ourIdentity.ethAddress())
             }
         }
 
         val txId = subFlow(signedTransactionFlow).id
 
         return subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txId))
-
-        // If you agree the Proposal in checkTransaction function, execute StartEventWatchFlow automatically as below.
-        // val signedTx = subFlow(ReceiveFinalityFlow(otherSideSession = flowSession, expectedTxId = txWeJustSignedId.id))
-        // val signedProposalState = signedTx.coreTransaction.outputsOfType<ProposalState>().first()
-        // subFlow(StartEventWatchFlow(signedProposalState.linearId))
     }
 }

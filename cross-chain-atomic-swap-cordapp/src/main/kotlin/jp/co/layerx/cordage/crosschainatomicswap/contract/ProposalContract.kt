@@ -2,7 +2,6 @@ package jp.co.layerx.cordage.crosschainatomicswap.contract
 
 import jp.co.layerx.cordage.crosschainatomicswap.ethAddress
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
-import jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
 import jp.co.layerx.cordage.crosschainatomicswap.types.ProposalStatus
 import net.corda.core.transactions.LedgerTransaction
 import net.corda.core.contracts.*
@@ -25,8 +24,8 @@ open class ProposalContract: Contract {
                 "No inputs should be consumed when issuing a Proposal." using (tx.inputs.isEmpty())
                 "Only one output state should be created when issuing a Proposal." using (tx.outputs.size == 1)
                 val proposal = tx.outputsOfType<ProposalState>().single()
-                "A newly issued Proposal must have a positive securityAmount." using (proposal.securityAmount > 0)
-                "A newly issued Proposal must have a positive weiAmount." using (proposal.weiAmount > BigInteger.ZERO)
+                "A newly issued Proposal must have a positive securityAmount." using (proposal.amount.quantity > 0)
+                "A newly issued Proposal must have a positive weiAmount." using (proposal.priceWei > BigInteger.ZERO)
                 "A newly issued Proposal must have a not-empty swapId." using (proposal.swapId.isNotEmpty())
                 "fromEthereumAddress must equal to proposer's ethAddress." using (proposal.fromEthereumAddress == proposal.proposer.ethAddress())
                 "toEthereumAddress must equal to acceptor's ethAddress." using (proposal.toEthereumAddress == proposal.acceptor.ethAddress())
@@ -36,12 +35,8 @@ open class ProposalContract: Contract {
                     (proposalCommand.signers.toSet() == proposal.participants.map { it.owningKey }.toSet())
             }
             is ProposalCommands.Consume -> requireThat {
-                "An Proposal Consume transaction should only consume two input states." using (tx.inputs.size == 2)
-                "An Proposal Consume transaction should only create two output states." using (tx.outputs.size == 2)
                 "An Proposal Consume transaction should consume only one input proposal state." using (tx.inputsOfType<ProposalState>().size == 1)
                 "An Proposal Consume transaction should create only one output proposal state." using (tx.outputsOfType<ProposalState>().size == 1)
-                "An Proposal Consume transaction should consume only one input security state." using (tx.inputsOfType<SecurityState>().size == 1)
-                "An Proposal Consume transaction should create only one output security state." using (tx.outputsOfType<SecurityState>().size == 1)
 
                 val inputProposal = tx.inputsOfType<ProposalState>().single()
                 val outputProposal = tx.outputsOfType<ProposalState>().single()

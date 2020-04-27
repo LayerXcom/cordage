@@ -15,41 +15,41 @@ internal class AgreementTest {
 
     @Test
     fun origin() {
-        Assertions.assertThat(actual.origin == ALICE.party)
+        Assertions.assertThat(actual.origin).isEqualTo(ALICE.party)
     }
 
     @Test
     fun target() {
-        Assertions.assertThat(actual.target == BOB.party)
+        Assertions.assertThat(actual.target).isEqualTo(BOB.party)
     }
 
     @Test
     fun status() {
-        Assertions.assertThat(actual.status == AgreementStatus.MADE)
+        Assertions.assertThat(actual.status).isEqualTo(AgreementStatus.MADE)
     }
 
     @Test
     fun agreementBody() {
-        Assertions.assertThat(actual.agreementBody == expectedAgreementBody)
+        Assertions.assertThat(actual.agreementBody).isEqualTo(expectedAgreementBody)
     }
 
     @Test
     fun linearId() {
-        Assertions.assertThat(actual.linearId.toString() == expectedUuid.toString())
+        Assertions.assertThat(actual.linearId.toString()).isEqualTo(expectedUuid.toString())
     }
 
     @Test
     fun participants() {
-        Assertions.assertThat(actual.participants == setOf(ALICE.party, BOB.party))
+        Assertions.assertThat(actual.participants.toSet()).isEqualTo(setOf(ALICE.party, BOB.party))
     }
 
     @Test
     fun terminate() {
         val terminatedAgreement = actual.terminate()
-        Assertions.assertThat(terminatedAgreement.status == AgreementStatus.TERMINATED)
+        Assertions.assertThat(terminatedAgreement.status).isEqualTo(AgreementStatus.TERMINATED)
 
         val expected = actual.copy(status = AgreementStatus.TERMINATED)
-        Assertions.assertThat(terminatedAgreement == expected)
+        Assertions.assertThat(terminatedAgreement).isEqualTo(expected)
     }
 
 }

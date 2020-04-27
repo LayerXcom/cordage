@@ -41,48 +41,59 @@ See https://docs.corda.net/tutorial-cordapp.html#running-the-example-cordapp.
 Use the `deployNodes` task and `./build/nodes/runnodes` script.
 
 
-## UAT normal scenario
-### Assumptions and constraints
-Party A wants to buy 100 amount of security that is owned by Party B.
+## UAT scenario
+### Assumption to participants
+There are 3 participants.
 
-- Party A pays 1 ether to Party B
-- Party B pays 100 amount of security to Party A
+Party C is an issuer of CorporateBond.
 
-This is expected to happen in atomic way.
+Party A wants to buy 100 amount of corporate bond that is owned by Party B.
+
+- Party A remits by ether to Party B (The unit price is specified with the initial CorporateBond registration)
+- Party B transfers 100 amount of corporate bond to Party A
+
+This is expected to happen in an atomic way.
+
+### Existing processes (nodes)
+Several processes (nodes) exist in this scenario.
+
+- Party A's Corda Node
+- Party B's Corda Node
+- Party C's Corda Node
+- Corda Notary; run with PostgreSQL
+- Ethereum Node; you may easily run by Ganache CLI
+
+Every Data propagation between Corda and Ethereum is executed by Corda Nodes or Notary.
+Other processes are not required.
 
 ### Setup
-
-#### Issue Security State
-Run SecurityIssueFlow from Security Issuer ParticipantC:
-
+#### Register CorporateBond from Party C
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityIssueFlow amount: 100, owner: "O=ParticipantB,L=New York,C=US", name: "LayerX"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.CorporateBondRegisterFlow name: "LayerX", unitPriceEther: "0.012345678901234567", observer: "O=ParticipantA,L=London,C=GB"
 ```
 
-This flow returns linearId of SecurityState
+at the same time, CorporateBond state is shared to Party A to notify the unit price of the corporate bond.
 
-### vaultQuery for Security State
-Run vaultQuery from ParticipantB:
-
+Then, get the linearId of CorporateBond
 ```
-run vaultQuery contractStateType: jp.co.layerx.cordage.crosschainatomicswap.state.SecurityState
+run vaultQuery contractStateType: jp.co.layerx.cordage.crosschainatomicswap.state.CorporateBond
 ```
 
-You can get linearId of Security State by the result.
-
-### Transfer Security State
-
+#### Issue CorporateBond from PartyC to Party B
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.SecurityTransferFlow linearId: "961ba806-e792-447f-a71e-8441f9ac8601", newOwner: "O=ParticipantA,L=London,C=GB"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.CorporateBondIssueFlow linearId: "52a6335d-f71e-43aa-86c4-696afdee0fdd", quantity: 1000, holder: "O=ParticipantB,L=New York,C=US"
 ```
 
-This flow returns linearId of SecurityState.
+Then, get the linearId of issued CorporateBond token by running below from Party B
+```
+run vaultQuery contractStateType: com.r3.corda.lib.tokens.contracts.states.FungibleToken
+```
 
 ### Propose Cross-Chain Atomic Swap
-Run ProposeAtomicSwapFlow from ParticipantA with ParticipantB's securityLinearId:
+Run ProposeAtomicSwapFlow from ParticipantA with corporateBondLinearId:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow securityLinearId: "b78cb920-f957-447e-b0bd-937341d99065", securityAmount: 100, weiAmount: 1000000000000000000, swapId: "3", acceptor: "O=ParticipantB,L=New York,C=US", FromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", ToEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b", mockLockEtherFlow: null
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.ProposeAtomicSwapFlow corporateBondLinearId: "52a6335d-f71e-43aa-86c4-696afdee0fdd", quantity: 100, swapId: "3", acceptor: "O=ParticipantB,L=New York,C=US", fromEthereumAddress: "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0", toEthereumAddress: "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b", mockLockEtherFlow: null
 ```
 
 The acceptor ParticipantB can validate this Proposal with `checkTransaction()` in `ProposeAtomicSwapFlowResponder`.
@@ -100,7 +111,7 @@ You can get linearId of Proposal State by the result.
 Go to the CRaSH shell for ParticipantB, and run the `StartEventWatchFlow` with `proposalStateLinearId`:
 
 ```
-flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "1f77abf7-e209-42e6-8327-a2279c85aab7"
+flow start jp.co.layerx.cordage.crosschainatomicswap.flow.StartEventWatchFlow proposalStateLinearId: "c8944c30-3db1-4e76-a0e2-1d06269d6bac"
 ```
 
 You can now start monitoring the node's flow activity...

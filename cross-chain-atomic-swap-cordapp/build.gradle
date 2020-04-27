@@ -15,6 +15,10 @@ buildscript {
         slf4j_version = constants.getProperty("slf4jVersion")
         corda_platform_version = constants.getProperty("platformVersion").toInteger()
         corda_minimum_platform_version = constants.getProperty("minimumPlatformVersion").toInteger()
+
+        // Token SDK
+        tokens_release_group = constants.getProperty("tokensReleaseGroup")
+        tokens_release_version = constants.getProperty("tokensReleaseVersion")
     }
 
     repositories {
@@ -80,6 +84,12 @@ dependencies {
     cordaCompile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j_version"
     cordaCompile "org.apache.logging.log4j:log4j-web:$log4j_version"
     cordaCompile "org.slf4j:jul-to-slf4j:$slf4j_version"
+
+    // Token SDK
+    cordapp "$tokens_release_group:tokens-contracts:$tokens_release_version"
+    cordapp "$tokens_release_group:tokens-workflows:$tokens_release_version"
+    cordapp "$tokens_release_group:tokens-selection:$tokens_release_version"
+    cordapp "$tokens_release_group:tokens-money:$tokens_release_version"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -109,6 +119,10 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         projectCordapp {
             config project.file("src/main/resources/ethAddress.properties")
         }
+        cordapp("$tokens_release_group:tokens-contracts:$tokens_release_version")
+        cordapp("$tokens_release_group:tokens-workflows:$tokens_release_version")
+        cordapp("$tokens_release_group:tokens-selection:$tokens_release_version")
+        cordapp("$tokens_release_group:tokens-money:$tokens_release_version")
     }
 
     node {
