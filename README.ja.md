@@ -45,14 +45,14 @@ PvP (Payment vs Payment) およびDvP (Payment vs Delivery) での決済が可�
 「Cordageが相互運用を可能にする方法」の章で説明したデータ伝播およびデータ検証機能は、次のように細分化された機能で構成されます。
 
 データ伝搬
--P1：CordeからEthereum Txを作成して送信する機能
--P2：EthereumからCorda Flowを実行する機能（おそらく不要）
--P3：EthereumでファイナライズされたTx /イベントをCordaにインポートする機能
--P4：CordaでファイナライズされたTxをEthereumにインポートする機能
+- P1：CordeからEthereum Txを作成して送信する機能
+- P2：EthereumからCorda Flowを実行する機能（おそらく不要）
+- P3：EthereumでファイナライズされたTx /イベントをCordaにインポートする機能
+- P4：CordaでファイナライズされたTxをEthereumにインポートする機能
 
 データ検証
--V1：P3でインポートされたEthereum Tx、イベント、ブロックを検証し、ブロックの最終性を検証する機能
--V2：P4でインポートされたTx値を検証し、Corda Txの最終性を検証する機能
+- V1：P3でインポートされたEthereum Tx、イベント、ブロックを検証し、ブロックの最終性を検証する機能
+- V2：P4でインポートされたTx値を検証し、Corda Txの最終性を検証する機能
 
 ### 実装ステータス
 これまでに以下のモジュールを実装しました。
