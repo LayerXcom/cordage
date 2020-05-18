@@ -11,6 +11,7 @@ import net.corda.core.flows.InitiatingFlow
 import net.corda.core.flows.StartableByRPC
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.ProgressTracker
+import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
 import java.math.BigInteger
@@ -18,14 +19,12 @@ import java.math.BigInteger
 @InitiatingFlow
 @StartableByRPC
 class StartEventWatchFlow(private val searchId: Int) : FlowLogic<Unit>() {
+
     companion object {
-        // TODO Use Node Configuration https://github.com/LayerXcom/cordage/issues/20
-        private const val ETHEREUM_RPC_URL = "http://localhost:8545"
-        private const val ETHEREUM_NETWORK_ID = "5777"
         const val EVENT_NAME = "Set"
-        val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-        val targetContractAddress = SimpleStorage.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)
-        object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
+
+        object READING_CONFIG : ProgressTracker.Step("Reading config from file.")
+        object CREATING_WATCHERSTATE : ProgressTracker.Step("Creating new WatcherState.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
         object VERIFYING_TRANSACTION : ProgressTracker.Step("Verifying a WatcherState transaction.")
         object SIGNING_TRANSACTION : ProgressTracker.Step("Signing transaction with our private key.")
@@ -34,11 +33,12 @@ class StartEventWatchFlow(private val searchId: Int) : FlowLogic<Unit>() {
         }
 
         fun tracker() = ProgressTracker(
-                CREATING_WATCHERSTATE,
-                GENERATING_TRANSACTION,
-                VERIFYING_TRANSACTION,
-                SIGNING_TRANSACTION,
-                FINALISING_TRANSACTION
+            READING_CONFIG,
+            CREATING_WATCHERSTATE,
+            GENERATING_TRANSACTION,
+            VERIFYING_TRANSACTION,
+            SIGNING_TRANSACTION,
+            FINALISING_TRANSACTION
         )
     }
 
@@ -46,6 +46,14 @@ class StartEventWatchFlow(private val searchId: Int) : FlowLogic<Unit>() {
 
     @Suspendable
     override fun call() {
+
+        progressTracker.currentStep = READING_CONFIG
+        val config = serviceHub.getAppContext().config
+        val ETHEREUM_RPC_URL = config.getString("rpcUrl")
+        val ETHEREUM_NETWORK_ID = config.getString("networkId")
+        val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+        val targetContractAddress = SimpleStorage.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)
+
         progressTracker.currentStep = CREATING_WATCHERSTATE
         val fromBlockNumber = BigInteger.ZERO
         val recentBlockNumber = web3.ethBlockNumber().send().blockNumber
@@ -54,8 +62,8 @@ class StartEventWatchFlow(private val searchId: Int) : FlowLogic<Unit>() {
         progressTracker.currentStep = GENERATING_TRANSACTION
         val cmd = Command(WatcherContract.Commands.Issue(), ourIdentity.owningKey)
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
-                .addOutputState(output, WatcherContract.contractID)
-                .addCommand(cmd)
+            .addOutputState(output, WatcherContract.contractID)
+            .addCommand(cmd)
 
         progressTracker.currentStep = VERIFYING_TRANSACTION
         txBuilder.verify(serviceHub)

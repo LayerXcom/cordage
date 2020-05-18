@@ -59,8 +59,7 @@ class CustomValidatingNotaryFlow(otherSide: FlowSession, service: CustomValidati
         val data = "Terminate: " + agreement.agreementBody
 
         // Add custom verification logic
-        // TODO Use Node Configuration https://github.com/LayerXcom/cordage/issues/20
-        val ETHEREUM_RPC_URL = "http://localhost:8545"
+        val ETHEREUM_RPC_URL = serviceHub.getAppContext().config.getString("rpcUrl")
         val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
         val tx = Transaction.createFunctionCallTransaction(
             "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1",

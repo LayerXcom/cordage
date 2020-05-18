@@ -7,7 +7,7 @@ import java.util.*
 
 private val HEX_CHARS = "0123456789ABCDEF".toCharArray()
 
-fun ByteArray.toHex() : String {
+fun ByteArray.toHex(): String {
     val result = StringBuffer()
 
     forEach {
@@ -25,7 +25,7 @@ private val ethAddress = Properties()
 
 fun Party.ethAddress(): String {
     if (ethAddress.isEmpty) {
-        val url = javaClass.classLoader.getResource("ethAddress.properties")
+        val url = javaClass.classLoader.getResource("config.conf")
         if (url != null) {
             ethAddress.load(url.openStream())
         }
@@ -36,5 +36,5 @@ fun Party.ethAddress(): String {
         }
     }
 
-    return ethAddress.getProperty(this.name.toString(), "0x0")
+    return ethAddress.getProperty(this.name.organisation.replace(" ", ""), "0x0")
 }

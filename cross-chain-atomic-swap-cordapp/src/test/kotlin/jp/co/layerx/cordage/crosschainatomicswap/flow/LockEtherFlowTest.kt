@@ -1,5 +1,6 @@
 package jp.co.layerx.cordage.crosschainatomicswap.flow
 
+import com.google.common.collect.ImmutableList
 import com.r3.corda.lib.tokens.contracts.utilities.of
 import io.mockk.every
 import io.mockk.mockk
@@ -7,16 +8,13 @@ import jp.co.layerx.cordage.crosschainatomicswap.ALICE
 import jp.co.layerx.cordage.crosschainatomicswap.BOB
 import jp.co.layerx.cordage.crosschainatomicswap.CHARLIE
 import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.Settlement
+import jp.co.layerx.cordage.crosschainatomicswap.readConfig
 import jp.co.layerx.cordage.crosschainatomicswap.state.CorporateBond
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
 import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.identity.CordaX500Name
 import net.corda.core.utilities.getOrThrow
 import net.corda.testing.core.ALICE_NAME
-import net.corda.testing.node.MockNetwork
-import net.corda.testing.node.MockNetworkNotarySpec
-import net.corda.testing.node.MockNodeParameters
-import net.corda.testing.node.StartedMockNode
+import net.corda.testing.node.*
 import org.assertj.core.api.Assertions
 import org.junit.After
 import org.junit.Before
@@ -24,6 +22,7 @@ import org.junit.Test
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.utils.Convert
 import java.math.BigDecimal
+import java.util.*
 
 
 class LockEtherFlowTest {
@@ -32,12 +31,20 @@ class LockEtherFlowTest {
 
     @Before
     fun setUp() {
+
+        val customConfig: MutableMap<String, String> = LinkedHashMap()
+        customConfig["rpcUrl"] = readConfig("rpcUrl")
+        customConfig["networkId"] = readConfig("networkId")
+        customConfig["privateKey"] = readConfig("privateKey")
+
         network = MockNetwork(
-            listOf("jp.co.layerx.cordage.crosschainatomicswap"),
-            notarySpecs = listOf(MockNetworkNotarySpec(CordaX500Name("Notary", "London", "GB")))
-        )
-        a = network.createNode(MockNodeParameters(legalName = ALICE_NAME))
-        val startedNodes = arrayListOf(a)
+            MockNetworkParameters()
+                .withCordappsForAllNodes(
+                    ImmutableList.of(
+                        TestCordapp.findCordapp("jp.co.layerx.cordage.crosschainatomicswap")
+                            .withConfig(customConfig))))
+
+        a = network.createNode(MockNodeParameters(legalName = ALICE_NAME, configOverrides = MockNodeConfigOverrides()))
         network.runNetwork()
     }
 

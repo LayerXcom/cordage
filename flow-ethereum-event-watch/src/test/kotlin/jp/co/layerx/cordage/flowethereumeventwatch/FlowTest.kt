@@ -1,5 +1,6 @@
 package jp.co.layerx.cordage.flowethereumeventwatch
 
+import com.google.common.collect.ImmutableList
 import org.assertj.core.api.Assertions.*
 
 import net.corda.client.rpc.notUsed
@@ -13,6 +14,7 @@ import org.junit.Test
 import jp.co.layerx.cordage.flowethereumeventwatch.flow.StartEventWatchFlow
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
+import java.util.LinkedHashMap
 
 class FlowTests {
     private lateinit var network: MockNetwork
@@ -20,8 +22,19 @@ class FlowTests {
 
     @Before
     fun setup() {
-        network = MockNetwork(MockNetworkParameters(threadPerNode = true, cordappsForAllNodes = listOf(
-                TestCordapp.findCordapp("jp.co.layerx.cordage.flowethereumeventwatch"))))
+
+        val customConfig: MutableMap<String, String> = LinkedHashMap()
+        customConfig["rpcUrl"] = "http://localhost:8545"
+        customConfig["networkId"] = "5777"
+        customConfig["privateKey"] = "0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d"
+
+        network = MockNetwork(
+            MockNetworkParameters(threadPerNode = true)
+                .withCordappsForAllNodes(
+                    ImmutableList.of(
+                        TestCordapp.findCordapp("jp.co.layerx.cordage.flowethereumeventwatch")
+                            .withConfig(customConfig))))
+
         node = network.createNode()
     }
 

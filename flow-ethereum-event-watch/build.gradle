@@ -102,6 +102,9 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
 
     nodeDefaults {
         rpcUsers = [[ user: "user1", "password": "password", "permissions": ["ALL"]]]
+        projectCordapp {
+            config project.file("src/main/resources/config.conf")
+        }
     }
 
     node {

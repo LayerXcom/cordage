@@ -28,13 +28,12 @@ import java.math.BigInteger
 @SchedulableFlow
 class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
-        private const val ETHEREUM_RPC_URL = "http://localhost:8545"
-        val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
         // TODO Use Node Configuration https://github.com/LayerXcom/cordage/issues/20
-        val credentials: Credentials = Credentials.create("0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d")
         val eventMapping = mapOf<String, Event>("Set" to SimpleStorage.SET_EVENT)
-        object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
-        object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
+
+        object READING_CONFIG : ProgressTracker.Step("Reading config from file.")
+        object CREATING_WATCHERSTATE : ProgressTracker.Step("Creating new WatcherState.")
+        object WATCHING_EVENT : ProgressTracker.Step("Getting Ethereum Events.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
         object VERIFYING_TRANSACTION : ProgressTracker.Step("Verifying a WatcherState transaction.")
         object SIGNING_TRANSACTION : ProgressTracker.Step("Signing transaction with our private key.")
@@ -43,12 +42,13 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         }
 
         fun tracker() = ProgressTracker(
-                CREATING_WATCHERSTATE,
-                WATCHING_EVENT,
-                GENERATING_TRANSACTION,
-                VERIFYING_TRANSACTION,
-                SIGNING_TRANSACTION,
-                FINALISING_TRANSACTION
+            READING_CONFIG,
+            CREATING_WATCHERSTATE,
+            WATCHING_EVENT,
+            GENERATING_TRANSACTION,
+            VERIFYING_TRANSACTION,
+            SIGNING_TRANSACTION,
+            FINALISING_TRANSACTION
         )
     }
 
@@ -56,6 +56,14 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
 
     @Suspendable
     override fun call(): String {
+        progressTracker.currentStep = READING_CONFIG
+        val config = serviceHub.getAppContext().config
+        val ETHEREUM_RPC_URL = config.getString("rpcUrl")
+        val ETHEREUM_PRIVATE_KEY = config.getString("privateKey")
+
+        val web3 = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+        val credentials = Credentials.create(ETHEREUM_PRIVATE_KEY)
+
         progressTracker.currentStep = WATCHING_EVENT
         val input = serviceHub.toStateAndRef<WatcherState>(stateRef)
         val fromBlockNumber = input.state.data.fromBlockNumber
@@ -66,20 +74,20 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         val event = eventMapping[eventName]
 
         val filter = EthFilter(DefaultBlockParameter.valueOf(fromBlockNumber),
-                DefaultBlockParameter.valueOf(toBlockNumber),
-                targetContractAddress)
+            DefaultBlockParameter.valueOf(toBlockNumber),
+            targetContractAddress)
 
         val ethLogs = web3.ethGetLogs(filter).send()
 
         val decodedLogs = ethLogs.result?.map { (it.get() as Log).data }
-                ?.map { DefaultFunctionReturnDecoder.decode(it, event?.nonIndexedParameters) }
+            ?.map { DefaultFunctionReturnDecoder.decode(it, event?.nonIndexedParameters) }
         if (decodedLogs != null && decodedLogs.isNotEmpty()) {
             decodedLogs.forEach { abiTypes ->
                 // find event values by searchId
                 val eventValues = abiTypes?.map { it.value as BigInteger }
                 val filteredEventValues = eventValues?.filter { e -> e == searchId }
                 if (filteredEventValues != null && filteredEventValues.isNotEmpty()) {
-                    doSomething(input.state.data)
+                    doSomething(input.state.data, web3, credentials)
                     return "Ethereum Event with id: $searchId watched and send TX Completed"
                 }
             }
@@ -93,9 +101,9 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         progressTracker.currentStep = GENERATING_TRANSACTION
         val watchCmd = Command(WatcherContract.Commands.Watch(), ourIdentity.owningKey)
         val txBuilder = TransactionBuilder(serviceHub.networkMapCache.notaryIdentities.first())
-                .addInputState(input)
-                .addOutputState(output, contractID)
-                .addCommand(watchCmd)
+            .addInputState(input)
+            .addOutputState(output, contractID)
+            .addCommand(watchCmd)
 
         progressTracker.currentStep = VERIFYING_TRANSACTION
         txBuilder.verify(serviceHub)
@@ -109,9 +117,9 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
         return "Event Watched. (fromBlockNumber: ${fromBlockNumber}, toBlockNumber: ${toBlockNumber})"
     }
 
-    private fun doSomething(input: WatcherState) {
+    private fun doSomething(input: WatcherState, web3: Web3j, credentials: Credentials) {
         val simpleStorage: SimpleStorage = SimpleStorage.load(input.targetContractAddress, web3, credentials,
-                StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
+            StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(500000)))
         simpleStorage.set(input.searchId.inc()).send()
     }
 }

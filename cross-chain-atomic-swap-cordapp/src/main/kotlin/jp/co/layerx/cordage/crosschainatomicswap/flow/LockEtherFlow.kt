@@ -3,7 +3,9 @@ package jp.co.layerx.cordage.crosschainatomicswap.flow
 import co.paralleluniverse.fibers.Suspendable
 import jp.co.layerx.cordage.crosschainatomicswap.ethWrapper.Settlement
 import jp.co.layerx.cordage.crosschainatomicswap.state.ProposalState
-import net.corda.core.flows.*
+import net.corda.core.flows.FlowLogic
+import net.corda.core.flows.InitiatingFlow
+import net.corda.core.flows.StartableByRPC
 import net.corda.core.utilities.ProgressTracker
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
@@ -15,20 +17,17 @@ import java.math.BigInteger
 @StartableByRPC
 class LockEtherFlow(
     private val proposalState: ProposalState,
-    private val settlement: Settlement = Settlement.load(targetContractAddress, web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(50000000)))
+    private val settlement: Settlement? = null
 ) : FlowLogic<String>() {
     companion object {
-        // TODO Use Node Configuration https://github.com/LayerXcom/cordage/issues/20
-        private const val ETHEREUM_RPC_URL = "http://localhost:8545"
-        private const val ETHEREUM_NETWORK_ID = "5777"
-        private const val ETHEREUM_PRIVATE_KEY = "0x6cbed15c793ce57650b9877cf6fa156fbef513c4e6134f022a85b1ffdd59b2a1"
-        val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-        val targetContractAddress = Settlement.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)!!
-        val credentials: Credentials = Credentials.create(ETHEREUM_PRIVATE_KEY)
 
+        object READING_CONFIG : ProgressTracker.Step("Reading config from node config file.")
+        object LOADING_WEB3 : ProgressTracker.Step("Loading web3 instance.")
         object SEND_TRANSACTION_TO_ETHEREUM_CONTRACT : ProgressTracker.Step("Sending ether to Settlement Contract for locking.")
 
         fun tracker() = ProgressTracker(
+            READING_CONFIG,
+            LOADING_WEB3,
             SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
         )
     }
@@ -37,10 +36,29 @@ class LockEtherFlow(
 
     @Suspendable
     override fun call(): String {
+        progressTracker.currentStep = READING_CONFIG
+        var _settlement: Settlement
+        val config = serviceHub.getAppContext().config
+        val ETHEREUM_RPC_URL = config.getString("rpcUrl")
+        val ETHEREUM_NETWORK_ID = config.getString("networkId")
+        val ETHEREUM_PRIVATE_KEY = config.getString("privateKey")
+
+        progressTracker.currentStep = LOADING_WEB3
+
+        val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+        val targetContractAddress = Settlement.getPreviouslyDeployedAddress(ETHEREUM_NETWORK_ID)!!
+        val credentials: Credentials = Credentials.create(ETHEREUM_PRIVATE_KEY)
+
         progressTracker.currentStep = SEND_TRANSACTION_TO_ETHEREUM_CONTRACT
 
+        if (settlement != null) {
+            _settlement = settlement
+        } else {
+            _settlement = Settlement.load(targetContractAddress, web3, credentials, StaticGasProvider(BigInteger.valueOf(1), BigInteger.valueOf(50000000)))
+        }
+
         // load Smart Contract Wrapper then send the transaction
-        val response = settlement.lock(
+        val response = _settlement.lock(
             proposalState.swapId,
             proposalState.fromEthereumAddress,
             proposalState.toEthereumAddress,

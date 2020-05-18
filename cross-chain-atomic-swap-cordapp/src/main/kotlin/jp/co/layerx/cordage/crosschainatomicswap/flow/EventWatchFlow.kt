@@ -31,10 +31,6 @@ import org.web3j.protocol.http.HttpService
 @SchedulableFlow
 class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
     companion object {
-        // TODO Use Node Configuration https://github.com/LayerXcom/cordage/issues/20
-        private const val ETHEREUM_RPC_URL = "http://localhost:8545"
-        val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-
         val eventMapping = mapOf<String, Event>("Locked" to Settlement.LOCKED_EVENT)
 
         val swapDetailType = listOf(
@@ -45,6 +41,8 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
             object : TypeReference<Uint8?>() {}
         )
 
+        object READING_CONFIG: ProgressTracker.Step("Reading config from node config file.")
+        object LOADING_WEB3: ProgressTracker.Step("Loading web3 instance.")
         object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
@@ -68,6 +66,15 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
 
     @Suspendable
     override fun call(): String {
+        progressTracker.currentStep = READING_CONFIG
+
+        val config = serviceHub.getAppContext().config
+        val ETHEREUM_RPC_URL = config.getString("rpcUrl")
+
+        progressTracker.currentStep = LOADING_WEB3
+
+        val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+
         progressTracker.currentStep = WATCHING_EVENT
         val input = serviceHub.toStateAndRef<WatcherState>(stateRef)
         val watcherState = input.state.data
