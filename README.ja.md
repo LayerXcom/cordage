@@ -1,4 +1,4 @@
-# ![Cordage](./docs/images/cordage.png)
+# ![Cordage](https://layerxcom.github.io/cordage/images/cordage.png)
 
 - [English](./README.md)
 - [日本語](./README.ja.md)
@@ -86,4 +86,4 @@ Cordageは[the Apache License, Version 2.0](./LICENSE)にて提供されてい�
 - [etaroid](https://github.com/etaroid)
 
 ## スポンサー
-<a href="https://layerx.co.jp/en/"><img src="./docs/images/layerx.png" alt="LayerX" width="500"></a><br />
+<a href="https://layerx.co.jp/en/"><img src="https://layerxcom.github.io/cordage/images/layerx.png" alt="LayerX" width="500"></a><br />

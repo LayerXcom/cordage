@@ -1,10 +1,10 @@
 # Flow Ethereum Transaction CorDapp
 <p align="center">
-  <img src="../docs/images/corda.png" alt="Corda" width="500">
+  <img src="https://layerxcom.github.io/cordage/images/corda.png" alt="Corda" width="500">
 </p>
 
 <p align="center">
-  <img src="../docs/images/ethereum.png" alt="Ethereum" width="500">
+  <img src="https://layerxcom.github.io/cordage/images/ethereum.png" alt="Ethereum" width="500">
 </p>
 
 ## Sending Transaction to Ethereum

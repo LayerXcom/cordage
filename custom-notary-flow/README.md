@@ -1,10 +1,10 @@
 # Custom Notary Flow
 <p align="center">
-  <img src="../docs/images/corda.png" alt="Corda" width="500">
+  <img src="https://layerxcom.github.io/cordage/images/corda.png" alt="Corda" width="500">
 </p>
 
 <p align="center">
-  <img src="../docs/images/ethereum.png" alt="Ethereum" width="500">
+  <img src="https://layerxcom.github.io/cordage/images/ethereum.png" alt="Ethereum" width="500">
 </p>
 
 This CorDapp provides a simple example of how to propagate data from Corda to Ethereum by creating a Custom Notary Flow.

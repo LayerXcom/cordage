@@ -1,0 +1,9 @@
+{
+  "name": "cordage-documentation-generator",
+  "version": "0.0.1",
+  "description": "Cordage documentation generator by Hugo and Docsy theme.",
+  "devDependencies": {
+    "autoprefixer": "^9.7.6",
+    "postcss-cli": "^7.1.1"
+  }
+}
