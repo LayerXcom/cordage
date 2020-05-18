@@ -6,7 +6,7 @@
 Cordageは、[Corda](https://www.corda.net/)と他のブロックチェーン間の相互運用を可能にします。
 信頼できる第三者を追加しなくともブロックチェーン間で情報を伝播、取得、検証することを可能にするいくつかのモジュールを提供します。
 
-最初の段階では、Ethereumや[Quorum](https://www.goquorum.com/)などのEVMベースのブロックチェーンに焦点を当てます。
+最初の段階では、Ethereumや[Quorum](https://www.goquorum.com/)、[Hyperledger Besu](https://www.hyperledger.org/use/besu)などのEVMベースのブロックチェーンに焦点を当てます。
 
 警告：Cordageはアルファ品質のソフトウェアであり、改善と修正は頻繁に行われます。
 

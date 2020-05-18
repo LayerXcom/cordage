@@ -7,7 +7,7 @@ Cordage makes the interoperability possible between [Corda](https://www.corda.ne
 by providing several modules that propagate, pull and verify information between Blockchains
 without further trusted third party.
 
-In the first stage, we focus on EVM based blockchain such as Ethereum and [Quorum](https://www.goquorum.com/).
+In the first stage, we focus on EVM based blockchain such as Ethereum, [Quorum](https://www.goquorum.com/) and [Hyperledger Besu](https://www.hyperledger.org/use/besu).
 
 WARNING: Cordage is alpha quality software, improvements and fixes are made frequently.
 
