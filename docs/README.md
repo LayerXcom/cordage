@@ -1,4 +1,5 @@
 # Cordage documentation generator
+![Publish GitHub Pages](https://github.com/LayerXcom/cordage/workflows/Publish%20GitHub%20Pages/badge.svg)
 
 To generate the site, Hugo and Docsy theme are used.
 
