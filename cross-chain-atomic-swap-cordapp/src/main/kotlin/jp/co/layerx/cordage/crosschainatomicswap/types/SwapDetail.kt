@@ -20,7 +20,11 @@ class SwapDetail(val fromEthereumAddress: Address,
         fun fromLockedEvent(lockedEvent: LockedEvent): SwapDetail {
             val encodedSwapDetail = lockedEvent.encodedSwapDetail
             val stringEncodedSwapDetail = "0x" + encodedSwapDetail.toHex()
-            val decodedSwapDetailList = DefaultFunctionReturnDecoder.decode(stringEncodedSwapDetail, EventWatchFlow.swapDetailType as MutableList<TypeReference<Type<Any>>>?)
+            @Suppress("UNCHECKED_CAST")
+            val decodedSwapDetailList = DefaultFunctionReturnDecoder.decode(
+                stringEncodedSwapDetail,
+                EventWatchFlow.swapDetailType as MutableList<TypeReference<Type<Any>>>?
+            )
             return listToSwapDetail(decodedSwapDetailList)
         }
 
