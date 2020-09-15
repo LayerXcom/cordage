@@ -86,7 +86,7 @@ run vaultQuery contractStateType: jp.co.layerx.cordage.crosschainatomicswap.stat
 flow start jp.co.layerx.cordage.crosschainatomicswap.flow.CorporateBondIssueFlow linearId: "52a6335d-f71e-43aa-86c4-696afdee0fdd", quantity: 1000, holder: "O=ParticipantB,L=New York,C=US"
 ```
 
-Then, get the linearId of issued CorporateBond token by running below from Party B
+Then, you can check issued CorporateBond token by running below from Party B
 ```
 run vaultQuery contractStateType: com.r3.corda.lib.tokens.contracts.states.FungibleToken
 ```

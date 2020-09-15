@@ -41,10 +41,13 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
             object : TypeReference<Uint8?>() {}
         )
 
-        object READING_CONFIG: ProgressTracker.Step("Reading config from node config file.")
-        object LOADING_WEB3: ProgressTracker.Step("Loading web3 instance.")
-        object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
+        // TODO: Use Environment Variables because we cannot access serviceHub from companion object
+        // In this flow, the web3 instance must be singleton because the call() is repeatedly called.
+        private const val ETHEREUM_RPC_URL = "http://localhost:8545"
+        val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
+
         object WATCHING_EVENT: ProgressTracker.Step("Getting Ethereum Events.")
+        object CREATING_WATCHERSTATE: ProgressTracker.Step("Creating new WatcherState.")
         object GENERATING_TRANSACTION : ProgressTracker.Step("Generating a WatcherState transaction.")
         object VERIFYING_TRANSACTION : ProgressTracker.Step("Verifying a WatcherState transaction.")
         object SIGNING_TRANSACTION : ProgressTracker.Step("Signing transaction with our private key.")
@@ -66,15 +69,6 @@ class EventWatchFlow(private val stateRef: StateRef) : FlowLogic<String>() {
 
     @Suspendable
     override fun call(): String {
-        progressTracker.currentStep = READING_CONFIG
-
-        val config = serviceHub.getAppContext().config
-        val ETHEREUM_RPC_URL = config.getString("rpcUrl")
-
-        progressTracker.currentStep = LOADING_WEB3
-
-        val web3: Web3j = Web3j.build(HttpService(ETHEREUM_RPC_URL))
-
         progressTracker.currentStep = WATCHING_EVENT
         val input = serviceHub.toStateAndRef<WatcherState>(stateRef)
         val watcherState = input.state.data
