@@ -14,6 +14,7 @@ open class ProposalContract: Contract {
 
     interface ProposalCommands : CommandData {
         class Propose : ProposalCommands
+        class Abort : ProposalCommands
         class Consume : ProposalCommands
     }
 
@@ -33,6 +34,18 @@ open class ProposalContract: Contract {
                 // Propose Tx must have proposer's and acceptor's signature.
                 "Both proposer and acceptor together only may sign Proposal issue transaction." using
                     (proposalCommand.signers.toSet() == proposal.participants.map { it.owningKey }.toSet())
+            }
+            is ProposalCommands.Abort -> requireThat {
+                "An Proposal Abort transaction should only consume one input state." using (tx.inputs.size == 1)
+                "Output state should be only one state." using (tx.outputs.size == 1)
+                val input = tx.inputsOfType<ProposalState>().single()
+                val output = tx.outputsOfType<ProposalState>().single()
+                "Input State's status must be PROPOSED." using (input.status == ProposalStatus.PROPOSED)
+                "Only the status property may change." using (output == input.withNewStatus(ProposalStatus.ABORTED))
+                // Abort Tx must have proposer's signature.
+                val expectedSigners = (input.participants).map { it.owningKey } - input.acceptor.owningKey
+                "The proposer only must sign an Proposal abort transaction" using
+                    (proposalCommand.signers.toSet() == expectedSigners.toSet())
             }
             is ProposalCommands.Consume -> requireThat {
                 "An Proposal Consume transaction should consume only one input proposal state." using (tx.inputsOfType<ProposalState>().size == 1)

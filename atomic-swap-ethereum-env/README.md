@@ -4,6 +4,7 @@ You can deploy the [Settlement](contracts/Settlement.sol) contract.
 
 ## Dependencies
 - Node.js v12 (Required)
+- Python v2 (for building)
 - yarn (Optional but recommended)
 
 ## Usage
@@ -12,12 +13,17 @@ Install npm dependencies
 yarn
 ```
 
+Run test
+```
+yarn test
+```
+
 Run local ethereum network
 ```
 yarn network
 ```
 
-Deploy SimpleStorage smart contract
+Deploy smart contracts
 ```
 yarn truffle migrate --network local
 ```

@@ -160,5 +160,111 @@ contract('Settlement', accounts => {
         'swapDetail.status is not Locked',
       );
     });
+
+    it('cannot unlock if the swapId status is Aborted', async () => {
+      await this.settlement.abort(
+        swapId,
+        { from: notaryAddress },
+      );
+
+      await truffleAssert.reverts(
+        this.settlement.unlock(
+          swapId,
+          { from: notaryAddress },
+        ),
+        'swapDetail.status is not Locked',
+      );
+    });
+  });
+
+  describe('abort', () => {
+    beforeEach(async () => {
+      await this.settlement.lock(
+        swapId,
+        proposerAddress,
+        acceptorAddress,
+        weiAmount,
+        securityAmount,
+        { from: proposerAddress, value: weiAmount },
+      );
+    });
+
+    it('emits Aborted event', async () => {
+      const tx = await this.settlement.abort(
+        swapId,
+        { from: notaryAddress },
+      );
+      const eventName = tx.logs[0].event;
+      expect(eventName).to.equal('Aborted');
+      const args = tx.logs[0].args;
+      expect(args.swapId).to.equal(swapId);
+
+      const actual = await this.settlement.swapIdToDetailMap.call(swapId);
+      const decodedSwapDetail = web3.eth.abi.decodeParameter({
+        SwapDetail: {
+          transferFromAddress: 'address',
+          transferToAddress: 'address',
+          weiAmount: 'uint256',
+          securityAmount: 'uint256',
+          status: 'uint8',
+        },
+      }, args.encodedSwapDetail);
+
+      expect(decodedSwapDetail.transferFromAddress).to.equal(actual.transferFromAddress);
+      expect(decodedSwapDetail.transferToAddress).to.equal(actual.transferToAddress);
+      expect(decodedSwapDetail.weiAmount).to.be.bignumber.equal(actual.weiAmount);
+      expect(decodedSwapDetail.securityAmount).to.be.bignumber.equal(actual.securityAmount);
+      expect(decodedSwapDetail.status).to.be.bignumber.equal(actual.status);
+    });
+
+    it('cannot execute unless it is from corda notary', async () => {
+      await truffleAssert.reverts(
+        this.settlement.abort(
+          swapId,
+          { from: proposerAddress },
+        ),
+        'caller is not the corda notary',
+      );
+    });
+
+    it('cannot unlock nonexistent swapId', async () => {
+      await truffleAssert.reverts(
+        this.settlement.unlock(
+          'BAD_SWAPID',
+          { from: notaryAddress },
+        ),
+        'swapDetail does not exist',
+      );
+    });
+
+    it('cannot abort if the swapId status is Unlocked', async () => {
+      await this.settlement.unlock(
+        swapId,
+        { from: notaryAddress },
+      );
+
+      await truffleAssert.reverts(
+        this.settlement.abort(
+          swapId,
+          { from: notaryAddress },
+        ),
+        'swapDetail.status is not Locked',
+      );
+    });
+
+    it('cannot abort if the swapId status is Aborted', async () => {
+      await this.settlement.abort(
+        swapId,
+        { from: notaryAddress },
+      );
+
+      await truffleAssert.reverts(
+        this.settlement.abort(
+          swapId,
+          { from: notaryAddress },
+        ),
+        'swapDetail.status is not Locked',
+      );
+    });
   });
 });
