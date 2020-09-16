@@ -36,7 +36,7 @@ PvP (Payment vs Payment) およびDvP (Payment vs Delivery) での決済が可�
 先取特権、金融担保、クローバックなどのさまざまなアプリケーションを実現します。
 
 ## Cordageサンプルアプリケーション
-![test for cross-chain-atomic-swap-cordapp](https://github.com/LayerXcom/cordage/workflows/test%20for%20cross-chain-atomic-swap-cordapp/badge.svg)
+![Run tests](https://github.com/LayerXcom/cordage/workflows/Run%20tests/badge.svg)
 
 - [クロスチェーンアトミックスワップ](./cross-chain-atomic-swap-cordapp)
 
