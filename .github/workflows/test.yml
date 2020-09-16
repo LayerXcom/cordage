@@ -8,10 +8,51 @@ on:
 
 env:
   JAVA_VERSION: 8
+  NODE_VERSION: 12
+  PYTHON_VERSION: 2.7
 
 jobs:
+  ethereum-env-test:
+    name: ${{ matrix.working-directory }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        working-directory: [atomic-swap-ethereum-env, minimal-ethereum-env]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+        working-directory: ${{ matrix.working-directory }}
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}/yarn.lock', matrix.working-directory)) }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn
+        working-directory: ${{ matrix.working-directory }}
+
+      - name: Run tests
+        run: yarn test
+        working-directory: ${{ matrix.working-directory }}
+
+
   cross-chain-atomic-swap-cordapp:
     runs-on: ubuntu-latest
+    env:
+      working-directory: cross-chain-atomic-swap-cordapp
 
     steps:
     - uses: actions/checkout@v2
@@ -26,10 +67,9 @@ jobs:
         cache-name: gradle-wrapper
       with:
         path: ~/.gradle/wrapper
-        key: cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-${{ hashFiles('cross-chain-atomic-swap-cordapp/gradle/wrapper/gradle-wrapper.properties') }}
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles(format('{0}/gradle/wrapper/gradle-wrapper.properties', env.working-directory)) }}
         restore-keys: |
-          cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-${{ hashFiles('cross-chain-atomic-swap-cordapp/gradle/wrapper/gradle-wrapper.properties') }}
-          cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-
+          ${{ runner.os }}-${{ env.cache-name }}-
 
     - name: cache dependencies
       uses: actions/cache@v1
@@ -37,10 +77,79 @@ jobs:
         cache-name: gradle-caches
       with:
         path: ~/.gradle/caches
-        key: cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-${{ hashFiles('cross-chain-atomic-swap-cordapp/build.gradle') }}
+        key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles(format('{0}/build.gradle', env.working-directory)) }}
         restore-keys: |
-          cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-${{ hashFiles('cross-chain-atomic-swap-cordapp/build.gradle') }}
-          cross-chain-atomic-swap-cordapp-test-${{ env.cache-name }}-
+          ${{ runner.os }}-${{ env.cache-name }}-
 
     - name: gradlew test
-      run: cd cross-chain-atomic-swap-cordapp && ./gradlew test
+      run: cd ${{ env.working-directory }} && ./gradlew test
+
+
+  flow-test-with-ethereum-env:
+    name: ${{ matrix.working-directory }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        working-directory: [custom-notary-flow, flow-ethereum-tx]
+# TODO https://github.com/LayerXcom/cordage/issues/33 が解決したら flow-ethereum-event-watchを戻す
+#        working-directory: [custom-notary-flow, flow-ethereum-event-watch, flow-ethereum-tx]
+    env:
+      ethereum-directory: minimal-ethereum-env
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          java-package: jdk
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+        working-directory: ${{ env.ethereum-directory }}
+
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles(format('{0}/yarn.lock', env.ethereum-directory)) }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn
+        working-directory: ${{ env.ethereum-directory }}
+
+      - name: cache gradle wrapper
+        uses: actions/cache@v1
+        env:
+          cache-name: gradle-wrapper
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles(format('{0}/gradle/wrapper/gradle-wrapper.properties', matrix.working-directory)) }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}-
+
+      - name: cache dependencies
+        uses: actions/cache@v1
+        env:
+          cache-name: gradle-caches
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles(format('{0}/build.gradle', matrix.working-directory)) }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.cache-name }}-
+
+      - name: gradlew test
+        run: |
+          cd ${{ env.ethereum-directory }}
+          yarn network &
+          # TODO https://github.com/LayerXcom/cordage/issues/33 が解決したら 以下コメントを外す
+          # yarn truffle migrate --network local
+          cd ../${{ matrix.working-directory }}
+          ./gradlew test
